@@ -1,0 +1,171 @@
+.route-mapbox-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Fullscreen via CSS (fallback mobile) */
+.route-mapbox-wrapper.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #000;
+  border-radius: 0;
+}
+.route-mapbox-wrapper.is-fullscreen .route-mapbox-container {
+  height: auto;
+  flex: 1;
+  border-radius: 0;
+}
+.route-mapbox-wrapper:fullscreen,
+.route-mapbox-wrapper:-webkit-full-screen {
+  background: #000;
+}
+.route-mapbox-wrapper:fullscreen .route-mapbox-container,
+.route-mapbox-wrapper:-webkit-full-screen .route-mapbox-container {
+  height: auto;
+  flex: 1;
+  border-radius: 0;
+}
+
+/* ── RIMOZIONE NAVBAR IN FULLSCREEN MOBILE ── */
+body.route-map-fullscreen-active .navbar-wrap {
+  display: none !important;
+}
+
+/* Gestione SafeArea per iPhone (Tacche/Barra inferiore) quando è fullscreen */
+.route-mapbox-wrapper.is-fullscreen .route-map-actions {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.route-mapbox-container {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.route-mapbox {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+/* ── Bottone Fullscreen (identico a BrunaMap) ── */
+.route-fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(15, 15, 15, 0.82);
+  border: 1.5px solid rgba(232, 201, 109, 0.55);
+  border-radius: 8px;
+  color: #E8C96D;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+.route-fullscreen-btn:hover {
+  background: rgba(232, 201, 109, 0.15);
+  border-color: rgba(232, 201, 109, 0.9);
+  color: #fff;
+}
+.route-fullscreen-btn.active {
+  background: rgba(232, 201, 109, 0.2);
+  border-color: #E8C96D;
+}
+
+
+/* ── Barra azioni sotto la mappa ── */
+.route-map-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(232, 201, 109, 0.15);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  backdrop-filter: blur(10px);
+}
+
+.route-map-actions-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.route-ext-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.route-ext-btn.google {
+  background: rgba(66, 133, 244, 0.15);
+  color: #5ba3f5;
+  border-color: rgba(66, 133, 244, 0.3);
+}
+.route-ext-btn.google:hover {
+  background: rgba(66, 133, 244, 0.3);
+  border-color: rgba(66, 133, 244, 0.6);
+  color: #fff;
+}
+
+.route-ext-btn.apple {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255,255,255,0.75);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.route-ext-btn.apple:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* ── ADATTAMENTO MOBILE BARRA MAPPA ── */
+@media (max-width: 600px) {
+  .route-map-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .route-map-actions-label {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .route-ext-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 5px;
+    font-size: 0.75rem;
+  }
+}

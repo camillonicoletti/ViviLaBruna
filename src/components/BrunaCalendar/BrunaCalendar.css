@@ -1,0 +1,104 @@
+.bruna-calendar {
+  width: 100%;
+  max-width: 380px; /* Allargato come richiesto ("puoi allargarti ai lati") */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  padding: 12px 18px; /* Un padding più orizzontale che verticale */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  margin: 0 auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px; /* Ridotto lo spazio superiore della griglia giorni */
+}
+
+.cal-month-title {
+  color: var(--gold-light);
+  font-family: var(--font-serif);
+  font-size: 1.25rem; /* Testo mese più proporzionato al box ridotto */
+  letter-spacing: 1px;
+}
+
+.cal-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: color 0.3s;
+}
+
+.cal-nav-btn:hover {
+  color: var(--gold-light);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  text-align: center;
+}
+
+.calendar-day-name {
+  color: var(--gold-dark);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 2px; /* Ridotto il gap tra Header giorni e numeri */
+}
+
+.calendar-day {
+  height: 38px; /* Altezza schiacciata per formare un calendario "rettangolare" complessivo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 8px; /* Angoli stondati invece che cerchio perfetto per accomodare la larghezza */
+  transition: all 0.2s;
+}
+
+.calendar-day:not(.empty):hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+
+.calendar-day.selected-start,
+.calendar-day.selected-end {
+  background: var(--gold);
+  color: var(--night);
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.calendar-day.in-range {
+  background: rgba(212, 175, 55, 0.15);
+  border-radius: 0;
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.bruna-day {
+  color: white; /* Il numero 2 resta in bianco per leggerlo sopra l'immagine */
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.8); /* Ombra pesante per staccarlo dallo sfondo */
+  font-weight: 800;
+  border: 2px solid var(--gold);
+  position: relative;
+  background-image: url('/affresco-della-Madonna-della-Bruna-1-1024x1010.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+}
+
+

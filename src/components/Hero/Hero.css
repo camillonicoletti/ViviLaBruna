@@ -1,0 +1,150 @@
+.hero-container {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Full screen height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+}
+
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Gradient overlay for premium dark mode feel */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%);
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-transform: uppercase;
+  background: linear-gradient(
+    90deg,
+    #c8971a 0%,
+    #f5e27a 20%,
+    #D4AF37 40%,
+    #fffbe0 55%,
+    #c9a84c 70%,
+    #f0d060 85%,
+    #c8971a 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+  animation: fadeInDown 1.2s ease-out, goldShimmer 4s linear 1.2s infinite;
+}
+
+.hero-subtitle {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.85);
+  animation: fadeInUp 1.2s ease-out 0.4s both;
+}
+
+.scroll-ornament-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInUp 1.2s ease-out 0.8s both, floatBounce 3s ease-in-out infinite;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 15px rgba(201, 168, 76, 0.4));
+}
+
+.scroll-ornament-wrapper:hover {
+  filter: drop-shadow(0 0 25px rgba(232, 201, 109, 0.8));
+}
+
+.scroll-ornament {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes goldShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 250% center; }
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to   { width: max-content; }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { border-color: rgba(212, 175, 55, 0.85); }
+  50%       { border-color: transparent; }
+}
+
+@keyframes removeCursor {
+  to { border-right-color: transparent; }
+}

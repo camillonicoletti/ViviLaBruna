@@ -1,0 +1,129 @@
+.navbar-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  padding: 20px 24px 0;
+  pointer-events: none;
+}
+
+.navbar-pill {
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 12px 16px 12px 24px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  background: rgba(8, 6, 4, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: var(--trans);
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.navbar-pill.scrolled {
+  background: rgba(8, 6, 4, 0.82);
+  border-color: rgba(201, 168, 76, 0.28);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(201, 168, 76, 0.08);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--cream);
+  white-space: nowrap;
+  margin-right: auto;
+}
+
+.nav-logo-png {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  transform: scale(2);
+  transform-origin: left center;
+  margin-left: 10px;
+}
+
+.nav-logo-icon {
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
+.nav-logo strong {
+  color: var(--gold);
+}
+
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.25s;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+.nav-cta {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--night);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  transition: var(--trans);
+  box-shadow: 0 2px 12px rgba(201, 168, 76, 0.25);
+}
+
+.nav-cta:hover {
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.45);
+  transform: translateY(-1px);
+}
+
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.nav-burger span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  background: var(--cream);
+  border-radius: 2px;
+  transition: var(--trans);
+}
+
+@media (max-width: 780px) {
+  .nav-links, .nav-cta { display: none; }
+  .nav-burger { display: flex; }
+}

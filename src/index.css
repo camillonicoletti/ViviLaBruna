@@ -1,0 +1,40 @@
+@import url('https://use.typekit.net/xna3vzf.css');
+
+:root {
+  --gold:        #C9A84C;
+  --gold-light:  #E8C96D;
+  --gold-dark:   #9B7A28;
+  --gold-glow:   rgba(201,168,76,0.18);
+  --crimson:     #8B1A1A;
+  --crimson-mid: #6B1212;
+  --night:       #080604;
+  --night-2:     #0F0B07;
+  --night-3:     #160F08;
+  --cream:       #F0E6CC;
+  --cream-dim:   #C8B888;
+  --muted:       rgba(240,230,204,0.45);
+  --font-serif:  'lemonde-journal', serif;
+  --font-sans:   'century-gothic', sans-serif;
+  --radius-pill: 9999px;
+  --radius-lg:   24px;
+  --radius-md:   16px;
+  --trans:       all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-serif);
+  background: var(--night);
+  color: var(--cream);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }

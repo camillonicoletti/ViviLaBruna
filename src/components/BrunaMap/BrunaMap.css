@@ -1,0 +1,448 @@
+.bruna-map-wrapper {
+  margin: 40px auto;
+  width: 90%;
+  max-width: 1000px;
+  background: var(--dark-bg, #0a0a0a);
+  border: 1px solid rgba(232, 201, 109, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  position: relative;
+}
+
+.bruna-map-header {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(15, 15, 15, 0.9) 100%);
+  border-bottom: 1px solid rgba(232, 201, 109, 0.1);
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bruna-map-intro {
+  text-align: center;
+  margin: 30px auto 20px auto;
+  padding: 0 20px;
+  max-width: 800px;
+}
+
+.bruna-map-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  color: #E8C96D;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.bruna-map-section-title .sparkle {
+  color: #E8C96D;
+  font-size: 2.5rem;
+  display: block;
+  animation: pulseSparkle 2s infinite ease-in-out;
+}
+
+.magic-geolocate-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #E8C96D 0%, #c9a84c 50%, #E8C96D 100%);
+  background-size: 200% auto;
+  color: #111;
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 16px 45px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(232, 201, 109, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin-top: 25px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.magic-geolocate-btn:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 15px 35px rgba(232, 201, 109, 0.5);
+  background-position: right center;
+}
+
+.magic-geolocate-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.magic-geolocate-btn .btn-glow {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: skewX(-25deg);
+  animation: shineGeolocate 3s infinite;
+}
+
+@keyframes shineGeolocate {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+@keyframes pulseSparkle {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.bruna-map-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-3d-btn {
+  background: rgba(232, 201, 109, 0.15);
+  border: 1px solid rgba(232, 201, 109, 0.5);
+  color: #E8C96D;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.toggle-3d-btn:hover {
+  background: rgba(232, 201, 109, 0.3);
+  box-shadow: 0 0 10px rgba(232, 201, 109, 0.5);
+}
+
+.toggle-3d-btn.active {
+  background: rgba(232, 201, 109, 0.8);
+  color: #111;
+  box-shadow: 0 0 15px rgba(232, 201, 109, 0.6);
+}
+
+.bruna-map-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-3d-btn svg {
+  display: block;
+}
+
+.bruna-map-header .sparkle {
+  color: #E8C96D;
+}
+
+.bruna-map-container {
+  height: 550px;
+  width: 100%;
+}
+
+/* Fullscreen Desktop (API nativa) */
+.bruna-map-wrapper:fullscreen,
+.bruna-map-wrapper:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.bruna-map-wrapper:fullscreen .bruna-map-container,
+.bruna-map-wrapper:-webkit-full-screen .bruna-map-container {
+  height: 100% !important;
+  flex: 1;
+}
+
+/* Fullscreen Mobile (fallback CSS) */
+.bruna-map-wrapper.is-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: -webkit-fill-available !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  z-index: 9999 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.bruna-map-wrapper.is-fullscreen .bruna-map-container {
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1;
+}
+
+/* Custom Marker Styling */
+.bruna-map-marker {
+  width: 44px;
+  height: 44px;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="%23FF2A2A"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>') no-repeat center center;
+  background-size: contain;
+  cursor: pointer;
+  filter: drop-shadow(0 0 10px rgba(255, 42, 42, 0.9));
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bruna-map-marker:hover {
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 16px rgba(255, 42, 42, 1));
+}
+
+/* ── Marker a goccia classica per i percorsi nella pergamena ── */
+.route-step-marker {
+  width: 36px;
+  height: 44px;
+  background-image: none !important;
+  filter: none !important;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Cerchio superiore (testa della goccia) */
+.route-step-marker::before {
+  content: attr(data-step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 4px;
+  background-color: var(--marker-color, #00bfff);
+  border: 2.5px solid rgba(255,255,255,0.9);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  line-height: 36px;
+  text-align: center;
+  /* Ruota il cerchio per avere la punta in basso a sinistra */
+  transform: rotate(-45deg);
+  transform-origin: bottom left;
+}
+
+/* Punta triangolare in basso */
+.route-step-marker::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid var(--marker-color, #00bfff);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.route-step-marker:hover::before {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  transform: rotate(-45deg) scale(1.1);
+}
+
+
+/* Custom Popup Styling */
+.bruna-map-popup .mapboxgl-popup-content {
+  background: rgba(15, 15, 15, 0.95);
+  border: 1px solid rgba(232, 201, 109, 0.4);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+  max-width: 230px;
+}
+
+.bruna-map-popup .mapboxgl-popup-close-button {
+  display: none; /* Nascosto, usiamo il nostro custom */
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(232, 201, 109, 0.2);
+  padding-bottom: 5px;
+  margin-bottom: 6px;
+}
+
+.popup-close-btn {
+  background: transparent;
+  border: none;
+  color: #E8C96D;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.popup-close-btn:hover {
+  opacity: 1;
+}
+
+.bruna-map-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(232, 201, 109, 0.4);
+  border-bottom-color: rgba(232, 201, 109, 0.4);
+}
+
+.popup-title {
+  font-family: 'Cinzel', serif;
+  color: #E8C96D;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.popup-time, .popup-type {
+  font-size: 0.75rem;
+  color: #ccc;
+  margin: 3px 0;
+}
+
+.popup-place {
+  font-size: 0.75rem;
+  color: #E8C96D;
+  margin: 2px 0 6px 0;
+  opacity: 0.9;
+}
+
+.popup-type strong, .popup-time strong {
+  color: #E8C96D;
+}
+
+.popup-info {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #eaeaea;
+}
+
+.popup-maps-links {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(232, 201, 109, 0.2);
+}
+
+.popup-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  flex: 1;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.google-btn {
+  background: rgba(66, 133, 244, 0.15);
+  border: 1px solid rgba(66, 133, 244, 0.4);
+  color: #7ab4f5;
+}
+
+.google-btn:hover {
+  background: rgba(66, 133, 244, 0.3);
+}
+
+.apple-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ddd;
+}
+
+.apple-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 480px) {
+
+  /* Riduce ulteriormente la voragine vuota tra il cavaliere dell'itinerario e la mappa */
+  .bruna-map-intro {
+    margin: 20px auto 10px auto;
+  }
+
+  .bruna-map-header {
+    padding: 0.5rem 0.5rem; /* Recuperato altro prezioso spazio laterale */
+    gap: 5px;
+  }
+  
+  .bruna-map-header .bruna-map-title {
+    font-size: 1.05rem; /* Dimensione limite dorata per far entrare tutto */
+    gap: 5px; /* Ridà respiro tra diamante e testo */
+  }
+  
+  /* Rinserito il diamantino calibrato al millimetro su smartphone */
+  .bruna-map-header .bruna-map-title .sparkle {
+    display: inline-block;
+    font-size: 1.15rem;
+  }
+
+  /* Rimpicciolisce il pulsante Vista 2D/3D ma vieta di andare a capo */
+  .toggle-3d-btn {
+    font-size: 0.85rem; /* Testo più grande del precedente 0.75 */
+    padding: 6px 10px;
+    white-space: nowrap; /* Impedisce al testo di andare su due righe */
+    flex-shrink: 0; /* Impedisce lo schiacciamento non richiesto */
+  }
+
+  /* Forza il tasto Fullscreen a essere un quadrato perfetto */
+  .fullscreen-toggle-btn {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .bruna-map-header-buttons {
+    gap: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}

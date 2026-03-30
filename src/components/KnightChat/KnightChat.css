@@ -1,0 +1,526 @@
+/* ───── GLOBAL APP LAYOUT ───── */
+.bruna-ai-app {
+  min-height: 100vh;
+  padding-top: 100px; /* Clear fixed navbar */
+  padding-bottom: 60px;
+  background: #000000;
+  color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ABSTRACT GOLDEN EMBELLISHMENT ── */
+.bruna-ai-app::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/corona.png');
+  background-position: center top;
+  background-size: 100vw auto;
+  background-repeat: repeat-y;
+  opacity: 0.15;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0; /* Behind the chat content */
+}
+
+/* ───── COUNTDOWN SECTION ───── */
+.app-countdown-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.countdown-pill {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 10, 5, 0.8);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 50px;
+  padding: 8px 24px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  gap: 24px;
+}
+
+.countdown-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-png {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+.countdown-brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.countdown-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(201, 168, 76, 0.3);
+}
+
+.countdown-timer-minimal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.min-time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.min-time b {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--cream);
+  font-weight: 400;
+}
+.min-time span {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+
+/* ───── SPLIT LAYOUT ───── */
+.app-split-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  gap: 40px;
+  padding: 0 20px;
+  flex: 1;
+  margin-right: auto;
+  margin-left: 9vw;
+}
+
+/* ───── LEFT: AVATAR ───── */
+.split-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px; /* Smaller than the original 600px hero */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-video {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+  animation: floatIdle 6s ease-in-out infinite alternate;
+}
+
+.avatar-shadow {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 16px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.8) 0%, transparent 70%);
+  filter: blur(8px);
+  z-index: -1;
+  animation: shadowBreathe 6s ease-in-out infinite alternate;
+}
+
+@keyframes floatIdle {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(-10px); }
+}
+@keyframes shadowBreathe {
+  0%   { transform: translateX(-50%) scaleX(1); opacity: 0.6; }
+  100% { transform: translateX(-50%) scaleX(0.85); opacity: 0.3; }
+}
+
+
+/* ───── RIGHT: AI QUIZ BOX ───── */
+.split-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ai-quiz-box {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(15, 12, 10, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quiz-header {
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 8px; /* Ridotto per alzare il testo sotto */
+}
+.sparkle { color: var(--gold); }
+
+.quiz-body {
+  min-height: auto; /* Rimosso il min-height fisso che creava vuoto inutile */
+  display: flex;
+  align-items: flex-start; /* Allinea il testo in alto anziché al centro del vuoto */
+  padding-top: 4px;
+}
+
+.quiz-question {
+  font-family: var(--font-serif);
+  font-size: 1.4rem; /* Smaller and more intuitive */
+  line-height: 1.5;
+  color: var(--cream);
+  font-weight: 400;
+}
+.quiz-question p {
+  margin: 0 0 12px 0;
+}
+.quiz-question p:last-child {
+  margin: 0;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; filter: blur(4px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+/* Typing Dots */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.typing-dots .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: typing 1.4s infinite ease-in-out both;
+}
+.typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0); opacity: 0; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+
+/* ───── OPTIONS GRID (4 BUTTONS) ───── */
+.quiz-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 0px; /* Azzerato per far salire il calendario/opzioni verso il testo */
+}
+
+.quiz-option-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--cream);
+  padding: 16px;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  backdrop-filter: blur(4px);
+  white-space: pre-line;
+  line-height: 1.4;
+}
+
+.quiz-option-btn:hover {
+  background: rgba(201, 168, 76, 0.1);
+  border-color: rgba(201, 168, 76, 0.4);
+  color: var(--gold-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Finale Actions */
+.quiz-finale-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.finale-btn-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--night);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: var(--trans);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.finale-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+}
+
+.finale-btn-secondary {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: color 0.3s;
+  padding: 8px;
+}
+.finale-btn-secondary:hover { color: var(--cream); }
+
+/* ───── RESPONSIVE ───── */
+@media (max-width: 900px) {
+  .app-split-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .countdown-brand, .countdown-divider {
+    display: none;
+  }
+  
+  .countdown-pill {
+    justify-content: center;
+    border-radius: 20px;
+    padding: 12px 24px;
+    margin-bottom: -10px;
+  }
+
+  .split-left {
+    order: 2;
+  }
+  .split-right {
+    order: 1;
+    justify-content: center;
+  }
+  
+  .avatar-video-wrapper {
+    max-width: 280px;
+  }
+  
+  .ai-quiz-box {
+    padding: 16px;
+    gap: 8px; /* Avvicinato drasticamente le tre sezioni del quiz */
+  }
+  
+  .quiz-body {
+    min-height: auto;
+  }
+  
+  .quiz-question {
+    font-size: 1.15rem;
+  }
+  
+  .quiz-option-btn {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+  
+  .quiz-options-grid {
+    grid-template-columns: 1fr 1fr; /* Keep 2 columns to save height */
+    gap: 8px;
+  }
+}
+
+/* ───── DYNAMIC INPUTS ───── */
+.dynamic-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Ridotto: prima era 20px, avvicina il calendario al testo */
+  width: 100%;
+  grid-column: 1 / -1; /* Spans full width of the 2-column grid */
+}
+
+.dynamic-input-container p {
+  color: var(--cream);
+  font-family: var(--font-sans);
+  margin: 0;
+  text-align: center;
+  font-size: 1rem; /* Leggermente ridotto per accompagnare il calendario rimpicciolito */
+}
+
+.dynamic-input-container strong {
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+/* Slider */
+.bruna-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  outline: none;
+  margin: 10px 0;
+}
+.bruna-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-light);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  transition: transform 0.2s;
+}
+.bruna-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Calendar */
+.calendar-inputs {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+.date-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+}
+.date-field label {
+  color: var(--gold-light);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.date-field input[type="date"] {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+  color-scheme: dark;
+}
+.date-field input[type="date"]:focus {
+  border-color: var(--gold-light);
+}
+
+/* Actions */
+.input-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+.input-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.confirm-btn {
+  background: var(--gold);
+  color: var(--night);
+  border: none;
+}
+.confirm-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+.confirm-btn:hover:not(:disabled) {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+}
+.back-btn {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ───── STEP COUNTER ───── */
+.quiz-step-counter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--gold);
+  color: var(--night);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}

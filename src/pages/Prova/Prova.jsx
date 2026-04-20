@@ -370,7 +370,7 @@ export default function Prova() {
 
       {/* Header */}
       <header className="header-hud">
-        <div className="hud-rating-box">
+        <div className="hud-rating-box" id="header-stars-box">
           <div className="hud-stars" id="header-stars">★ 4.9</div>
           <div className="hud-reviews-btn" onClick={() => window.hudShowToast('Apertura recensioni...')}>Vedi Recensioni</div>
         </div>

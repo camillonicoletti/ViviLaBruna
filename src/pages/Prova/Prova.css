@@ -299,10 +299,53 @@
   text-transform: uppercase; color: var(--gold-l); opacity: 0;
   transition: all .4s cubic-bezier(.25,1,.5,1); pointer-events: none; white-space: nowrap;
 }
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
 /* ── MOBILE OPTIMIZATIONS ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  #hud-cursor { display: none !important; }
+  :root {
+    --h1: 42vh;
+    --h2: 21vh;
+    --h3: 37vh;
+  }
+
+  #cur, #cur-ring { display: none !important; visibility: hidden !important; }
+  .hint-key { display: none !important; }
   * { cursor: auto !important; }
+
+  /* Titolo compresso in alto per tirato verso l'immagine */
+  #band-2 .band-slide { justify-content: flex-start; padding-top: 15px; }
+
+  /* Il bottone Il Mio Programma spostato in modo dinamico per seguire la diminuzione della band-2 */
+  .header-hud { padding-top: 15px !important; }
+  .header-right { 
+    position: fixed; top: calc(var(--h1) + var(--h2) + 8px); left: 20px; right: 20px; width: auto; 
+    display: flex; justify-content: center; margin-top: 0; z-index: 50;
+  }
+  .itinerary-btn { width: 100%; justify-content: center; padding: 8px 22px; font-size: 11px; }
+
+  /* Spingiamo il prezzo e il tasto Aggiungi verso il bottone centrale */
+  #band-3 .band-slide { align-items: flex-start; padding-top: 55px; padding-bottom: 0; }
+
+  /* Sposta le stelle sotto il titolo, calcolato sul fondo della nuova band-2 */
+  .hud-rating-box {
+    position: fixed;
+    top: calc(var(--h1) + var(--h2) - 34px);
+    left: 20px;
+    z-index: 50;
+  }
+  .hud-reviews-btn { padding: 4px 10px; font-size: 8px; }
+
+  /* Tasto Più (Aggiungi) in evidenza forte su mobile, testo bianco */
+  .add-ring {
+    background: var(--gold); border: none; color: var(--night);
+    box-shadow: 0 4px 15px rgba(201,168,76,.4);
+  }
+  .add-plus { color: var(--night) !important; font-weight: bold; }
+  .add-ring.done { box-shadow: none; background: var(--gold); }
+  .add-label { color: var(--cream) !important; font-weight: 600; }
+  
+  /* Rimuovi duplicato stelle/recensioni vicino al prezzo in basso */
+  .slide-reviews { display: none !important; }
+  
+  /* Sistema allineamenti duration e title se serve su mobile */
+  .slide-duration { right: 20px !important; bottom: 18px !important; }
 }

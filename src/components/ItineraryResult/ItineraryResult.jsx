@@ -96,14 +96,14 @@ const ITINERARIES = {
   }
 };
 
-export default function ItineraryResult({ answers, isActive }) {
+export default function ItineraryResult({ answers, isActive, selectedExperiences = [], hideMap = false }) {
   const [route, setRoute] = useState(ITINERARIES.spiritual);
   const [draw, setDraw] = useState(false);
 
   useEffect(() => {
     // Logic to select the route based on answers
-    const period = answers.period || '';
-    const vibe = answers.vibe || '';
+    const period = answers?.period || '';
+    const vibe = answers?.vibe || '';
 
     let selectedKey = 'spiritual';
     if (period.includes('2 Luglio') || period.includes('Luglio')) {
@@ -116,13 +116,34 @@ export default function ItineraryResult({ answers, isActive }) {
       selectedKey = 'spiritual';
     }
     
-    setRoute(ITINERARIES[selectedKey]);
+    // Create a copy of the base itinerary to inject our cart selections
+    const baseRoute = JSON.parse(JSON.stringify(ITINERARIES[selectedKey]));
+
+    if (selectedExperiences.length > 0 && baseRoute.schedule && baseRoute.schedule.length > 0) {
+      // Assegnamo orari verosimili sfalsati di qualche ora partendo dalle 10:30
+      const injectedEvents = selectedExperiences.map((exp, index) => {
+        const hour = 10 + (index * 3); // 10:30, 13:30, 16:30...
+        return {
+          time: `${hour.toString().padStart(2, '0')}:30`,
+          type: 'activity',
+          title: `✦ ${exp.title}`, // Stellina per evidenziare quelli scelti da noi!
+          desc: `Esperienza Selezionata: ${exp.duration} • Prezzo: ${exp.price}`,
+          image: exp.image
+        };
+      });
+
+      // Appendi ed ordina per orario la stringa 'HH:MM'
+      baseRoute.schedule[0].events.push(...injectedEvents);
+      baseRoute.schedule[0].events.sort((a, b) => a.time.localeCompare(b.time));
+    }
+
+    setRoute(baseRoute);
     
     // Inizia l'animazione della linea blu poco dopo il render (se attivo)
     if (isActive) {
       setTimeout(() => setDraw(true), 500);
     }
-  }, [answers, isActive]);
+  }, [answers, isActive, selectedExperiences]);
 
   return (
     <div className={`itinerary-wrapper ${isActive ? 'is-active' : ''}`}>
@@ -167,18 +188,20 @@ export default function ItineraryResult({ answers, isActive }) {
         </div>
 
         {/* Dettagli Itinerario */}
-        <div className="itinerary-content">
+        <div className="itinerary-content" style={{ textAlign: 'left', paddingLeft: '20px', paddingRight: '20px', marginBottom: '40px' }}>
           <h3 className="route-title">{route.title}</h3>
           <h4 className="route-subtitle">{route.subtitle}</h4>
           <p className="route-desc">{route.desc}</p>
         </div>
 
-        {/* Piantina di Matera (Ora Mapbox 3D) */}
-        <div className="map-container" style={{ margin: '0 auto', marginBottom: '30px' }}>
-          {draw && route.waypoints && (
-            <RouteMapbox waypoints={route.waypoints} draw={draw} />
-          )}
-        </div>
+        {/* Piantina di Matera (Ora Mapbox 3D) - Nascosta se hideMap=true */}
+        {!hideMap && (
+          <div className="map-container" style={{ marginBottom: '30px' }}>
+            {draw && route.waypoints && (
+              <RouteMapbox waypoints={route.waypoints} draw={draw} />
+            )}
+          </div>
+        )}
         
         {/* Programma Giornaliero (Timeline) */}
         {route.schedule && route.schedule.length > 0 && (

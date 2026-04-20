@@ -1,17 +1,18 @@
+import { Routes, Route } from 'react-router-dom';
 import './index.css';
 import Navbar from './components/Navbar/Navbar';
-import Hero from './components/Hero/Hero';
-import KnightChat from './components/KnightChat/KnightChat';
 import Footer from './components/Footer/Footer';
+import Home from './pages/Home/Home';
+import Activities from './pages/Activities/Activities';
 
 export default function App() {
   return (
     <>
       <Navbar />
-      <Hero />
-      <div id="knight-chat-section">
-        <KnightChat />
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/attivita" element={<Activities />} />
+      </Routes>
       <Footer />
     </>
   );

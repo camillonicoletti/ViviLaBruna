@@ -1,0 +1,725 @@
+.cinematic-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #050505;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.bg-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.dynamic-bg {
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(40px) brightness(0.35);
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.dynamic-bg.active {
+  opacity: 1;
+}
+
+.cinematic-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* Dark gradient to ensure text readability on top, clear in middle for cards */
+  background: linear-gradient(to bottom, rgba(10,10,10,0.8) 0%, rgba(10,10,10,0.1) 40%, rgba(10,10,10,0.4) 100%);
+  z-index: 2;
+}
+
+.cinematic-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.cinematic-content.has-sidebar {
+  width: 75%;
+}
+
+/* ... existing code between header and responsive layout ... */
+/* Below we rewrite the CSS from ITINERARY DOCK to ITINERARY SIDEBAR. Since I can't easily multi-replace with wildcard, I will rewrite the whole bottom of the file precisely. 
+Wait, the easiest is to just use multi_replace_file_content.
+Let's cancel this and use multi_replace.
+*/
+
+.cinematic-header {
+  padding: 100px 5% 20px 5%;
+  flex-shrink: 0;
+}
+
+.cinematic-header h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #FFF, #C9A84C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cinematic-header p {
+  font-size: 1.2rem;
+  color: #c0c0c0;
+  max-width: 600px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* CAROUSEL TRACK */
+.carousel-track {
+  display: flex;
+  gap: 30px;
+  padding: 20px 5% 60px 5%; /* Spazio laterale */
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* Nascondi la scrollbar ma consenti lo scroll */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
+  flex-grow: 1;
+  align-items: center; /* Centriamo le card verticalmente rispetto allo spazio rimanente */
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* CARDS: LOCANDINE FILM */
+.movie-poster-card {
+  position: relative;
+  min-width: 300px;
+  width: 320px;
+  height: 480px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  scroll-snap-align: center;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.spacer-card {
+  min-width: 5vw; /* Piccolo spacer finale */
+  flex-shrink: 0;
+}
+
+.movie-poster-card:hover {
+  transform: translateY(-15px) scale(1.05); /* L'effetto "Locandina" che si solleva */
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.2);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+.poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s ease;
+}
+
+.movie-poster-card:hover .poster-img {
+  transform: scale(1.1);
+}
+
+.poster-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%);
+  z-index: 1;
+}
+
+/* INFORMAZIONI NELLA CARD */
+.poster-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 25px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-tag {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.poster-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  line-height: 1.2;
+}
+
+.poster-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-bottom: 20px;
+}
+
+.poster-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 15px;
+  margin-top: 5px;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #E8C96D;
+}
+
+.book-btn {
+  background: #E8C96D;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.movie-poster-card:hover .book-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.book-btn:hover {
+  background: #fff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .movie-poster-card {
+    min-width: 280px;
+    height: 420px;
+    scroll-snap-align: center;
+  }
+  
+  .cinematic-header {
+    padding-top: 120px; /* Lascia spazio alla navbar su mobile */
+  }
+
+  .carousel-track {
+    align-items: flex-start;
+  }
+}
+
+/* ITINERARY SIDEBAR (SPLIT SCREEN) */
+.itinerary-sidebar {
+  position: absolute;
+  top: 0;
+  right: -25%; /* Hidden by default */
+  width: 25%;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(25px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  transition: right 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: -10px 0 50px rgba(0,0,0,0.5);
+}
+
+.itinerary-sidebar.open {
+  right: 0;
+}
+
+.sidebar-header {
+  padding: 40px 30px 20px 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  color: #fff;
+}
+
+.sidebar-count {
+  font-size: 0.9rem;
+  color: #E8C96D;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-timeline {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 15px;
+  position: relative;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #E8C96D;
+  border-radius: 50%;
+  margin-top: 25px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.timeline-dot::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 5px;
+  width: 2px;
+  height: calc(100% + 40px);
+  background: rgba(255,255,255,0.1);
+}
+
+.timeline-item:last-child .timeline-dot::after {
+  display: none;
+}
+
+.timeline-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+}
+
+.timeline-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.timeline-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.timeline-info h4 {
+  font-size: 0.9rem;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.timeline-info span {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.remove-btn:hover {
+  background: #ff4444;
+}
+
+.sidebar-footer {
+  padding: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.build-program-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #FFF 0%, #E8C96D 100%);
+  color: #000;
+  border: none;
+  border-radius: 25px;
+  padding: 15px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.build-program-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.4);
+}
+
+.book-btn.selected {
+  background: #2a2a2a;
+  color: #E8C96D;
+  border: 1px solid #E8C96D;
+}
+
+@media (max-width: 1024px) {
+  .cinematic-content.has-sidebar { width: 100%; }
+  .itinerary-sidebar { width: 100%; right: -100%; z-index: 100; }
+}
+
+/* WIZARD COMPACT MODE */
+.sidebar-timeline.compact-mode {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  overflow-y: visible;
+}
+
+.compact-mode .timeline-item {
+  width: auto;
+}
+
+.compact-mode .timeline-dot {
+  display: none;
+}
+
+.compact-mode .timeline-card {
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(232, 201, 109, 0.2);
+  border-color: #E8C96D;
+}
+
+.compact-mode .timeline-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.compact-mode h4 {
+  font-size: 0.8rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* PERGAMENA MAGICA (DARK GLASS) */
+.wizard-pergamena {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.pergamena-inner {
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(15px);
+  color: #fff;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
+  font-family: inherit;
+  position: relative;
+  border: 1px solid rgba(232, 201, 109, 0.2);
+}
+
+.pergamena-title {
+  color: #E8C96D;
+  margin: 0 0 15px 0;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pergamena-title::before {
+  content: '✦';
+}
+
+.pergamena-step {
+  margin-top: 15px;
+}
+
+.pergamena-step p {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  font-weight: 500;
+}
+
+.pergamena-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pergamena-options button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 12px 15px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.pergamena-options button:hover {
+  background: rgba(232, 201, 109, 0.15);
+  border-color: #E8C96D;
+  transform: translateY(-2px);
+}
+
+/* FINAL PROGRAM */
+.final-program {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #E8C96D;
+}
+
+.final-title {
+  font-size: 1.2rem;
+  color: #E8C96D;
+  margin: 0 0 15px 0;
+}
+
+.final-day h5 {
+  font-size: 1rem;
+  margin: 0 0 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 5px;
+}
+
+.final-day p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.final-day p strong {
+  color: #aaa;
+  margin-right: 5px;
+}
+
+.reset-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Utils */
+.fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Typing Dots */
+.typing-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.typing-dots .dot {
+  width: 8px;
+  height: 8px;
+  background: #8b6d33;
+  border-radius: 50%;
+  animation: dotBlink 1.4s infinite ease-in-out both;
+}
+
+.typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes dotBlink {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── BANNER DI RICALCOLO ── */
+.recalculate-banner {
+  margin-top: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 20, 10, 0.95) 100%);
+  border: 1px solid rgba(232, 201, 109, 0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,201,109,0.1) inset;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recalculate-icon {
+  font-size: 2rem;
+  color: #E8C96D;
+  text-align: center;
+  animation: spinOnce 0.5s ease-out forwards;
+}
+
+@keyframes spinOnce {
+  from { transform: rotate(-180deg); opacity: 0; }
+  to   { transform: rotate(0deg);    opacity: 1; }
+}
+
+.recalculate-body strong {
+  display: block;
+  color: #E8C96D;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.recalculate-body p {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.recalculate-body em {
+  color: #fff;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.recalculate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recalc-confirm-btn {
+  width: 100%;
+  padding: 11px 0;
+  background: linear-gradient(135deg, #E8C96D, #c9a84c);
+  color: #1a1208;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
+}
+
+.recalc-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 201, 109, 0.4);
+}
+
+.recalc-fresh-btn {
+  width: 100%;
+  padding: 11px 0;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.recalc-fresh-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+}
+
+.recalc-cancel-btn {
+  width: 100%;
+  padding: 8px 0;
+  background: transparent;
+  color: rgba(255,255,255,0.3);
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.recalc-cancel-btn:hover {
+  color: rgba(255,255,255,0.6);
+}

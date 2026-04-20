@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 export default function Hero() {
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (videoRef.current) {
@@ -39,6 +41,9 @@ export default function Hero() {
       <div className="hero-content">
         <h1 className="hero-title">VIVI LA BRUNA</h1>
         <p className="hero-subtitle">Scopri Come Costruire il Tuo Itinerario Perfetto</p>
+        <button className="primary-glass-btn uppercase" onClick={() => navigate('/attivita')}>
+          Esplora Attività
+        </button>
         <div className="scroll-ornament-wrapper" onClick={scrollToChat}>
           <svg className="scroll-ornament" viewBox="0 0 100 100" fill="none">
             <path d="M 25 50 L 50 75 L 75 50" stroke="url(#goldGrad)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />

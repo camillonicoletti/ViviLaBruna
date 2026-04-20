@@ -300,3 +300,9 @@
   transition: all .4s cubic-bezier(.25,1,.5,1); pointer-events: none; white-space: nowrap;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── MOBILE OPTIMIZATIONS ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #hud-cursor { display: none !important; }
+  * { cursor: auto !important; }
+}

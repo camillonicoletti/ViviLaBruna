@@ -296,11 +296,32 @@ export default function Prova() {
     // ── SWIPE ─────────────────────────────────────────────────────────────────────
     let ty0 = 0;
     function tStart(e) { ty0 = e.touches[0].clientY; }
+    
+    function tMove(e) {
+      const dy = e.touches[0].clientY - ty0;
+      const isScrollToFooter = (cur === N - 1 && dy < 0);
+      const isScrollFromFooter = (window.scrollY > 5 && dy > 0);
+
+      if (isScrollToFooter || isScrollFromFooter) return;
+      e.preventDefault(); 
+    }
+
     function tEnd(e) {
       const dy = e.changedTouches[0].clientY - ty0;
-      if (Math.abs(dy) > 50) window.hudNavigate(dy < 0 ? 1 : -1);
+      const isScrollToFooter = (cur === N - 1 && dy < 0);
+      const isScrollFromFooter = (window.scrollY > 5 && dy > 0);
+      
+      if (isScrollToFooter || isScrollFromFooter) return;
+
+      if (Math.abs(dy) > 40) {
+        const dir = dy < 0 ? 1 : -1;
+        if (cur + dir >= N || cur + dir < 0) return;
+        window.hudNavigate(dir);
+      }
     }
-    container.addEventListener('touchstart', tStart);
+    
+    container.addEventListener('touchstart', tStart, { passive: true });
+    container.addEventListener('touchmove', tMove, { passive: false });
     container.addEventListener('touchend', tEnd);
 
     // ── TOAST ─────────────────────────────────────────────────────────────────────

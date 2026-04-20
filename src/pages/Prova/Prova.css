@@ -1,0 +1,302 @@
+.prova-wrapper {
+  --gold: #C9A84C; --gold-l: #E8C96D; --gold-d: #9B7A28;
+  --night: #060403; --cream: #F0E6CC; --muted: rgba(240,230,204,0.4);
+  --gap: 3px;
+  --h1: 38vh; --h2: 34vh; --h3: calc(28vh - 6px);
+
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden; 
+  background: var(--night); 
+  cursor: none;
+  font-family: 'EB Garamond', serif; 
+  -webkit-font-smoothing: antialiased;
+  z-index: 100;
+}
+
+.prova-wrapper * {
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0;
+}
+
+/* ── CUSTOM CURSOR ────────────────────────────────────────────────────────── */
+#cur {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); mix-blend-mode: difference;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s, border-radius .2s;
+}
+#cur.big { width: 80px; height: 80px; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.5); mix-blend-mode: normal; }
+#cur-ring {
+  position: fixed; z-index: 9998; pointer-events: none;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid rgba(201,168,76,0.3);
+  transform: translate(-50%,-50%);
+}
+
+/* ── SCAN FLASH (gold sweep on align) ────────────────────────────────────── */
+#scan-flash {
+  position: fixed; inset: 0; z-index: 500; pointer-events: none;
+  background: linear-gradient(to right, transparent 0%, rgba(201,168,76,0.06) 50%, transparent 100%);
+  opacity: 0; transform: translateX(-100%);
+}
+#scan-flash.fire { animation: scanSweep .6s ease-out forwards; }
+@keyframes scanSweep {
+  from { opacity: 1; transform: translateX(-100%); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
+/* ── NOISE OVERLAY ────────────────────────────────────────────────────────── */
+.noise {
+  position: absolute; inset: 0; z-index: 498; pointer-events: none; opacity: .03; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.header-hud {
+  position: absolute; top: 90px; left: 0; right: 0; z-index: 200;
+  padding: 22px 40px; display: flex; align-items: center; justify-content: space-between;
+  mix-blend-mode: normal; /* Modificato da difference per evitare conflitti cromatici con l'oro */
+}
+/* Recensioni Header (sostituisce il logo) */
+.hud-rating-box {
+  display: flex; align-items: center; gap: 14px;
+}
+.hud-stars {
+  font-family: 'Josefin Sans', sans-serif; font-size: 14px;
+  color: var(--gold-l); display: flex; align-items: center; gap: 6px;
+  letter-spacing: .08em;
+}
+.hud-reviews-btn {
+  font-family: 'Josefin Sans', sans-serif; font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase; background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.2); color: var(--cream);
+  padding: 6px 14px; border-radius: 30px; cursor: none;
+  transition: all .3s ease;
+}
+.hud-reviews-btn:hover { background: rgba(255,255,255,.1); }
+
+.header-right {
+  font-family: 'Josefin Sans', sans-serif; font-size: 9px;
+  letter-spacing: .35em; text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 20px;
+}
+.itinerary-btn {
+  font-family: 'Josefin Sans', sans-serif; font-size: 10px; letter-spacing: .25em; font-weight: 600;
+  text-transform: uppercase; background: var(--gold);
+  border: 1px solid var(--gold-l); color: var(--night);
+  padding: 10px 22px; border-radius: 30px; cursor: none;
+  transition: all .3s ease; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 15px rgba(201,168,76,.3);
+}
+.itinerary-btn:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,.4); }
+#badge-count {
+  background: var(--night); color: var(--gold); border-radius: 50%;
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; transition: transform .3s ease;
+}
+
+/* ── SLOTS WRAPPER ────────────────────────────────────────────────────────── */
+.slots {
+  position: absolute; inset: 0; top: 0; bottom: 0; 
+  display: flex; flex-direction: column; gap: var(--gap);
+}
+
+/* ── BAND BASE ────────────────────────────────────────────────────────────── */
+.band { position: relative; overflow: hidden; flex-shrink: 0; }
+.band-track {
+  position: absolute; left: 0; right: 0; top: 0;
+  will-change: transform;
+}
+/* each slide in track */
+.band-slide { position: relative; width: 100%; overflow: hidden; }
+
+/* ── BAND 1: IMAGE ────────────────────────────────────────────────────────── */
+#band-1 { height: var(--h1); }
+#band-1 .band-slide { height: var(--h1); }
+.slide-img {
+  position: absolute; inset: -12%;
+  background-size: cover; background-position: center;
+  filter: brightness(.55) saturate(1.3);
+  transition: transform .1s ease;
+}
+/* Category label — top-left */
+.slide-cat {
+  position: absolute; bottom: 20px; left: 32px; z-index: 3;
+  font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: .35em;
+  text-transform: uppercase; color: rgba(240,230,204,.75);
+  font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+}
+.slide-cat::before { content: ''; width: 30px; height: 1.5px; background: var(--gold); opacity: 0.8; }
+/* Top-right: counter */
+.slide-counter {
+  position: absolute; top: 110px; right: 32px; z-index: 3;
+  font-family: 'EB Garamond', serif; font-size: 3.5rem; font-weight: 700;
+  color: rgba(240,230,204,.08); line-height: 1; letter-spacing: -.02em;
+  user-select: none;
+}
+/* Gradient bottom */
+.band1-grad {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60%; z-index: 2;
+  background: linear-gradient(to top, var(--night) 0%, transparent 100%); pointer-events: none;
+}
+/* Gradient top */
+.band1-grad-top {
+  position: absolute; top: 0; left: 0; right: 0; height: 40%; z-index: 2;
+  background: linear-gradient(to bottom, var(--night) 0%, transparent 100%); pointer-events: none;
+}
+
+/* ── BAND 2: TITLE ────────────────────────────────────────────────────────── */
+#band-2 { height: var(--h2); background: var(--night); }
+#band-2 .band-slide {
+  height: var(--h2); display: flex; align-items: center;
+  padding: 0 40px; position: relative; overflow: hidden;
+}
+/* Interactive title styling */
+.slide-title {
+  position: relative; z-index: 2;
+  font-family: 'EB Garamond', serif; font-size: clamp(3rem, 7vw, 7rem);
+  line-height: .9; color: var(--cream);
+  cursor: none; user-select: none;
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  max-width: 75%;
+  text-wrap: balance;
+}
+.slide-title:hover {
+  transform: scale(1.03);
+}
+/* Italic watermark — huge, behind title */
+.slide-title-bg {
+  position: absolute; right: -2vw; top: 50%; transform: translateY(-50%);
+  font-family: 'EB Garamond', serif; font-style: italic; font-weight: 700;
+  font-size: clamp(5rem, 14vw, 14rem);
+  line-height: .85; white-space: nowrap;
+  color: transparent; -webkit-text-stroke: 1px rgba(201,168,76,.15);
+  user-select: none; pointer-events: none; z-index: 1;
+  letter-spacing: -.04em;
+}
+/* Left accent line */
+#band-2 .band-slide::before {
+  content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 2px; background: linear-gradient(to bottom, transparent, var(--gold-d), transparent);
+  opacity: .5;
+}
+/* Duration pill — right side of band 2 */
+.slide-duration {
+  position: absolute; right: 40px; bottom: 24px; z-index: 3;
+  font-family: 'Josefin Sans', sans-serif; font-size: 12px; letter-spacing: .25em;
+  text-transform: uppercase; color: rgba(240,230,204,.75);
+  font-weight: 600;
+}
+
+/* ── BAND 3: META + CTA ──────────────────────────────────────────────────── */
+#band-3 { height: var(--h3); background: var(--night); flex-grow: 1; }
+#band-3 .band-slide {
+  height: var(--h3);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; border-top: 1px solid rgba(255,255,255,.04);
+  position: relative;
+}
+/* Price big */
+.slide-price {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.price-label {
+  font-family: 'Josefin Sans', sans-serif; font-size: 8px; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--muted);
+}
+.price-val {
+  font-family: 'EB Garamond', serif; font-size: 2.8rem; font-weight: 700;
+  color: var(--gold-l); line-height: 1; letter-spacing: -.02em;
+}
+/* Reviews */
+.slide-reviews {
+  font-family: 'Josefin Sans', sans-serif; font-size: 9px; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--muted);
+}
+/* Add to itinerary — FULL HEIGHT band strip (click anywhere) */
+.slide-cta {
+  display: flex; align-items: center; gap: 12px; cursor: none;
+}
+.add-ring {
+  width: 64px; height: 64px; border-radius: 50%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid rgba(201,168,76,.35); background: rgba(201,168,76,.06);
+  transition: all .3s ease;
+  font-size: 24px; color: var(--gold-l); overflow: hidden;
+}
+.add-ring::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--gold) 0deg, transparent 0deg);
+  opacity: 0; transition: opacity .3s;
+}
+.add-ring.spinning::before { opacity: 1; animation: conicSpin .6s linear forwards; }
+@keyframes conicSpin { from { --a: 0deg; } to { background: conic-gradient(var(--gold) 360deg, transparent 360deg); } }
+.add-ring.done { background: var(--gold); border-color: var(--gold); color: var(--night); }
+.add-ring.done::after { content: '✓'; position: absolute; font-size: 22px; color: var(--night); }
+.add-ring.done .add-plus { opacity: 0; }
+.add-label {
+  font-family: 'Josefin Sans', sans-serif; font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--muted); max-width: 60px; line-height: 1.5;
+}
+/* Band 3 divider line decoration */
+.b3-line {
+  position: absolute; left: 50%; top: 20%; bottom: 20%; width: 1px;
+  background: rgba(255,255,255,.04); transform: translateX(-50%);
+}
+
+/* ── NAVIGATION HINTS ─────────────────────────────────────────────────────── */
+.nav-hint {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 300; display: flex; align-items: center; gap: 20px;
+  animation: fadeUp .8s ease 1.5s both;
+}
+@keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+.hint-key {
+  font-family: 'Josefin Sans', sans-serif; font-size: 9px; letter-spacing: .25em;
+  text-transform: uppercase; color: rgba(240,230,204,.25);
+  display: flex; align-items: center; gap: 8px;
+}
+.key-box {
+  border: 1px solid rgba(255,255,255,.15); border-radius: 5px; padding: 3px 8px;
+  font-size: 11px; color: rgba(255,255,255,.3);
+}
+/* Dot progress */
+.dot-progress { display: flex; gap: 6px; align-items: center; }
+.dot-p {
+  width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.15);
+  transition: background .4s ease, width .4s ease;
+}
+.dot-p.active { background: var(--gold); width: 20px; border-radius: 2px; }
+
+/* ── VERTICAL SCROLL INDICATOR (left) ────────────────────────────────────── */
+.v-indicator {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  z-index: 300; display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.v-track { width: 1px; height: 80px; background: rgba(255,255,255,.08); position: relative; }
+.v-fill {
+  position: absolute; left: 0; top: 0; width: 100%; background: var(--gold);
+  transition: height .5s cubic-bezier(.4,0,.2,1);
+}
+.v-label {
+  font-family: 'Josefin Sans', sans-serif; font-size: 8px; letter-spacing: .2em;
+  text-transform: uppercase; color: rgba(240,230,204,.25);
+  writing-mode: vertical-lr; transform: rotate(180deg);
+}
+
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed; top: 90px; left: 50%; transform: translateX(-50%) translateY(-16px);
+  z-index: 600; background: rgba(6,4,3,.9); border: 1px solid rgba(201,168,76,.3);
+  backdrop-filter: blur(12px); border-radius: 30px; padding: 9px 22px;
+  font-family: 'Josefin Sans', sans-serif; font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--gold-l); opacity: 0;
+  transition: all .4s cubic-bezier(.25,1,.5,1); pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

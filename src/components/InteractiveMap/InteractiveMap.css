@@ -1,0 +1,44 @@
+.interactive-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.05);
+  background: #1a1a1a;
+}
+
+.interactive-map-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.interactive-map-container:active {
+  cursor: grabbing;
+}
+
+.dest-marker {
+  width: 20px;
+  height: 20px;
+  background-color: var(--gold, #C9A84C);
+  border-radius: 50%;
+  border: 3px solid #060403;
+  box-shadow: 0 0 10px rgba(201,168,76,.6);
+  cursor: pointer;
+}
+
+.user-marker {
+  width: 16px;
+  height: 16px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 10px rgba(59,130,246,.6);
+}
+
+/* Fix mapbox controls inside modal if needed */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}

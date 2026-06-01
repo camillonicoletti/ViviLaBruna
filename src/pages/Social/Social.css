@@ -1,0 +1,1404 @@
+/* ==========================================================================
+   STILI SEZIONE SOCIAL & CREATORE DI CARTOLINE (INSTAGRAM STORY)
+   ========================================================================== */
+
+.social-page-container {
+  min-height: 100vh;
+  background-color: var(--night);
+  background-image: radial-gradient(circle at 50% 20%, rgba(26, 15, 8, 0.6) 0%, rgba(8, 6, 4, 0.95) 100%);
+  padding: 120px 20px 60px 20px;
+  position: relative;
+  overflow: hidden;
+  color: var(--cream);
+}
+
+/* Scintille animate di sfondo (Festa della Bruna Fireworks Atmosphere) */
+.particles-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.spark {
+  position: absolute;
+  bottom: -20px;
+  width: 4px;
+  height: 4px;
+  background: var(--gold-light);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--gold-light), 0 0 20px var(--gold);
+  opacity: 0;
+  animation: riseSpark 12s infinite linear;
+}
+
+.spark-1 { left: 15%; animation-delay: 0s; animation-duration: 9s; }
+.spark-2 { left: 35%; animation-delay: 2.5s; animation-duration: 14s; }
+.spark-3 { left: 55%; animation-delay: 5s; animation-duration: 11s; }
+.spark-4 { left: 75%; animation-delay: 1s; animation-duration: 13s; }
+.spark-5 { left: 90%; animation-delay: 7s; animation-duration: 8s; }
+
+@keyframes riseSpark {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-110vh) scale(0.4) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Header della sezione */
+.social-header-section {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 50px auto;
+  position: relative;
+  z-index: 1;
+}
+
+.social-main-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold-light) 50%, var(--gold-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4));
+}
+
+.social-subtitle {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--cream-dim);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* Workspace di Editing */
+.editor-workspace {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+  align-items: start;
+}
+
+/* ==========================================================================
+   COLONNA A: ANTEPRIMA CELLULARE / INSTAGRAM STORY
+   ========================================================================== */
+
+.preview-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: radial-gradient(ellipse at center, rgba(80, 55, 25, 0.45) 0%, transparent 72%);
+  border-radius: 32px;
+  padding: 24px 16px;
+}
+
+/* Nuovo Mockup iPhone basato sull'immagine fornita */
+.phone-mockup-wrapper.new-iphone-mockup {
+  position: relative;
+  width: 100%;
+  max-width: 336px;
+  aspect-ratio: 478 / 776; /* Proporzione esatta dell'immagine caricata */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  display: block;
+  margin: 0 auto;
+}
+
+/* L'immagine overlay dell'iPhone (con pulsanti, riflessi e notch trasparenti) */
+.iphone-overlay-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: normal;
+  filter: none;
+}
+
+/* La preview si incastra perfettamente nell'area dello schermo del PNG dell'iPhone */
+.new-iphone-mockup .instagram-story-preview {
+  position: absolute;
+  top: 5.1%;
+  left: 14.1%;
+  right: 14.1%;
+  bottom: 4.2%;
+  width: auto;
+  height: auto;
+  border-radius: 44px;
+  overflow: hidden;
+  z-index: 1;
+  padding: 0;
+  transition: all 0.5s ease;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  contain: paint;
+}
+
+/* Status Bar di iOS posizionata all'interno della preview */
+.new-iphone-mockup .iphone-status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 38px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 5;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.new-iphone-mockup .iphone-status-time {
+  margin-top: 11px;
+}
+
+.new-iphone-mockup .iphone-status-icons {
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Icone segnale e batteria */
+.new-iphone-mockup .iphone-icon-signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 9px;
+}
+.new-iphone-mockup .iphone-icon-signal span {
+  width: 2.2px;
+  background: #fff;
+  border-radius: 0.5px;
+}
+.new-iphone-mockup .iphone-icon-signal span:nth-child(1) { height: 3px; }
+.new-iphone-mockup .iphone-icon-signal span:nth-child(2) { height: 5px; }
+.new-iphone-mockup .iphone-icon-signal span:nth-child(3) { height: 7px; }
+.new-iphone-mockup .iphone-icon-signal span:nth-child(4) { height: 9px; }
+
+.new-iphone-mockup .iphone-icon-wifi {
+  color: #fff;
+}
+
+.new-iphone-mockup .iphone-icon-battery {
+  width: 18px;
+  height: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 2.5px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1px;
+}
+.new-iphone-mockup .iphone-icon-battery::after {
+  content: '';
+  position: absolute;
+  right: -2.5px;
+  top: 2px;
+  width: 1.5px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 1px;
+}
+.new-iphone-mockup .iphone-icon-battery-level {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 1px;
+}
+
+/* Home Indicator di iOS posizionato sopra l'overlay */
+.new-iphone-mockup .phone-home-indicator {
+  position: absolute;
+  bottom: 3.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+  z-index: 12;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   CARTOLINA LIVE — design della cartolina dentro l'iPhone
+   ========================================================================== */
+
+.cartolina-live {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 38px 0 0 0; /* spazio per la status bar */
+}
+
+.cartolina-live.bruna-template-live {
+  padding: 0;
+  background: #f7edda;
+}
+
+.cartolina-live.bruna-template-live::before {
+  content: none;
+}
+
+.bruna-template-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.bruna-template-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/bruna_template.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.bruna-template-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image: url('/bruna_template_frame.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.bruna-template-photo-slot {
+  position: absolute;
+  left: 7.4%;
+  top: 36.77%;
+  width: 85.2%;
+  height: 26.15%;
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.bruna-template-photo-slot.has-photo {
+  cursor: grab;
+}
+
+.bruna-template-photo-slot.has-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(178, 138, 55, 0.5);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.bruna-template-text-slot {
+  position: absolute;
+  left: 8.3%;
+  top: 78.1%;
+  width: 54.6%;
+  height: 13%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 18px 12px;
+  overflow: hidden;
+  text-align: center;
+  background: transparent;
+}
+
+.bruna-template-quote {
+  width: 100%;
+  max-height: 4.4em;
+  margin: 0;
+  overflow: hidden;
+  color: #8a6f38;
+  font-family: var(--font-serif);
+  font-size: clamp(0.54rem, 2.08vw, 0.66rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+  text-shadow: none;
+  transform: translate(5px, -4px);
+}
+
+.bruna-template-firma {
+  max-width: 100%;
+  overflow: hidden;
+  color: #a6843e;
+  font-family: var(--font-sans);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* Foto come sfondo pieno della cartolina */
+.cartolina-photo-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.cartolina-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25) 0%,
+    rgba(0,0,0,0.1) 35%,
+    rgba(0,0,0,0.55) 70%,
+    rgba(0,0,0,0.85) 100%
+  );
+  z-index: 1;
+}
+
+/* Sticker sopra la foto */
+.preview-sticker-corona {
+  position: absolute;
+  width: 60px;
+  z-index: 8;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+}
+
+.bruna-template-stage .bruna-sticker {
+  z-index: 3;
+  pointer-events: none;
+}
+
+.bruna-template-stage .preview-sticker-corona {
+  width: 42px;
+  top: 32.4%;
+  left: 51.7%;
+}
+
+/* Header cartolina */
+.cartolina-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 6px 18px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cartolina-ornament-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.6), transparent);
+}
+
+.cartolina-header-label {
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Body cartolina — occupa lo spazio restante */
+.cartolina-body {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* Placeholder quando non c'è foto */
+.cartolina-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.cartolina-photo-placeholder:hover { opacity: 0.8; }
+.cartolina-photo-placeholder .photo-placeholder-icon { font-size: 1.6rem; }
+.cartolina-photo-placeholder .photo-placeholder-text {
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+
+/* Wrap testo messaggio */
+.cartolina-message-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* La citazione — testo principale che cambia live */
+.cartolina-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+  line-height: 1.5;
+  color: var(--cream);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
+}
+
+/* Adatta la dimensione del font alla lunghezza del testo */
+.cartolina-quote:not(:empty) {
+  font-size: clamp(0.7rem, 3vw, 1rem);
+}
+
+/* Firma autore */
+.cartolina-firma {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Footer cartolina */
+.cartolina-footer {
+  position: relative;
+  z-index: 5;
+  padding: 6px 18px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cartolina-footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Foto Caricata dall'utente */
+.user-uploaded-image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transform-origin: center;
+  transition: transform 0.1s ease-out; /* Abbastanza veloce per il drag */
+}
+
+.photo-placeholder-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.photo-placeholder-view:hover {
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.photo-placeholder-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 5px rgba(201, 168, 76, 0.5));
+  animation: floatBounce 3s ease-in-out infinite;
+}
+
+.photo-placeholder-text {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+
+/* Sticker nell'Anteprima */
+.preview-sticker-timbro {
+  position: absolute;
+  width: 50px;
+  right: 14px;
+  top: 55px;
+  z-index: 8;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  transform: rotate(15deg);
+}
+
+.bruna-template-stage .preview-sticker-timbro {
+  width: 54px;
+  top: 31.7%;
+  left: 3.9%;
+  right: auto;
+}
+
+.preview-sticker-knight {
+  position: absolute;
+  width: 55px;
+  left: 10px;
+  bottom: 80px;
+  z-index: 8;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+}
+
+.bruna-template-stage .preview-sticker-knight {
+  width: 58px;
+  left: 6%;
+  bottom: 20%;
+}
+
+.preview-sticker-carro {
+  position: absolute;
+  width: 65px;
+  right: 10px;
+  bottom: 75px;
+  z-index: 8;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+}
+
+.bruna-template-stage .preview-sticker-carro {
+  width: 55px;
+  left: 4.8%;
+  right: auto;
+  bottom: 5.8%;
+}
+
+/* Logo e hashtag (usati sia nel footer cartolina che nel canvas export) */
+.preview-official-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.preview-logo-img {
+  height: 20px;
+  opacity: 0.8;
+}
+
+.preview-hashtag {
+  font-family: var(--font-sans);
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  color: var(--muted);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.drag-hint {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--gold);
+  margin-top: 15px;
+  text-align: center;
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   COLONNA B: PANNELLO GUIDATO WIZARD
+   ========================================================================== */
+
+.editor-panel-column {
+  background: rgba(26, 19, 13, 0.45);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  backdrop-filter: blur(15px);
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Stepper progressivo */
+.wizard-stepper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 40px;
+  padding: 0 10px;
+}
+
+.wizard-stepper::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: rgba(240, 230, 204, 0.1);
+  z-index: 1;
+}
+
+.step-dot-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.step-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--night-3);
+  border: 2px solid var(--cream-dim);
+  color: var(--cream-dim);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-dot-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cream-dim);
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+
+/* Stati dello Stepper */
+.step-dot-wrapper.active .step-dot {
+  background: var(--gold);
+  border-color: var(--gold-light);
+  color: var(--night);
+  box-shadow: 0 0 15px var(--gold-glow);
+  transform: scale(1.15);
+}
+
+.step-dot-wrapper.active .step-dot-label {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.step-dot-wrapper.completed .step-dot {
+  background: var(--gold-dark);
+  border-color: var(--gold);
+  color: var(--cream);
+}
+
+/* Corpo del Wizard */
+.wizard-card-body {
+  flex-grow: 1;
+  margin-bottom: 30px;
+}
+
+.wizard-step-content {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-title {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+
+.step-description {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--cream-dim);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Step 1: Lista dei Template */
+.template-selectors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.template-option-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(240, 230, 204, 0.15);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.template-option-card:hover {
+  background: rgba(201, 168, 76, 0.04);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+.template-option-card.selected {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--border-highlight, var(--gold));
+  box-shadow: 0 0 15px rgba(201, 168, 76, 0.1);
+}
+
+.template-option-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--cream-dim);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.template-option-card.selected .template-option-indicator {
+  border-color: var(--border-highlight, var(--gold));
+}
+
+.inner-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.3s;
+}
+
+.template-option-card.selected .inner-indicator {
+  background: var(--border-highlight, var(--gold));
+}
+
+.template-option-details h4 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.template-option-details p {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+  line-height: 1.4;
+}
+
+/* Step 2: Custom Text inputs */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+
+.custom-textarea {
+  width: 100%;
+  height: 100px;
+  background: var(--night-3);
+  border: 1px solid rgba(240, 230, 204, 0.2);
+  border-radius: 10px;
+  color: var(--cream);
+  padding: 12px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  resize: none;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.custom-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.char-counter {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 4px;
+}
+
+.custom-input {
+  width: 100%;
+  background: var(--night-3);
+  border: 1px solid rgba(240, 230, 204, 0.2);
+  border-radius: 10px;
+  color: var(--cream);
+  padding: 12px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.custom-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.preset-quotes-section {
+  margin-top: 25px;
+}
+
+.preset-quotes-section label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+  margin-bottom: 10px;
+}
+
+.preset-quotes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.preset-quote-btn {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(240,230,204,0.1);
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preset-quote-btn:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+.quote-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.quote-sub {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--cream-dim);
+  opacity: 0.8;
+}
+
+/* Step 3: Foto Upload */
+.upload-dropzone {
+  border: 2px dashed rgba(201, 168, 76, 0.3);
+  background: rgba(201, 168, 76, 0.02);
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.dropzone-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.upload-dropzone h3 {
+  font-family: var(--font-serif);
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+
+.upload-dropzone p {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+}
+
+.photo-controls-card {
+  background: var(--night-3);
+  border: 1px solid rgba(240, 230, 204, 0.1);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.uploaded-photo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--gold-light);
+  border-bottom: 1px solid rgba(240, 230, 204, 0.1);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.remove-photo-btn {
+  background: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.sliders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.control-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-label-val {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--cream);
+}
+
+.slider-label-val label {
+  color: var(--cream-dim);
+}
+
+.reset-alignment-btn {
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.reset-alignment-btn:hover {
+  background: var(--gold);
+  color: var(--night);
+}
+
+.premium-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(240, 230, 204, 0.2);
+  outline: none;
+}
+
+.premium-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--gold-light);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(201, 168, 76, 0.5);
+  transition: transform 0.1s;
+}
+
+.premium-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.adjustment-tip {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Step 4: Griglia Sticker */
+.stickers-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.sticker-select-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(240,230,204,0.1);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  position: relative;
+}
+
+.sticker-select-card:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+  background: rgba(201, 168, 76, 0.02);
+}
+
+.sticker-select-card.active {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.08);
+  box-shadow: 0 0 15px rgba(201, 168, 76, 0.1);
+}
+
+.sticker-img-preview-container {
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sticker-select-thumbnail {
+  max-height: 100%;
+  max-width: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.sticker-select-label {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+
+.sticker-toggle-checkbox {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.05);
+  color: var(--cream-dim);
+}
+
+.sticker-select-card.active .sticker-toggle-checkbox {
+  background: var(--gold);
+  color: var(--night);
+  font-weight: 700;
+}
+
+/* Step 5: Esportazione */
+.export-options-box {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(201, 168, 76, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 16px;
+  margin-bottom: 25px;
+}
+
+.action-btn-primary {
+  width: 100%;
+  background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-light) 100%);
+  color: var(--night);
+  border: none;
+  border-radius: 30px;
+  padding: 16px 30px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(201, 168, 76, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-btn-primary:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(201, 168, 76, 0.5);
+  filter: brightness(1.1);
+}
+
+.action-btn-primary:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.action-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.share-note {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+  margin-top: 15px;
+  line-height: 1.4;
+}
+
+/* Spinner per caricamento */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.creative-inspiration-tip {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(240, 230, 204, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.creative-inspiration-tip h4 {
+  font-family: var(--font-serif);
+  color: var(--gold-light);
+  margin-bottom: 10px;
+}
+
+.creative-inspiration-tip ol {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.creative-inspiration-tip ol li strong {
+  color: var(--cream);
+}
+
+/* Bottoni di navigazione Wizard */
+.wizard-navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(240, 230, 204, 0.1);
+  padding-top: 25px;
+  margin-top: auto;
+  gap: 15px;
+}
+
+.nav-wizard-btn {
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.prev-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(240,230,204,0.15);
+  color: var(--cream);
+}
+
+.prev-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--cream-dim);
+}
+
+.prev-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.next-btn {
+  background: var(--gold-dark);
+  border: 1px solid var(--gold);
+  color: var(--cream);
+}
+
+.next-btn:hover {
+  background: var(--gold);
+  color: var(--night);
+  box-shadow: 0 0 15px var(--gold-glow);
+}
+
+.reset-wizard-btn {
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px dashed var(--gold);
+  color: var(--gold-light);
+}
+
+.reset-wizard-btn:hover {
+  background: var(--gold);
+  color: var(--night);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Ottimizzazione Mobile & Tablet)
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .editor-workspace {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .preview-column {
+    order: 1; /* Su mobile l'anteprima va sopra l'editor */
+  }
+
+  .editor-panel-column {
+    order: 2;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-page-container {
+    padding: 100px 15px 40px 15px;
+  }
+
+  .editor-panel-column {
+    padding: 20px;
+  }
+
+  .wizard-stepper {
+    margin-bottom: 30px;
+  }
+
+  .step-dot-label {
+    display: none; /* Nasconde le etichette testuali dello stepper su schermi piccolissimi */
+  }
+
+  .wizard-stepper::before {
+    left: 15px;
+    right: 15px;
+  }
+
+  .stickers-selector-grid {
+    grid-template-columns: 1fr;
+  }
+}

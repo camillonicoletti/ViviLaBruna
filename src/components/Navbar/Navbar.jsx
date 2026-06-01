@@ -168,8 +168,9 @@ export default function Navbar() {
             <ul className="traditional-nav-links">
               <li><a href="/" onClick={(e) => handleLinkClick(e, '/')}>Mappa Iniziale</a></li>
               <li><a href="/attivita" onClick={(e) => handleLinkClick(e, '/attivita')}>Esplora Attività</a></li>
+              <li><a href="/la-storia" onClick={(e) => handleLinkClick(e, '/la-storia')}>La Storia</a></li>
+              <li><a href="/social" onClick={(e) => handleLinkClick(e, '/social')}>Social & Cartoline</a></li>
               <li><a href="/prova" onClick={(e) => handleLinkClick(e, '/prova')}>HUD Sperimentale</a></li>
-              <li><a href="#" onClick={(e) => handleLinkClick(e, null)}>La Storia ed Evoluzione</a></li>
               <li><a href="#" onClick={(e) => handleLinkClick(e, null)}>Linee Guida Traffico</a></li>
               <li><a href="#" onClick={(e) => handleLinkClick(e, null)}>Aziende Coinvolte</a></li>
             </ul>

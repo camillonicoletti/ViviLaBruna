@@ -1,30 +1,37 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Prova.css';
 
 export default function Prova() {
   const containerRef = useRef(null);
+  const navigate = useNavigate();
+  const [modalData, setModalData] = useState(null);
 
   useEffect(() => {
     // ── DATA ──────────────────────────────────────────────────────────────────
     const ITEMS = [
       { title:"Tour dei Sassi al Tramonto", cat:"Cultura & Storia", price:"25€", rating:"4.9", reviews:1240, duration:"2 ore",
-        img:"/hud/matera_sassi_sunset.png" },
+        img:"/hud/matera_sassi_sunset.png", desc: "Scopri la magia dei Sassi di Matera al calar del sole in un suggestivo percorso guidato tra i rioni storici. Visiteremo antiche cisterne e chiese rupestri avvolti dalla luce dorata del tramonto.", map: "Piazza Vittorio Veneto, Matera", cont: "+39 333 1234567 | info@materatours.it", dates: "Tutti i giorni, h 18:00", coords: [16.6105, 40.6664] },
       { title:"Volo in Mongolfiera all'Alba", cat:"Avventura", price:"180€", rating:"5.0", reviews:312, duration:"3 ore",
-        img:"/hud/matera_hot_air_balloon.png" },
+        img:"/hud/matera_hot_air_balloon.png", desc: "Sorvola i Sassi e il Parco della Murgia alle prime luci dell'alba in un'esperienza mozzafiato. Al termine del volo nel silenzio più assoluto, brinderemo con deliziosi prodotti tipici locali.", map: "Contrada Murgia Timone, Matera", cont: "+39 340 9876543 | voli@matera-balloons.com", dates: "Mar, Gio, Sab, Dom, h 05:30", coords: [16.6210, 40.6720] },
       { title:"Laboratorio del Pane IGP", cat:"Food & Drink", price:"45€", rating:"4.8", reviews:580, duration:"2.5 ore",
-        img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1400&auto=format&fit=crop" },
+        img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1400&auto=format&fit=crop", desc: "Metti le mani in pasta e scopri i segreti della panificazione tradizionale materana in un antico forno. Impara la storia del Pane di Matera IGP e gusta la tua forma calda appena sfornata.", map: "Via Santo Stefano, Matera", cont: "+39 0835 123456 | panificio@materabread.it", dates: "Lun, Mer, Ven, h 10:00", coords: [16.6080, 40.6675] },
       { title:"Trekking Murgia Materana", cat:"Natura", price:"20€", rating:"4.7", reviews:890, duration:"4 ore",
-        img:"https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1400&auto=format&fit=crop" },
+        img:"https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1400&auto=format&fit=crop", desc: "Avventurati attraverso il canyon della Gravina, tra ponti tibetani e antiche chiese rupestri. Un'escursione indimenticabile che unisce la natura selvaggia del Parco Archeologico alla spiritualità.", map: "Jazzo Gattini, Parco della Murgia", cont: "+39 320 1122334 | trekking@murgiapark.it", dates: "Sabato e Domenica, h 09:00", coords: [16.6150, 40.6600] },
       { title:"E-Bike dalla Cripta", cat:"Sport", price:"35€", rating:"4.9", reviews:420, duration:"½ Giornata",
-        img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop" },
+        img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop", desc: "Esplora senza fatica le magnifiche campagne materane fino alla Cripta del Peccato Originale, la 'Cappella Sistina' dell'arte rupestre. Un tour in E-Bike immersivo, panoramico e green.", map: "Piazzetta Pascoli, Matera", cont: "+39 331 4455667 | rent@ebikematera.it", dates: "Tutti i giorni, h 09:00 e 15:00", coords: [16.6040, 40.6650] },
       { title:"Cena Romantica in Grotta", cat:"Exclusive", price:"90€", rating:"4.9", reviews:215, duration:"Serata intera",
-        img:"/hud/matera_romantic_dinner.png" },
+        img:"/hud/matera_romantic_dinner.png", desc: "Goditi un esclusivo menu degustazione a lume di candela in un raffinato ristorante scavato direttamente nel tufo del Sasso Caveoso. Un'atmosfera intima e suggestiva per una serata speciale.", map: "Sasso Caveoso, Matera", cont: "+39 0835 987654 | ristorante@grottamatera.it", dates: "Tutte le sere, su prenotazione", coords: [16.6110, 40.6640] },
     ];
     const N = ITEMS.length;
     let cur = 0, spinning = false;
     const selected = new Set();
     const container = containerRef.current;
     if (!container) return;
+
+    window.hudOpenModal = function(idx) {
+      setModalData(ITEMS[idx]);
+    };
 
     const G = (id) => container.querySelector(`#${id}`);
 
@@ -65,6 +72,7 @@ export default function Prova() {
         s2.innerHTML = `
           <div class="slide-title-bg">${it.title}</div>
           <h2 class="slide-title">${it.title}</h2>
+          <div class="slide-desc-btn" onclick="window.hudOpenModal(${i})">Leggi descrizione</div>
           <div class="slide-duration">${it.duration}</div>
         `;
         t2.appendChild(s2);
@@ -235,8 +243,8 @@ export default function Prova() {
       band2.addEventListener('mouseleave', mhLeave);
     }
 
-    // ── KEYBOARD ──────────────────────────────────────────────────────────────────
     function keyDownHandler(e) {
+      if (document.querySelector('.hud-modal-overlay')) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') window.hudNavigate(1);
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') window.hudNavigate(-1);
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); window.hudToggleAdd(cur); }
@@ -247,6 +255,10 @@ export default function Prova() {
     let lastWheelTime = 0;
     
     function wheelHandler(e) {
+      if (document.querySelector('.hud-modal-overlay')) {
+        e.preventDefault(); // Blocca scrolling nativo del body se il modale è aperto
+        return;
+      }
       const isScrollToFooter = (cur === N - 1 && e.deltaY > 0);
       const isScrollFromFooter = (window.scrollY > 5 && e.deltaY < 0);
       let now = Date.now();
@@ -298,6 +310,10 @@ export default function Prova() {
     function tStart(e) { ty0 = e.touches[0].clientY; }
     
     function tMove(e) {
+      if (document.querySelector('.hud-modal-overlay')) {
+        e.preventDefault(); // Blocca lo scorrimento verso il footer su iOS Safari
+        return;
+      }
       const dy = e.touches[0].clientY - ty0;
       const isScrollToFooter = (cur === N - 1 && dy < 0);
       const isScrollFromFooter = (window.scrollY > 5 && dy > 0);
@@ -307,6 +323,7 @@ export default function Prova() {
     }
 
     function tEnd(e) {
+      if (document.querySelector('.hud-modal-overlay')) return;
       const dy = e.changedTouches[0].clientY - ty0;
       const isScrollToFooter = (cur === N - 1 && dy < 0);
       const isScrollFromFooter = (window.scrollY > 5 && dy > 0);
@@ -357,8 +374,18 @@ export default function Prova() {
       delete window.hudNavigate;
       delete window.hudToggleAdd;
       delete window.hudShowToast;
+      delete window.hudOpenModal;
     };
   }, []);
+
+  useEffect(() => {
+    if (modalData) {
+      document.body.classList.add('hud-modal-open');
+    } else {
+      document.body.classList.remove('hud-modal-open');
+    }
+    return () => { document.body.classList.remove('hud-modal-open'); };
+  }, [modalData]);
 
   return (
     <div className="prova-wrapper" ref={containerRef}>
@@ -375,8 +402,8 @@ export default function Prova() {
           <div className="hud-reviews-btn" onClick={() => window.hudShowToast('Apertura recensioni...')}>Vedi Recensioni</div>
         </div>
         <div className="header-right">
-          <div className="itinerary-btn" onClick={() => window.hudShowToast('Programma aggiornato')}>
-            Il mio programma <span id="badge-count">0</span>
+          <div className="itinerary-btn" onClick={() => navigate('/la-storia')}>
+            La storia <span id="badge-count">0</span>
           </div>
         </div>
       </header>
@@ -411,6 +438,97 @@ export default function Prova() {
         <div className="dot-progress" id="dots"></div>
         <div className="hint-key"><div className="key-box">Space</div> aggiungi</div>
       </div>
+
+      {/* Modal / Scheda */}
+      {modalData && (
+        <div 
+          className="hud-modal-overlay" 
+          onClick={() => setModalData(null)}
+          onWheel={e => e.stopPropagation()}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+        >
+          <div className="hud-modal-content modern horizontal" onClick={e => e.stopPropagation()}>
+            <button className="hud-modal-close" onClick={() => setModalData(null)}>✕</button>
+            
+            <div className="hud-modal-left-pane" style={{ backgroundImage: `url(${modalData.img})` }}>
+              <div className="hud-modal-hero-gradient"></div>
+            </div>
+            
+            <div className="hud-modal-right-pane">
+              <div className="hud-modal-header">
+                <div className="hud-modal-cat">{modalData.cat}</div>
+                <h3 className="hud-modal-title">{modalData.title}</h3>
+                <div className="hud-modal-meta-row">
+                  <span>★ {modalData.rating} ({modalData.reviews})</span>
+                  <span>•</span>
+                  <span>{modalData.duration}</span>
+                  <span>•</span>
+                  <span>{modalData.price}</span>
+                </div>
+              </div>
+              <p className="hud-modal-desc clamped">{modalData.desc}</p>
+              
+              <div className="hud-modal-info-compact">
+                <div className="hud-info-item">
+                  <div className="hud-info-icon-box"><span className="hud-info-icon">📍</span></div>
+                  <div className="hud-info-text">
+                    <strong>Luogo</strong>
+                    <span>{modalData.map}</span>
+                  </div>
+                </div>
+                <div className="hud-info-item">
+                  <div className="hud-info-icon-box"><span className="hud-info-icon">📞</span></div>
+                  <div className="hud-info-text">
+                    <strong>Contatti</strong>
+                    <span>{modalData.cont}</span>
+                  </div>
+                </div>
+                <div className="hud-info-item">
+                  <div className="hud-info-icon-box"><span className="hud-info-icon">📅</span></div>
+                  <div className="hud-info-text">
+                    <strong>Disponibilità</strong>
+                    <span>{modalData.dates}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hud-modal-actions">
+                <div className="hud-modal-cta" onClick={() => {
+                  setModalData(null);
+                  const idx = ITEMS.findIndex(i => i.title === modalData.title);
+                  if(idx !== -1) window.hudToggleAdd(idx);
+                }}>
+                  Aggiungi al programma
+                </div>
+
+                {modalData.coords && (
+                  <div className="hud-modal-nav-links">
+                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${modalData.coords[1]},${modalData.coords[0]}`} target="_blank" rel="noreferrer" className="nav-btn google">
+                      <span className="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                      </span> Google Maps
+                    </a>
+                    <a href={`http://maps.apple.com/?daddr=${modalData.coords[1]},${modalData.coords[0]}`} target="_blank" rel="noreferrer" className="nav-btn apple">
+                      <span className="nav-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.18 1.27-2.16 3.8.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.78M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                        </svg>
+                      </span> Apple Maps
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -18,6 +18,8 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+public/italy_matera_sassi_houses.glb
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

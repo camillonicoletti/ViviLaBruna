@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './KnightChat.css';
 import BrunaCalendar from '../BrunaCalendar/BrunaCalendar';
 import ItineraryResult from '../ItineraryResult/ItineraryResult';
 import CarroOverlay from '../CarroOverlay/CarroOverlay';
 import BrunaMap from '../BrunaMap/BrunaMap';
+import WeatherAdvisor from '../WeatherAdvisor/WeatherAdvisor';
 
 /* ── Conversation script ── */
 const FLOW = [
@@ -66,6 +67,7 @@ function calculateTimeLeft(targetDate) {
 export default function KnightChat() {
   const [step,     setStep]     = useState(0);
   const [answers,  setAnswers]  = useState({});
+  const [weatherReport, setWeatherReport] = useState(null);
   const [typing,   setTyping]   = useState(false);
   const [done,     setDone]     = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -93,12 +95,26 @@ export default function KnightChat() {
     return date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
   };
 
+  const formatDateOnly = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const videoRef      = useRef(null);
   const startedRef    = useRef(false);
   const itineraryRef  = useRef(null);
+  const handleWeatherChange = useCallback((report) => {
+    setWeatherReport(report);
+  }, []);
 
   // Hardcoded for La Bruna 2026
   const timeLeft = useCountdown('2026-07-02T00:00:00');
+  const answersWithWeather = useMemo(() => (
+    weatherReport ? { ...answers, weather: weatherReport } : answers
+  ), [answers, weatherReport]);
 
   /* Init */
   useEffect(() => {
@@ -116,7 +132,7 @@ export default function KnightChat() {
     }, 1000);
   }
 
-  function choose(text) {
+  function choose(text, extraAnswers = {}) {
     if (typing) return;
     
     // Play video animazione
@@ -128,7 +144,7 @@ export default function KnightChat() {
     // Salva risposta e vai avanti con un piccolo delay per l'animazione
     setTimeout(() => {
       const current = FLOW[step];
-      const newAnswers = { ...answers, [current.id]: text };
+      const newAnswers = { ...answers, [current.id]: text, ...extraAnswers };
       setAnswers(newAnswers);
 
       const next = step + 1;
@@ -174,6 +190,9 @@ export default function KnightChat() {
               <span>È arrivata!</span>
             )}
           </div>
+        </div>
+        <div className="countdown-weather-dot">
+          <WeatherAdvisor onWeatherChange={handleWeatherChange} />
         </div>
       </section>
 
@@ -236,7 +255,10 @@ export default function KnightChat() {
                       <div className="input-actions" style={{ maxWidth: '400px', width: '100%' }}>
                         <button className="confirm-btn" 
                                 disabled={!dateFrom || !dateTo} 
-                                onClick={() => choose(`Dal ${formatDate(dateFrom)} al ${formatDate(dateTo)}`)}>
+                                onClick={() => choose(`Dal ${formatDate(dateFrom)} al ${formatDate(dateTo)}`, {
+                                  periodStart: formatDateOnly(dateFrom),
+                                  periodEnd: formatDateOnly(dateTo)
+                                })}>
                           Conferma {dateFrom && dateTo ? `(${formatDate(dateFrom)} - ${formatDate(dateTo)})` : 'Date'}
                         </button>
                       </div>
@@ -269,6 +291,11 @@ export default function KnightChat() {
 
               {done && !typing && (
                 <div className="quiz-finale-actions fade-in-up">
+                  {weatherReport?.isRainy && (
+                    <div className="weather-program-note">
+                      Pioggia su Matera: preparo un programma più riparato.
+                    </div>
+                  )}
                   {!showResult && (
                     <button className="finale-btn-primary" onClick={() => { setShowCarroOverlay(true); setShowResult(true); }}>
                       Genera Itinerario
@@ -303,7 +330,7 @@ export default function KnightChat() {
       {showResult && (
         <div ref={itineraryRef}>
           {/* L'itinerario comincia a svegliarsi ("isActive") non appena il carro inizia a sfumare */}
-          <ItineraryResult answers={answers} isActive={!showCarroOverlay || isCarroExiting} />
+          <ItineraryResult answers={answersWithWeather} isActive={!showCarroOverlay || isCarroExiting} />
         </div>
       )}
 

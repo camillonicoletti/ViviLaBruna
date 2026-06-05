@@ -2,6 +2,235 @@ import { useState, useEffect } from 'react';
 import './ItineraryResult.css';
 import RouteMapbox from '../RouteMapbox/RouteMapbox';
 
+const CALENDAR_YEAR_FALLBACK = 2026;
+const CALENDAR_LOCATION = 'Matera, Basilicata, Italia';
+const CALENDAR_TIMEZONE = 'Europe/Rome';
+const ITALIAN_MONTHS = {
+  gennaio: 0,
+  febbraio: 1,
+  marzo: 2,
+  aprile: 3,
+  maggio: 4,
+  giugno: 5,
+  luglio: 6,
+  agosto: 7,
+  settembre: 8,
+  ottobre: 9,
+  novembre: 10,
+  dicembre: 11
+};
+
+const pad = (value) => String(value).padStart(2, '0');
+
+const dateOnlyFromDate = (date) => (
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+);
+
+const parseDateOnly = (value) => {
+  if (!value || typeof value !== 'string') return null;
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+};
+
+const parseItalianDateFromPeriod = (period = '', index = 0) => {
+  const matches = [...String(period).toLowerCase().matchAll(/(\d{1,2})\s+([a-zà]+)/g)];
+  const match = matches[index] || matches[0];
+
+  if (!match) return null;
+
+  const month = ITALIAN_MONTHS[match[2]];
+  if (month === undefined) return null;
+
+  return new Date(CALENDAR_YEAR_FALLBACK, month, Number(match[1]));
+};
+
+const addDays = (date, days) => (
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + days)
+);
+
+const addHours = (date, hours) => (
+  new Date(date.getTime() + hours * 60 * 60 * 1000)
+);
+
+const dateContains = (start, end, target) => (
+  start.getTime() <= target.getTime() && target.getTime() <= end.getTime()
+);
+
+const formatGoogleAllDayDate = (date) => (
+  `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`
+);
+
+const formatIcsLocalDateTime = (date) => (
+  `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`
+);
+
+const formatIcsUtcDateTime = (date) => (
+  date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
+);
+
+const cleanCalendarText = (value = '') => (
+  String(value).replace(/[✦]/g, '').replace(/\s+/g, ' ').trim()
+);
+
+const escapeIcsText = (value = '') => (
+  cleanCalendarText(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;')
+);
+
+const slugify = (value = 'itinerario') => (
+  cleanCalendarText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'itinerario'
+);
+
+const hasRainyWeather = (answers = {}) => Boolean(answers?.weather?.isRainy);
+
+const getCalendarDateRange = (answers = {}, route) => {
+  let start = parseDateOnly(answers.periodStart) || parseItalianDateFromPeriod(answers.period, 0);
+  let end = parseDateOnly(answers.periodEnd) || parseItalianDateFromPeriod(answers.period, 1);
+
+  if (!start) {
+    start = route?.title === ITINERARIES.bruna.title
+      ? new Date(CALENDAR_YEAR_FALLBACK, 6, 2)
+      : new Date(CALENDAR_YEAR_FALLBACK, 6, 1);
+  }
+
+  if (!end || end < start) {
+    end = start;
+  }
+
+  return { start, end };
+};
+
+const getScheduleBaseDate = (answers, route) => {
+  const { start, end } = getCalendarDateRange(answers, route);
+  const brunaDate = new Date(CALENDAR_YEAR_FALLBACK, 6, 2);
+
+  if (route?.title === ITINERARIES.bruna.title && dateContains(start, end, brunaDate)) {
+    return brunaDate;
+  }
+
+  return start;
+};
+
+const buildCalendarDetails = (route) => {
+  const lines = [
+    route.title,
+    route.subtitle,
+    '',
+    route.desc,
+    '',
+    'Programma:'
+  ];
+
+  route.schedule?.forEach((dayData) => {
+    lines.push('', dayData.day);
+    dayData.events.forEach((event) => {
+      lines.push(`${event.time} - ${cleanCalendarText(event.title)}: ${cleanCalendarText(event.desc)}`);
+    });
+  });
+
+  return lines.join('\n');
+};
+
+const getGoogleCalendarUrl = (route, answers) => {
+  const { start, end } = getCalendarDateRange(answers, route);
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `${route.title} - Vivi La Bruna`,
+    dates: `${formatGoogleAllDayDate(start)}/${formatGoogleAllDayDate(addDays(end, 1))}`,
+    details: buildCalendarDetails(route),
+    location: CALENDAR_LOCATION,
+    ctz: CALENDAR_TIMEZONE
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
+const getEventDurationHours = (event) => {
+  if (event.type === 'sleep') return 8;
+  if (event.type === 'eat') return 1.5;
+  if (event.type === 'see') return 1.5;
+  return 2;
+};
+
+const getTimedCalendarEvents = (route, answers) => {
+  const scheduleBaseDate = getScheduleBaseDate(answers, route);
+
+  return (route.schedule || []).flatMap((dayData, dayIndex) => (
+    dayData.events.map((event, eventIndex) => {
+      const [hours, minutes] = event.time.split(':').map(Number);
+      const midnightOffset = event.type === 'sleep' && hours === 0 ? 1 : 0;
+      const start = new Date(
+        scheduleBaseDate.getFullYear(),
+        scheduleBaseDate.getMonth(),
+        scheduleBaseDate.getDate() + dayIndex + midnightOffset,
+        hours,
+        minutes || 0
+      );
+      const end = addHours(start, getEventDurationHours(event));
+
+      return {
+        ...event,
+        start,
+        end,
+        dayTitle: dayData.day,
+        uid: `${dateOnlyFromDate(start)}-${dayIndex}-${eventIndex}-${slugify(event.title)}@vivilabruna.local`
+      };
+    })
+  ));
+};
+
+const createAppleCalendarFile = (route, answers) => {
+  const now = formatIcsUtcDateTime(new Date());
+  const events = getTimedCalendarEvents(route, answers);
+
+  const eventBlocks = events.map((event) => ([
+    'BEGIN:VEVENT',
+    `UID:${event.uid}`,
+    `DTSTAMP:${now}`,
+    `DTSTART;TZID=${CALENDAR_TIMEZONE}:${formatIcsLocalDateTime(event.start)}`,
+    `DTEND;TZID=${CALENDAR_TIMEZONE}:${formatIcsLocalDateTime(event.end)}`,
+    `SUMMARY:${escapeIcsText(`${event.title} - Vivi La Bruna`)}`,
+    `LOCATION:${escapeIcsText(CALENDAR_LOCATION)}`,
+    `DESCRIPTION:${escapeIcsText(`${event.dayTitle}\n${event.desc}`)}`,
+    'END:VEVENT'
+  ].join('\r\n')));
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Vivi La Bruna//Itinerario//IT',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `X-WR-CALNAME:${escapeIcsText(`Vivi La Bruna - ${route.title}`)}`,
+    `X-WR-TIMEZONE:${CALENDAR_TIMEZONE}`,
+    ...eventBlocks,
+    'END:VCALENDAR'
+  ].join('\r\n');
+};
+
+const downloadAppleCalendarFile = (route, answers) => {
+  const calendarFile = createAppleCalendarFile(route, answers);
+  const blob = new Blob([calendarFile], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = `${slugify(route.title)}-vivi-la-bruna.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
 // 4 Predefined routes
 const ITINERARIES = {
   bruna: {
@@ -93,6 +322,31 @@ const ITINERARIES = {
         ]
       }
     ]
+  },
+  rain: {
+    title: 'Matera al Riparo',
+    subtitle: 'Piano intelligente per pioggia e vicoli bagnati',
+    desc: 'Il meteo segnala pioggia su Matera: il percorso si sposta in luoghi coperti, grotte visitabili, botteghe e soste gastronomiche riparate. Restano i Sassi e la Festa, ma con meno tratti esposti e più pause al chiuso.',
+    waypoints: [
+      { 0: 16.6102, 1: 40.6640, title: 'Palazzo Lanfranchi', desc: 'Museo e punto coperto per iniziare dal racconto storico della città.', time: '10:00', icon: '🏛️' },
+      { 0: 16.6113, 1: 40.6634, title: 'Casa Grotta nei Sassi', desc: 'Visita interna per capire la vita nelle grotte materane senza restare sotto la pioggia.', time: '11:30', icon: '🏠' },
+      { 0: 16.6122, 1: 40.6657, title: 'MUSMA', desc: 'Scultura contemporanea negli ambienti ipogei di Palazzo Pomarici.', time: '15:30', icon: '🎨' },
+      { 0: 16.6098, 1: 40.6660, title: 'Cena in grotta', desc: 'Chiusura lenta in un ristorante scavato nel tufo, evitando gli spostamenti più scoperti.', time: '20:00', icon: '🍽️' }
+    ],
+    schedule: [
+      {
+        day: 'Giorno 1 - Piano al Coperto',
+        events: [
+          { time: '10:00', type: 'see', title: 'Palazzo Lanfranchi', desc: 'Ingresso al museo e lettura storica della città, con una prima tappa completamente riparata.' },
+          { time: '11:30', type: 'see', title: 'Casa Grotta nei Sassi', desc: 'Visita negli ambienti scavati nel tufo per vivere i Sassi senza lunghi tratti all’aperto.' },
+          { time: '13:00', type: 'eat', title: 'Pranzo in trattoria coperta', desc: 'Crapiata, pane di Matera e peperoni cruschi in una sala interna del centro storico.' },
+          { time: '15:30', type: 'see', title: 'MUSMA e ambienti ipogei', desc: 'Arte e scultura negli spazi sotterranei di Palazzo Pomarici, ideale quando piove.' },
+          { time: '17:30', type: 'activity', title: 'Bottega di cartapesta', desc: 'Laboratorio breve sui simboli della Bruna, con lavorazione al chiuso e souvenir artigianale.' },
+          { time: '20:00', type: 'eat', title: 'Cena in grotta', desc: 'Cena riparata in un ristorante scavato nel tufo, con spostamenti ridotti e atmosfera materana.' },
+          { time: '22:00', type: 'sleep', title: 'Rientro nei Sassi', desc: 'Rientro consigliato con percorso breve e scarpe adatte ai gradini bagnati.' }
+        ]
+      }
+    ]
   }
 };
 
@@ -102,17 +356,19 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
 
   useEffect(() => {
     // Logic to select the route based on answers
-    const period = answers?.period || '';
-    const vibe = answers?.vibe || '';
+    const period = (answers?.period || '').toLowerCase();
+    const vibe = (answers?.vibe || '').toLowerCase();
 
     let selectedKey = 'spiritual';
-    if (period.includes('2 Luglio') || period.includes('Luglio')) {
+    if (hasRainyWeather(answers)) {
+      selectedKey = 'rain';
+    } else if (period.includes('2 luglio') || period.includes('luglio')) {
       selectedKey = 'bruna';
-    } else if (vibe.includes('Avventura')) {
+    } else if (vibe.includes('avventura')) {
       selectedKey = 'adventure';
-    } else if (vibe.includes('Sapori')) {
+    } else if (vibe.includes('sapori')) {
       selectedKey = 'food';
-    } else if (vibe.includes('Storia')) {
+    } else if (vibe.includes('storia')) {
       selectedKey = 'spiritual';
     }
     
@@ -144,6 +400,9 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
       setTimeout(() => setDraw(true), 500);
     }
   }, [answers, isActive, selectedExperiences]);
+
+  const googleCalendarUrl = getGoogleCalendarUrl(route, answers);
+  const weather = answers?.weather;
 
   return (
     <div className={`itinerary-wrapper ${isActive ? 'is-active' : ''}`}>
@@ -188,6 +447,19 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
         </div>
 
         {/* Dettagli Itinerario */}
+        {weather?.isRainy && (
+          <div className="weather-route-alert">
+            <span className="weather-route-alert-icon" aria-hidden="true"></span>
+            <div>
+              <strong>Meteo intelligente attivo</strong>
+              <p>
+                {weather.conditionLabel || 'Pioggia'} a Matera
+                {weather.temperature !== null && weather.temperature !== undefined ? `, ${weather.temperature}°C` : ''}: il programma è stato ricalcolato con tappe coperte.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="itinerary-content" style={{ textAlign: 'left', paddingLeft: '20px', paddingRight: '20px', marginBottom: '40px' }}>
           <h3 className="route-title">{route.title}</h3>
           <h4 className="route-subtitle">{route.subtitle}</h4>
@@ -241,11 +513,24 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
         )}
 
         <div className="parchment-footer" style={{ marginTop: '20px', position: 'relative' }}>
-          <button className="download-btn">Scarica la Mappa in PDF</button>
+          <button className="download-btn">Scarica Programma in PDF</button>
+          <a
+            className="calendar-btn calendar-btn-google"
+            href={googleCalendarUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Aggiungi a Google Calendar
+          </a>
+          <button
+            className="calendar-btn calendar-btn-apple"
+            onClick={() => downloadAppleCalendarFile(route, answers)}
+          >
+            Aggiungi ad Apple Calendar
+          </button>
         </div>
         
       </div>
     </div>
   );
 }
-

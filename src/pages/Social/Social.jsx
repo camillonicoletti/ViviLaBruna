@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Social.css';
 
 // Frasi tradizionali della Festa della Bruna
@@ -50,8 +50,158 @@ const TEMPLATES = [
   }
 ];
 
+const getActivityReviewSlug = (title) =>
+  title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+const ACTIVITY_REVIEW_DATA = [
+  {
+    title: 'Tour dei Sassi al Tramonto',
+    category: 'Cultura & Storia',
+    image: '/hud/matera_sassi_sunset.png',
+    rating: '4.9',
+    totalReviews: '1.240',
+    verdict: 'Il piu fotografato',
+    signal: 'Top per prime visite',
+    quote: 'Il tramonto sui Sassi e stato gestito con tempi perfetti. Guida precisa, scorci incredibili e ritmo mai turistico.',
+    author: 'Giulia R.',
+    context: 'Coppia · Maggio 2026',
+    tags: ['Tramonto', 'Guida locale', 'Foto point'],
+    metrics: [
+      { label: 'Atmosfera', value: '9.8' },
+      { label: 'Organizzazione', value: '9.6' },
+      { label: 'Story-ready', value: '98%' }
+    ],
+    reviews: [
+      { name: 'Marco V.', text: 'Percorso elegante, non troppo lungo e pieno di dettagli che da soli avremmo perso.', detail: 'Famiglia · 2 ore' },
+      { name: 'Alessia P.', text: 'La luce finale dalla terrazza vale il tour. Ottimo anche per chi visita Matera per la prima volta.', detail: 'Amiche · Golden hour' },
+      { name: 'Nico L.', text: 'Tutto puntuale, guida super chiara e gruppo piccolo. Esperienza molto curata.', detail: 'Solo traveller · Cultura' }
+    ]
+  },
+  {
+    title: "Volo in Mongolfiera all'Alba",
+    category: 'Avventura',
+    image: '/hud/matera_hot_air_balloon.png',
+    rating: '5.0',
+    totalReviews: '312',
+    verdict: 'Esperienza wow',
+    signal: 'Prenotazione anticipata consigliata',
+    quote: "Silenzio totale, alba sulla Murgia e brindisi finale. E una di quelle cose che ti restano addosso.",
+    author: 'Davide M.',
+    context: 'Compleanno · Aprile 2026',
+    tags: ['Alba', 'Panorama', 'Regalo'],
+    metrics: [
+      { label: 'Emozione', value: '10' },
+      { label: 'Sicurezza', value: '9.9' },
+      { label: 'Ricordo', value: '100%' }
+    ],
+    reviews: [
+      { name: 'Serena T.', text: 'Equipaggio impeccabile e atmosfera quasi cinematografica. Consigliatissimo per un regalo importante.', detail: 'Coppia · Alba' },
+      { name: 'Luca B.', text: 'Avevo timore dell altezza, ma e stato tutto morbido, lento e rassicurante.', detail: 'Prima volta · Avventura' },
+      { name: 'Marta D.', text: 'Vista pazzesca sui Sassi. Foto bellissime senza dover forzare nulla.', detail: 'Viaggio speciale · Panorama' }
+    ]
+  },
+  {
+    title: 'Laboratorio del Pane IGP',
+    category: 'Food & Drink',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1400&auto=format&fit=crop',
+    rating: '4.8',
+    totalReviews: '580',
+    verdict: 'Piu autentico',
+    signal: 'Perfetto con bambini',
+    quote: 'Mani in pasta, racconti veri e profumo di forno antico. Sembra piccolo, invece ti porti via un pezzo di Matera.',
+    author: 'Elena C.',
+    context: 'Famiglia · Marzo 2026',
+    tags: ['Tradizione', 'Degustazione', 'Forno storico'],
+    metrics: [
+      { label: 'Autenticita', value: '9.7' },
+      { label: 'Gusto', value: '9.5' },
+      { label: 'Family-fit', value: '96%' }
+    ],
+    reviews: [
+      { name: 'Paolo F.', text: 'Esperienza concreta e calda. Il pane appena uscito dal forno e una cosa seria.', detail: 'Food lover · Mattina' },
+      { name: 'Irene S.', text: 'I bambini si sono divertiti e noi abbiamo capito davvero perche il pane qui e cultura.', detail: 'Famiglia · Food' },
+      { name: 'Roberto N.', text: 'Racconto semplice, ingredienti ottimi e finale goloso. Molto piu bello del previsto.', detail: 'Coppia · Degustazione' }
+    ]
+  },
+  {
+    title: 'Trekking Murgia Materana',
+    category: 'Natura',
+    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1400&auto=format&fit=crop',
+    rating: '4.7',
+    totalReviews: '890',
+    verdict: 'Piu wild',
+    signal: 'Scarpe comode obbligatorie',
+    quote: 'Canyon, grotte e vento della Murgia. Faticoso il giusto, ma la vista finale ripaga ogni passo.',
+    author: 'Andrea G.',
+    context: 'Gruppo · Aprile 2026',
+    tags: ['Outdoor', 'Canyon', 'Chiese rupestri'],
+    metrics: [
+      { label: 'Paesaggio', value: '9.7' },
+      { label: 'Ritmo', value: '8.9' },
+      { label: 'Natura', value: '97%' }
+    ],
+    reviews: [
+      { name: 'Chiara L.', text: 'Guida attenta e percorso bellissimo. Alcuni tratti richiedono fiato, ma niente di ingestibile.', detail: 'Outdoor · Weekend' },
+      { name: 'Stefano Q.', text: 'Il ponte e le chiese rupestri danno al trekking una dimensione molto materana.', detail: 'Amici · Natura' },
+      { name: 'Mina A.', text: 'Consiglio acqua e cappello. Esperienza intensa, vera, molto diversa dai soliti tour.', detail: 'Solo traveller · 4 ore' }
+    ]
+  },
+  {
+    title: 'E-Bike dalla Cripta',
+    category: 'Sport',
+    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop',
+    rating: '4.9',
+    totalReviews: '420',
+    verdict: 'Piu dinamica',
+    signal: 'Green tour consigliato',
+    quote: "La bici elettrica rende tutto fluido: salite facili, campagne bellissime e arrivo alla cripta con l effetto sorpresa.",
+    author: 'Francesca Z.',
+    context: 'Amici · Maggio 2026',
+    tags: ['E-bike', 'Panorama', 'Green'],
+    metrics: [
+      { label: 'Divertimento', value: '9.6' },
+      { label: 'Accessibilita', value: '9.4' },
+      { label: 'Green mood', value: '99%' }
+    ],
+    reviews: [
+      { name: 'Tommaso E.', text: 'Bici in ottime condizioni e itinerario calibrato bene. Si vede tanto senza stress.', detail: 'Sport · Mezza giornata' },
+      { name: 'Laura I.', text: 'Perfetta anche se non sei allenatissima. Le salite diventano parte del divertimento.', detail: 'Coppia · E-bike' },
+      { name: 'Gabriele D.', text: 'La cripta alla fine chiude il giro in modo memorabile. Bella combinazione arte e sport.', detail: 'Amici · Cultura' }
+    ]
+  },
+  {
+    title: 'Cena Romantica in Grotta',
+    category: 'Exclusive',
+    image: '/hud/matera_romantic_dinner.png',
+    rating: '4.9',
+    totalReviews: '215',
+    verdict: 'Piu elegante',
+    signal: 'Da prenotare per tempo',
+    quote: 'Luce bassa, tufo, servizio discreto e piatti curati. Sembra una scena privata dentro Matera.',
+    author: 'Martina S.',
+    context: 'Anniversario · Febbraio 2026',
+    tags: ['Grotta', 'Cena', 'Occasione speciale'],
+    metrics: [
+      { label: 'Atmosfera', value: '9.9' },
+      { label: 'Servizio', value: '9.6' },
+      { label: 'Romance', value: '100%' }
+    ],
+    reviews: [
+      { name: 'Claudio H.', text: 'Location bellissima senza essere pacchiana. Menu degustazione equilibrato.', detail: 'Coppia · Sera' },
+      { name: 'Federica O.', text: 'Perfetta per chiudere una giornata nei Sassi. Silenziosa, intima, molto curata.', detail: 'Anniversario · Exclusive' },
+      { name: 'Nadia B.', text: 'Servizio gentile e tempi rilassati. Il contesto nella grotta fa davvero la differenza.', detail: 'Cena speciale · Food' }
+    ]
+  }
+];
+
 export default function Social() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
   const [template, setTemplate] = useState('strazzo');
   const [customText, setCustomText] = useState("A mmoğğj a mmoğğj all'onn c vèn!");
@@ -66,6 +216,7 @@ export default function Social() {
   
   // Sticker attivi
   const [activeStickers, setActiveStickers] = useState(['corona']);
+  const [selectedReviewActivity, setSelectedReviewActivity] = useState(0);
 
   // Stati ausiliari
   const [isGenerating, setIsGenerating] = useState(false);
@@ -79,6 +230,31 @@ export default function Social() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const reviewSlug = params.get('review');
+    const shouldScrollToReviews = location.hash === '#recensioni-attivita';
+
+    if (reviewSlug) {
+      const reviewIndex = ACTIVITY_REVIEW_DATA.findIndex(
+        (activity) => getActivityReviewSlug(activity.title) === reviewSlug
+      );
+
+      if (reviewIndex >= 0) {
+        setSelectedReviewActivity(reviewIndex);
+      }
+    }
+
+    if (reviewSlug || shouldScrollToReviews) {
+      window.requestAnimationFrame(() => {
+        document.getElementById('recensioni-attivita')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
+    }
+  }, [location.hash, location.search]);
 
   // Gestione upload foto
   const handlePhotoUpload = (e) => {
@@ -157,7 +333,7 @@ export default function Social() {
           const img = new Image();
           img.crossOrigin = 'anonymous';
           img.onload = () => resolve(img);
-          img.onerror = (e) => reject(new Error(`Errore caricamento immagine: ${src}`));
+          img.onerror = () => reject(new Error(`Errore caricamento immagine: ${src}`));
           img.src = src;
         });
       };
@@ -297,7 +473,7 @@ export default function Social() {
             }
 
             ctx.restore();
-          } catch (e) {
+          } catch {
             console.warn(`Impossibile caricare sticker ${stickerId}`);
           }
         }
@@ -349,7 +525,7 @@ export default function Social() {
           // Overlay scuro per migliorare contrasto testo
           ctx.fillStyle = 'rgba(13, 13, 22, 0.45)';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-        } catch (e) {
+        } catch {
           // Fallback gradiente se l'immagine fallisce
           const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
           grad.addColorStop(0, '#0d0d16');
@@ -394,7 +570,9 @@ export default function Social() {
           ctx.globalAlpha = 0.08;
           ctx.drawImage(timbroBg, canvas.width / 2 - 300, canvas.height / 2 - 400, 600, 600);
           ctx.restore();
-        } catch (e) {}
+        } catch {
+          console.warn('Impossibile caricare il timbro araldico di sfondo');
+        }
       }
 
       // ── Step 3: Cornici Esterne della Storia ──
@@ -614,7 +792,7 @@ export default function Social() {
               ctx.drawImage(stickerImg, -80, -80, 160, 160);
             }
             ctx.restore();
-          } catch (e) {
+          } catch {
             console.warn(`Impossibile caricare sticker ${stickerId}`);
           }
         }
@@ -768,7 +946,7 @@ export default function Social() {
         ctx.textAlign = 'center';
         ctx.fillText("#VIVILABRUNA", canvas.width / 2, canvas.height - 90);
         ctx.restore();
-      } catch (e) {
+      } catch {
         // Fallback testuale se il logo non carica
         ctx.fillStyle = '#C9A84C';
         ctx.font = '800 22px Century Gothic, sans-serif';
@@ -844,6 +1022,7 @@ export default function Social() {
 
   // Ottieni i colori del template corrente per stili inline dinamici nell'editor
   const currTemp = TEMPLATES.find(t => t.id === template) || TEMPLATES[0];
+  const activeActivityReview = ACTIVITY_REVIEW_DATA[selectedReviewActivity];
 
   return (
     <div className="social-page-container">
@@ -857,7 +1036,9 @@ export default function Social() {
       </div>
 
       <div className="social-header-section">
-        <h1 className="social-main-title">Crea la tua Cartolina Social</h1>
+        <h1 className="social-main-title">
+          Crea la tua <br className="social-title-mobile-break" />Cartolina Social
+        </h1>
         <p className="social-subtitle">Crea la tua cartolina social, scegli il tema, carica la tua foto e condividi</p>
       </div>
 
@@ -1149,12 +1330,12 @@ export default function Social() {
             {currentStep === 3 && (
               <div className="wizard-step-content fade-in">
                 <h2 className="step-title">3. Aggiungi una Tua Foto (Opzionale)</h2>
-                <p className="step-description">Inserisci un tuo scatto per incastonarlo all'interno della cornice dorata della storia:</p>
+                <p className="step-description">Inserisci un tuo scatto per incastonarlo all&apos;interno della cornice dorata della storia:</p>
 
                 {!userPhoto ? (
                   <div className="upload-dropzone" onClick={() => fileInputRef.current.click()}>
                     <span className="dropzone-icon">📥</span>
-                    <h3>Seleziona un'immagine</h3>
+                    <h3>Seleziona un&apos;immagine</h3>
                     <p>Trascina un file PNG o JPG qui o sfoglia le tue foto</p>
                   </div>
                 ) : (
@@ -1204,7 +1385,7 @@ export default function Social() {
                           <label>Regola Allineamento</label>
                           <button className="reset-alignment-btn" onClick={() => { setPhotoX(0); setPhotoY(0); }}>Centra</button>
                         </div>
-                        <p className="adjustment-tip">Usa il mouse o trascina col dito direttamente la foto nell'anteprima a sinistra per spostarla in orizzontale/verticale.</p>
+                        <p className="adjustment-tip">Usa il mouse o trascina col dito direttamente la foto nell&apos;anteprima a sinistra per spostarla in orizzontale/verticale.</p>
                       </div>
                     </div>
                   </div>
@@ -1312,6 +1493,112 @@ export default function Social() {
 
         </div>
       </div>
+
+      <section id="recensioni-attivita" className="activity-reviews-section" aria-labelledby="activity-reviews-title">
+        <div className="reviews-section-header">
+          <span className="reviews-kicker">Recensioni esperienze</span>
+          <div className="reviews-title-row">
+            <h2 id="activity-reviews-title">Le voci di chi ha gia vissuto le attivita</h2>
+            <button
+              type="button"
+              className="reviews-explore-link"
+              onClick={() => navigate('/prova')}
+              aria-label="Apri Esplora Attivita"
+            >
+              <span>↗</span>
+              Esplora
+            </button>
+          </div>
+          <p>
+            Seleziona una delle esperienze presenti in Esplora Attivita e leggi feedback,
+            segnali utili e micro-recensioni pensate per scegliere piu in fretta.
+          </p>
+        </div>
+
+        <div className="activity-review-tabs" role="tablist" aria-label="Attivita recensite">
+          {ACTIVITY_REVIEW_DATA.map((activity, idx) => (
+            <button
+              key={activity.title}
+              type="button"
+              role="tab"
+              aria-selected={selectedReviewActivity === idx}
+              className={`activity-review-tab ${selectedReviewActivity === idx ? 'active' : ''}`}
+              onClick={() => setSelectedReviewActivity(idx)}
+            >
+              <span className="activity-tab-index">{String(idx + 1).padStart(2, '0')}</span>
+              <span className="activity-tab-copy">
+                <strong>{activity.title}</strong>
+                <small>{activity.category}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="reviews-showcase-grid">
+          <article className="featured-review-panel">
+            <div
+              className="featured-review-media"
+              style={{ backgroundImage: `url(${activeActivityReview.image})` }}
+              aria-hidden="true"
+            >
+              <div className="featured-review-rating">
+                <span>★</span>
+                {activeActivityReview.rating}
+              </div>
+            </div>
+
+            <div className="featured-review-content">
+              <div className="featured-review-topline">
+                <span>{activeActivityReview.category}</span>
+                <strong>{activeActivityReview.totalReviews} recensioni</strong>
+              </div>
+              <h3>{activeActivityReview.title}</h3>
+              <p className="featured-review-quote">“{activeActivityReview.quote}”</p>
+
+              <div className="featured-review-author">
+                <span>{activeActivityReview.author}</span>
+                <small>{activeActivityReview.context}</small>
+              </div>
+
+              <div className="review-tag-list" aria-label="Punti forti">
+                {activeActivityReview.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+            </div>
+          </article>
+
+          <aside className="review-insight-panel" aria-label="Sintesi recensioni">
+            <div className="review-verdict-card">
+              <span className="review-verdict-label">Verdetto rapido</span>
+              <strong>{activeActivityReview.verdict}</strong>
+              <p>{activeActivityReview.signal}</p>
+            </div>
+
+            <div className="review-metrics-grid">
+              {activeActivityReview.metrics.map((metric) => (
+                <div className="review-metric" key={metric.label}>
+                  <span>{metric.value}</span>
+                  <small>{metric.label}</small>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+
+        <div className="review-card-row" aria-label={`Recensioni per ${activeActivityReview.title}`}>
+          {activeActivityReview.reviews.map((review) => (
+            <article className="mini-review-card" key={`${activeActivityReview.title}-${review.name}`}>
+              <div className="mini-review-stars" aria-label="Valutazione 5 su 5">★★★★★</div>
+              <p>“{review.text}”</p>
+              <div>
+                <strong>{review.name}</strong>
+                <span>{review.detail}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

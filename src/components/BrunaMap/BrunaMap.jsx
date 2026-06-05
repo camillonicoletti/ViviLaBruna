@@ -327,36 +327,40 @@ export default function BrunaMap() {
   }, []);
 
   return (
-    <>
-      <div className="bruna-map-intro">
-        <h2 className="bruna-map-section-title">
-          <span className="sparkle">✦</span>
-          Scopri subito cosa accade attorno a te
-        </h2>
-        <button className="magic-geolocate-btn" onClick={triggerGeolocate}>
-          Geolocalizzati in 3D
-          <span className="btn-glow"></span>
-        </button>
+    <section className="bruna-map-section" aria-labelledby="bruna-map-heading">
+      <div className="bruna-map-section-inner">
+        <div className="bruna-map-intro">
+          <h2 className="bruna-map-section-title" id="bruna-map-heading">
+            <span className="sparkle">✦</span>
+            <span className="bruna-map-title-copy">
+              Scopri subito cosa<span className="bruna-map-mobile-break"><br /></span> <span className="bruna-map-second-line">accade attorno a te</span>
+            </span>
+          </h2>
+          <button className="magic-geolocate-btn" onClick={triggerGeolocate}>
+            Geolocalizzati in 3D
+            <span className="btn-glow"></span>
+          </button>
+        </div>
+        <div className="bruna-map-wrapper">
+          <div className="bruna-map-header">
+            <div className="bruna-map-title">
+              <span className="sparkle">✦</span> Mappa degli Eventi
+            </div>
+            <div className="bruna-map-header-buttons">
+              <button className={`toggle-3d-btn ${is3D ? 'active' : ''}`} onClick={toggle3D}>
+                {is3D ? "Vista 2D" : "Vista 3D"}
+              </button>
+              <button className={`toggle-3d-btn fullscreen-toggle-btn ${isFullscreen ? 'active' : ''}`} onClick={toggleFullscreen} title="Tutto Schermo">
+                {isFullscreen
+                  ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                  : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                }
+              </button>
+            </div>
+          </div>
+          <div ref={mapContainerRef} className="bruna-map-container" />
+        </div>
       </div>
-      <div className="bruna-map-wrapper">
-        <div className="bruna-map-header">
-           <div className="bruna-map-title">
-             <span className="sparkle">✦</span> Mappa degli Eventi
-           </div>
-           <div className="bruna-map-header-buttons">
-           <button className={`toggle-3d-btn ${is3D ? 'active' : ''}`} onClick={toggle3D}>
-             {is3D ? "Vista 2D" : "Vista 3D"}
-           </button>
-           <button className={`toggle-3d-btn ${isFullscreen ? 'active' : ''}`} onClick={toggleFullscreen} title="Tutto Schermo">
-             {isFullscreen
-               ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
-               : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-             }
-           </button>
-         </div>
-      </div>
-      <div ref={mapContainerRef} className="bruna-map-container" />
-    </div>
-    </>
+    </section>
   );
 }

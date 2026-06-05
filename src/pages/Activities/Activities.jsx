@@ -95,6 +95,14 @@ export default function Activities() {
     return date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
   };
 
+  const formatDateOnly = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const toggleItinerary = (id) => {
     // Se c'è un itinerario generato, mostra il banner di ricalcolo
     if (wizardStep === 'done') {
@@ -277,7 +285,12 @@ export default function Activities() {
                           className="confirm-btn"
                           disabled={!dateFrom || !dateTo} 
                           onClick={() => {
-                            setWizardAnswers({...wizardAnswers, period: `Dal ${formatDate(dateFrom)} al ${formatDate(dateTo)}`});
+                            setWizardAnswers({
+                              ...wizardAnswers,
+                              period: `Dal ${formatDate(dateFrom)} al ${formatDate(dateTo)}`,
+                              periodStart: formatDateOnly(dateFrom),
+                              periodEnd: formatDateOnly(dateTo)
+                            });
                             setWizardStep(2);
                           }}>
                           Conferma {dateFrom && dateTo ? `(${formatDate(dateFrom)} - ${formatDate(dateTo)})` : 'Date'}

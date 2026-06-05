@@ -1,15 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './Prova.css';
+import BrunaCalendar from '../../components/BrunaCalendar/BrunaCalendar';
+import ItineraryResult from '../../components/ItineraryResult/ItineraryResult';
 
-export default function Prova() {
-  const containerRef = useRef(null);
-  const navigate = useNavigate();
-  const [modalData, setModalData] = useState(null);
+const getActivityReviewSlug = (title) =>
+  title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
-  useEffect(() => {
-    // ── DATA ──────────────────────────────────────────────────────────────────
-    const ITEMS = [
+// ── DATA ──────────────────────────────────────────────────────────────────
+const ITEMS = [
       { title:"Tour dei Sassi al Tramonto", cat:"Cultura & Storia", price:"25€", rating:"4.9", reviews:1240, duration:"2 ore",
         img:"/hud/matera_sassi_sunset.png", desc: "Scopri la magia dei Sassi di Matera al calar del sole in un suggestivo percorso guidato tra i rioni storici. Visiteremo antiche cisterne e chiese rupestri avvolti dalla luce dorata del tramonto.", map: "Piazza Vittorio Veneto, Matera", cont: "+39 333 1234567 | info@materatours.it", dates: "Tutti i giorni, h 18:00", coords: [16.6105, 40.6664] },
       { title:"Volo in Mongolfiera all'Alba", cat:"Avventura", price:"180€", rating:"5.0", reviews:312, duration:"3 ore",
@@ -22,7 +25,63 @@ export default function Prova() {
         img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop", desc: "Esplora senza fatica le magnifiche campagne materane fino alla Cripta del Peccato Originale, la 'Cappella Sistina' dell'arte rupestre. Un tour in E-Bike immersivo, panoramico e green.", map: "Piazzetta Pascoli, Matera", cont: "+39 331 4455667 | rent@ebikematera.it", dates: "Tutti i giorni, h 09:00 e 15:00", coords: [16.6040, 40.6650] },
       { title:"Cena Romantica in Grotta", cat:"Exclusive", price:"90€", rating:"4.9", reviews:215, duration:"Serata intera",
         img:"/hud/matera_romantic_dinner.png", desc: "Goditi un esclusivo menu degustazione a lume di candela in un raffinato ristorante scavato direttamente nel tufo del Sasso Caveoso. Un'atmosfera intima e suggestiva per una serata speciale.", map: "Sasso Caveoso, Matera", cont: "+39 0835 987654 | ristorante@grottamatera.it", dates: "Tutte le sere, su prenotazione", coords: [16.6110, 40.6640] },
-    ];
+];
+
+export default function Prova() {
+  const containerRef = useRef(null);
+  const [modalData, setModalData] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]); // indici sincronizzati col Set dell'HUD
+  const [programOpen, setProgramOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  // ── Wizard "Genera Programma" (stessa logica di Esplora attività) ──
+  const [wizardStep, setWizardStep] = useState(false); // false | 0..4 | 'done'
+  const [wizardAnswers, setWizardAnswers] = useState({});
+  const [dateFrom, setDateFrom] = useState(null);
+  const [dateTo, setDateTo] = useState(null);
+
+  const formatDate = (date) =>
+    date ? date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) : '';
+
+  const formatDateOnly = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const searchResults = useMemo(() => {
+    if (!normalizedSearch) return [];
+
+    return ITEMS
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => (
+        item.title.toLowerCase().includes(normalizedSearch) ||
+        item.cat.toLowerCase().includes(normalizedSearch) ||
+        item.desc.toLowerCase().includes(normalizedSearch) ||
+        item.map.toLowerCase().includes(normalizedSearch) ||
+        item.dates.toLowerCase().includes(normalizedSearch)
+      ));
+  }, [normalizedSearch]);
+
+  const goToActivity = (index) => {
+    if (typeof window !== 'undefined' && window.hudGoTo) {
+      window.hudGoTo(index);
+    }
+    setSearchFocused(false);
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    if (searchResults.length > 0) {
+      goToActivity(searchResults[0].index);
+    }
+  };
+
+  useEffect(() => {
     const N = ITEMS.length;
     let cur = 0, spinning = false;
     const selected = new Set();
@@ -179,6 +238,7 @@ export default function Prova() {
     window.hudToggleAdd = function(idx) {
       if (selected.has(idx)) {
         selected.delete(idx);
+        setSelectedItems(Array.from(selected));
         const ring = G(`ring-${idx}`);
         if(ring) {
           ring.classList.remove('done');
@@ -195,6 +255,7 @@ export default function Prova() {
           r.classList.remove('spinning');
           r.classList.add('done');
           selected.add(idx);
+          setSelectedItems(Array.from(selected));
           if(G('badge-count')) G('badge-count').textContent = selected.size;
           showToast(`"${ITEMS[idx].title.split(' ').slice(0,3).join(' ')}…" aggiunto`);
         }, 650);
@@ -245,6 +306,14 @@ export default function Prova() {
 
     function keyDownHandler(e) {
       if (document.querySelector('.hud-modal-overlay')) return;
+      const target = e.target;
+      const isEditable = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      );
+      if (isEditable) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') window.hudNavigate(1);
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') window.hudNavigate(-1);
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); window.hudToggleAdd(cur); }
@@ -343,13 +412,18 @@ export default function Prova() {
 
     // ── TOAST ─────────────────────────────────────────────────────────────────────
     let toastTimer;
-    window.hudShowToast = function showToast(msg) {
+    function showToast(msg) {
       const t = G('toast');
       if(!t) return;
       t.textContent = msg; t.classList.add('show');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
     }
+    window.hudShowToast = showToast;
+    window.hudOpenReviews = function() {
+      const slug = getActivityReviewSlug(ITEMS[cur].title);
+      window.location.href = `/social?review=${encodeURIComponent(slug)}#recensioni-attivita`;
+    };
 
     // ── INIT ──────────────────────────────────────────────────────────────────────
     buildTracks();
@@ -375,6 +449,7 @@ export default function Prova() {
       delete window.hudToggleAdd;
       delete window.hudShowToast;
       delete window.hudOpenModal;
+      delete window.hudOpenReviews;
     };
   }, []);
 
@@ -388,7 +463,8 @@ export default function Prova() {
   }, [modalData]);
 
   return (
-    <div className="prova-wrapper" ref={containerRef}>
+    <>
+    <div className={`prova-wrapper ${programOpen ? 'mp-open' : ''}`} ref={containerRef}>
       <div id="cur"></div>
       <div id="cur-ring"></div>
       <div id="scan-flash"></div>
@@ -399,11 +475,73 @@ export default function Prova() {
       <header className="header-hud">
         <div className="hud-rating-box" id="header-stars-box">
           <div className="hud-stars" id="header-stars">★ 4.9</div>
-          <div className="hud-reviews-btn" onClick={() => window.hudShowToast('Apertura recensioni...')}>Vedi Recensioni</div>
+          <button type="button" className="hud-reviews-btn" onClick={() => window.hudOpenReviews?.()}>Vedi Recensioni</button>
         </div>
+
+        <form
+          className={`activity-search ${searchFocused ? 'is-focused' : ''}`}
+          onSubmit={handleSearchSubmit}
+          onKeyDown={(e) => e.stopPropagation()}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setSearchFocused(false);
+            }
+          }}
+        >
+          <div className="activity-search-field">
+            <span className="activity-search-icon" aria-hidden="true"></span>
+            <input
+              className="activity-search-input"
+              type="search"
+              value={searchQuery}
+              placeholder="Cerca attività"
+              aria-label="Cerca attività"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onFocus={() => setSearchFocused(true)}
+            />
+            {searchQuery && (
+              <button
+                className="activity-search-clear"
+                type="button"
+                aria-label="Cancella ricerca"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchFocused(false);
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {searchFocused && normalizedSearch && (
+            <div className="activity-search-results" role="listbox">
+              {searchResults.length > 0 ? (
+                searchResults.map(({ item, index }) => (
+                  <button
+                    key={item.title}
+                    className="activity-search-result"
+                    type="button"
+                    role="option"
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      goToActivity(index);
+                    }}
+                  >
+                    <span className="activity-search-result-title">{item.title}</span>
+                    <span className="activity-search-result-meta">{item.cat} • {item.duration}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="activity-search-empty">Nessuna attività trovata</div>
+              )}
+            </div>
+          )}
+        </form>
+
         <div className="header-right">
-          <div className="itinerary-btn" onClick={() => navigate('/la-storia')}>
-            La storia <span id="badge-count">0</span>
+          <div className="itinerary-btn" onClick={() => setProgramOpen(true)}>
+            Il mio programma <span id="badge-count">{selectedItems.length}</span>
           </div>
         </div>
       </header>
@@ -530,5 +668,165 @@ export default function Prova() {
         </div>
       )}
     </div>
+
+      {/* Backdrop pannello "Il mio programma" */}
+      {programOpen && <div className="mp-sidebar-backdrop" onClick={() => setProgramOpen(false)}></div>}
+
+      {/* IL MIO PROGRAMMA — pannello laterale (fuori da .prova-wrapper per evitare
+          il reset universale e il font serif dell'HUD: stesso design di "Esplora attività") */}
+      <div className={`mp-sidebar ${programOpen ? 'open' : ''}`}>
+        <div className="mp-sidebar-header">
+          <button className="mp-sidebar-close" onClick={() => setProgramOpen(false)}>✕</button>
+          <h3>Il tuo Programma</h3>
+          <span className="mp-sidebar-count">
+            {selectedItems.length} {selectedItems.length === 1 ? 'attività' : 'attività'}
+          </span>
+        </div>
+
+        <div className="mp-sidebar-timeline">
+          {selectedItems.length === 0 && wizardStep === false && (
+            <p className="mp-sidebar-empty">
+              Nessuna attività nel programma.<br />
+              Aggiungi le esperienze che vuoi vivere.
+            </p>
+          )}
+
+          {/* Card delle attività selezionate (nascoste quando l'itinerario è pronto) */}
+          {wizardStep !== 'done' && selectedItems.map((idx) => {
+            const exp = ITEMS[idx];
+            if (!exp) return null;
+            return (
+              <div key={`mp-${idx}`} className="mp-timeline-item">
+                <div className="mp-timeline-dot"></div>
+                <div className="mp-timeline-card">
+                  <img src={exp.img} alt={exp.title} className="mp-timeline-img" />
+                  <div className="mp-timeline-info">
+                    <h4>{exp.title}</h4>
+                    <span>{exp.duration} • {exp.price}</span>
+                  </div>
+                  <button className="mp-remove-btn" onClick={() => window.hudToggleAdd(idx)}>×</button>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* IL QUIZ MAGICO — 4 domande (come in Esplora attività) */}
+          {wizardStep !== false && wizardStep !== 'done' && (
+            <div className="wizard-pergamena fade-in-up">
+              <div className="pergamena-inner">
+                <h4 className="pergamena-title">Cavaliere della Bruna AI</h4>
+
+                {wizardStep === 0 && (
+                  <div className="pergamena-step fade-in">
+                    <p>In quanti siete in questo viaggio?</p>
+                    <div className="pergamena-options">
+                      {['Solo', 'In coppia', 'Gruppo di amici', 'Famiglia'].map(opt => (
+                        <button key={opt} onClick={() => { setWizardAnswers({...wizardAnswers, people: opt}); setWizardStep(1); }}>{opt}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 1 && (
+                  <div className="pergamena-step fade-in">
+                    <p>In quali giorni il vostro cammino toccherà la Murgia?</p>
+                    <div className="dynamic-input-container fade-in">
+                      <BrunaCalendar onRangeSelect={(start, end) => { setDateFrom(start); setDateTo(end); }} />
+                      <div className="input-actions" style={{ width: '100%', marginTop: '15px' }}>
+                        <button
+                          className="confirm-btn"
+                          disabled={!dateFrom || !dateTo}
+                          onClick={() => {
+                            setWizardAnswers({
+                              ...wizardAnswers,
+                              period: `Dal ${formatDate(dateFrom)} al ${formatDate(dateTo)}`,
+                              periodStart: formatDateOnly(dateFrom),
+                              periodEnd: formatDateOnly(dateTo)
+                            });
+                            setWizardStep(2);
+                          }}>
+                          Conferma {dateFrom && dateTo ? `(${formatDate(dateFrom)} - ${formatDate(dateTo)})` : 'Date'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 2 && (
+                  <div className="pergamena-step fade-in">
+                    <p>Come vorreste vivere questo soggiorno?</p>
+                    <div className="pergamena-options">
+                      {[
+                        { label: 'Risparmio', desc: '(0-80€)' },
+                        { label: 'Comodo', desc: '(80–150€)' },
+                        { label: 'Lusso', desc: '(150–250€)' },
+                        { label: 'Magnifico', desc: '(250€+)' }
+                      ].map(opt => (
+                        <button key={opt.label} onClick={() => { setWizardAnswers({...wizardAnswers, budget: opt.label}); setWizardStep(3); }}>
+                          {opt.label}<br/><span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{opt.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 3 && (
+                  <div className="pergamena-step fade-in">
+                    <p>Cosa cerca la vostra anima tra le pietre antiche?</p>
+                    <div className="pergamena-options">
+                      {['Storia e spiritualità', 'Sapori e tradizioni', 'Arte e fotografia', 'Avventura'].map(opt => (
+                        <button key={opt} onClick={() => { setWizardAnswers({...wizardAnswers, vibe: opt}); setWizardStep(4); }}>{opt}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 4 && (
+                  <div className="pergamena-step fade-in text-center">
+                    <p>Ho tutto ciò che mi serve. Sto tracciando il vostro percorso segreto.</p>
+                    <button className="build-program-btn" style={{ width: '100%', marginTop: '15px' }} onClick={() => setWizardStep('done')}>
+                      Genera Itinerario Definitivo ➔
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* RISULTATO FINALE (pergamena con itinerario) */}
+          {wizardStep === 'done' && (
+            <div className="final-program-wrapper fade-in-up" style={{ margin: '0 -30px' }}>
+              <ItineraryResult
+                answers={wizardAnswers}
+                isActive={true}
+                selectedExperiences={selectedItems.map(idx => {
+                  const it = ITEMS[idx];
+                  return { title: it.title, duration: it.duration, price: it.price, image: it.img };
+                })}
+                hideMap={true}
+              />
+              <div style={{ padding: '0 20px 20px 20px' }}>
+                <button className="recalc-fresh-btn" onClick={() => { setWizardStep(false); setWizardAnswers({}); }}>
+                  ↺ Ricomincia e modifica
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {wizardStep === false && (
+          <div className="mp-sidebar-footer">
+            <button
+              className="build-program-btn"
+              disabled={selectedItems.length === 0}
+              style={selectedItems.length === 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+              onClick={() => setWizardStep(0)}
+            >
+              Genera Programma ➔
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

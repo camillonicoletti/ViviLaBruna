@@ -21,9 +21,541 @@
   touch-action: auto;
 }
 
-.story-black-space {
-  min-height: 220px;
-  background: #080604;
+/* ───────────────────────────────────────────────────────── */
+/* LA PINACOTECA — parete di quadri → galleria 3D              */
+/* ───────────────────────────────────────────────────────── */
+.pinacoteca {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  padding: 0;
+  color: #f3e9da;
+  text-align: center;
+  background: #f0d49a url('/sfondo_storia.png') center / cover no-repeat;
+  isolation: isolate;
+}
+
+/* velo scuro in alto (per il titolo) */
+.pinacoteca::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 34%;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(18, 10, 3, 0.62) 0%, rgba(18, 10, 3, 0.18) 58%, transparent 100%);
+  pointer-events: none;
+}
+
+/* velo scuro in basso (per il bottone) */
+.pinacoteca::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 36%;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(18, 10, 3, 0.68) 0%, rgba(18, 10, 3, 0.22) 56%, transparent 100%);
+  pointer-events: none;
+}
+
+/* titolo in alto, sopra la sala */
+.pina-intro {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  padding: clamp(20px, 3.2vw, 50px) 20px 0;
+}
+
+.pina-kicker {
+  margin: 0 0 12px;
+  color: #f0c873;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(10px, 1vw, 12px);
+  font-weight: 800;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.pina-intro h2 {
+  margin: 0;
+  color: #fff7e8;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(28px, 4vw, 60px);
+  line-height: 1.04;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 14px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* ── cornice dorata condivisa ── */
+.pina-frame {
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  padding: clamp(8px, 1.1vw, 13px);
+  border: 0;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #f6dd97 0%, #cda653 20%, #8a6a2a 50%, #cda653 80%, #f6dd97 100%);
+  box-shadow:
+    0 20px 38px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 244, 210, 0.55),
+    inset 0 0 0 7px rgba(90, 64, 24, 0.4);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.pina-frame img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 2px solid #15100a;
+  border-radius: 1px;
+}
+
+.pina-frame:focus-visible {
+  outline: 2px solid rgba(255, 214, 140, 0.9);
+  outline-offset: 4px;
+}
+
+/* OPERA CENTRALE: la Madonna sulla parete di fondo, nel cono di luce */
+.pina-hero {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  height: 35%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 1s ease 0.25s;
+}
+
+.is-lit .pina-hero { opacity: 1; }
+
+/* ── CAVALLETTO: treppiedi in legno che regge la Madonna sul pavimento ── */
+.pina-easel {
+  position: absolute;
+  left: 50%;
+  top: 22%;              /* parte dietro il quadro: le punte restano nascoste */
+  width: 66%;
+  height: 120%;          /* gambe accorciate sotto il quadro */
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.easel-leg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 4%;
+  height: 100%;
+  margin-left: -2%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a2611 0%, #6b4823 32%, #b1854a 50%, #6b4823 68%, #3a2611 100%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  transform-origin: top center;
+}
+
+.easel-leg--left  { transform: rotate(-13deg); }
+.easel-leg--right { transform: rotate(13deg); }
+
+.easel-leg--back {
+  left: 61%;
+  width: 3.2%;
+  margin-left: -1.6%;
+  height: 94%;
+  transform: rotate(3deg);
+  filter: brightness(0.72);
+}
+
+.pina-hero-frame {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  height: 100%;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  line-height: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: 0;
+}
+
+.pina-hero-frame:focus,
+.pina-hero-frame:focus-visible,
+.pina-hero-frame:active {
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pina-hero-frame img {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+.pina-gallery-arrow {
+  display: none;
+}
+
+/* ───────────────────────────────────────────────────────── */
+/* OVERLAY STORIA — spiegazione al centro quando tocchi un quadro */
+/* ───────────────────────────────────────────────────────── */
+.art-lore-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 40px);
+  background: rgba(8, 5, 3, 0.78);
+  backdrop-filter: blur(10px);
+  animation: artLoreFade 0.35s ease both;
+}
+
+@keyframes artLoreFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.art-lore-card {
+  position: relative;
+  display: flex;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  border-radius: 6px;
+  background: #1a120a;
+  border: 1px solid rgba(255, 222, 150, 0.28);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 244, 210, 0.12);
+  animation: artLoreRise 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes artLoreRise {
+  from { opacity: 0; transform: translateY(48px) scale(0.84); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.art-lore-media {
+  position: relative;
+  flex: 0 0 42%;
+  min-height: 280px;
+  background: #0e0a06;
+}
+
+.art-lore-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 60%, rgba(26, 18, 10, 0.55) 100%);
+  pointer-events: none;
+}
+
+.art-lore-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.art-lore-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 4vw, 48px);
+  color: #f6efe3;
+  text-align: left;
+  overflow-y: auto;
+}
+
+.art-lore-kicker {
+  display: block;
+  margin-bottom: 14px;
+  color: #f0c873;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.art-lore-title {
+  margin: 0 0 16px;
+  color: #fff7e8;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.12;
+}
+
+.art-lore-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(16px, 1.6vw, 20px);
+  line-height: 1.5;
+}
+
+.art-lore-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+  color: #1a120a;
+  background: linear-gradient(180deg, #ffd98a, #ffb347);
+  border: 1px solid rgba(255, 222, 150, 0.65);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.art-lore-close:hover {
+  transform: scale(1.08);
+  background: linear-gradient(180deg, #ffe2a0, #ffc164);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-lore-overlay,
+  .art-lore-card {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .art-lore-overlay {
+    padding: 12px;
+  }
+
+  .art-lore-card {
+    flex-direction: row;
+    width: 100%;
+    max-height: min(78vh, 430px);
+  }
+
+  .art-lore-media {
+    flex: 0 0 42%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .art-lore-media::after {
+    background: linear-gradient(90deg, transparent 58%, rgba(26, 18, 10, 0.58) 100%);
+  }
+
+  .art-lore-body {
+    padding: 22px 14px 18px;
+    justify-content: flex-start;
+  }
+
+  .art-lore-kicker {
+    margin-bottom: 8px;
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .art-lore-title {
+    margin-bottom: 10px;
+    font-size: clamp(17px, 5vw, 22px);
+  }
+
+  .art-lore-text {
+    font-size: clamp(13px, 3.8vw, 15px);
+    line-height: 1.34;
+  }
+
+  .art-lore-close {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    font-size: 21px;
+  }
+
+  .art-lore-media .art-lore-madonna-image {
+    object-fit: cover;
+    transform: scale(1.2);
+    transform-origin: center;
+  }
+}
+
+/* OPERE LATERALI: appese alle pareti, ruotate in prospettiva */
+.room-art {
+  position: absolute;
+  top: 46%;
+  width: calc(15% - var(--k) * 3%);   /* 15 / 12 / 9 : esterne grandi, interne piccole (prospettiva) */
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  transition-delay: calc(0.4s + var(--i) * 0.12s);
+}
+
+.is-lit .room-art { opacity: 1; }
+
+.room-art--left {
+  /* posizione orizzontale impostata inline da ROOM_ART_POS */
+  transform: translateY(-50%) perspective(520px) rotateY(50deg);
+  transform-origin: left center;
+}
+
+.room-art--right {
+  /* posizione orizzontale impostata inline da ROOM_ART_POS */
+  transform: translateY(-50%) perspective(520px) rotateY(-50deg);
+  transform-origin: right center;
+}
+
+.room-art .pina-work-frame {
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  padding: clamp(5px, 0.7vw, 9px);
+}
+
+/* numero inciso sul muro, sopra il quadro — eredita l'inclinazione della parete */
+.room-art-num {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + clamp(4px, 0.6vw, 12px));
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 44px);
+  line-height: 1;
+  color: #7a5526;
+  text-shadow:
+    0 1px 0 rgba(255, 248, 232, 0.55),
+    0 -1px 1px rgba(74, 48, 18, 0.45);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.room-art .pina-work-frame:hover,
+.room-art .pina-work-frame:focus-visible {
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 244, 210, 0.7),
+    inset 0 0 0 5px rgba(90, 64, 24, 0.4),
+    0 0 26px rgba(255, 205, 120, 0.5);
+  filter: brightness(1.08);
+}
+
+/* ── azioni: testo guida in basso sulla sala ── */
+.pina-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(82px, 7vw, 112px);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s ease 0.9s, transform 0.8s ease 0.9s;
+}
+
+.is-lit .pina-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pina-instruction {
+  max-width: calc(100% - 32px);
+  margin: 0 auto;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(7px, 1.05vw, 15px);
+  font-weight: 800;
+  letter-spacing: clamp(0.25px, 0.1vw, 1.2px);
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.78);
+}
+
+.pina-view-switch {
+  position: absolute;
+  right: clamp(18px, 3vw, 42px);
+  bottom: clamp(18px, 3vw, 42px);
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 9px 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #fff7e8;
+  background: rgba(18, 10, 3, 0.52);
+  border: 1px solid rgba(240, 200, 115, 0.76);
+  border-radius: 4px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.8s ease 1s,
+    transform 0.8s ease 1s,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.is-lit .pina-view-switch {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pina-view-switch:hover {
+  transform: translateY(-2px);
+  color: #1a120a;
+  background: #f0c873;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+}
+
+.pina-view-switch:focus-visible {
+  outline: 2px solid rgba(255, 244, 210, 0.9);
+  outline-offset: 4px;
+}
+
+/* riduzione del movimento: tutto gia acceso, niente transizioni */
+@media (prefers-reduced-motion: reduce) {
+  .pina-hero,
+  .room-art,
+  .pina-actions,
+  .pina-view-switch {
+    transition: none !important;
+    opacity: 1 !important;
+  }
+
+  .pina-actions,
+  .pina-view-switch {
+    transform: translateY(0) !important;
+  }
 }
 
 .story-intro-page::before {
@@ -307,38 +839,11 @@
   border-color: var(--event-accent);
   background: rgba(255, 179, 71, 0.22);
   color: #fff;
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .story-moment-dot span {
   display: block;
-}
-
-.story-intro-cta {
-  margin-top: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  border: 1px solid rgba(255, 179, 71, 0.78);
-  border-radius: 4px;
-  background: #ffb347;
-  color: #1a120a;
-  padding: 14px 24px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.32);
-  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
-}
-
-.story-intro-cta:hover {
-  transform: translateY(-2px);
-  background: #ffc977;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38);
 }
 
 .three-wrapper {
@@ -760,10 +1265,11 @@
   .story-intro-page {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-end;
-    padding: 86px 20px 34px;
-    background-position: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 100svh;
+    padding: 150px 18px 24px;
+    background-position: center top;
   }
 
   .story-intro-page::before {
@@ -777,19 +1283,123 @@
     width: 100%;
   }
 
-  .story-black-space {
-    min-height: 160px;
+  .pinacoteca {
+    min-height: 100svh;
+    aspect-ratio: auto;
+  }
+
+  .pina-intro {
+    padding-top: 18px;
+  }
+
+  .pina-kicker {
+    margin-bottom: 8px;
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+
+  .pina-intro h2 {
+    font-size: clamp(22px, 6.5vw, 30px);
+  }
+
+  .pina-hero {
+    top: 54%;
+    width: min(58vw, 235px);
+    height: 42%;
+  }
+
+  .pina-hero-frame {
+    width: 100%;
+    height: 100%;
+  }
+
+  .pina-hero-frame--framed {
+    padding: clamp(7px, 2.2vw, 11px);
+    background: linear-gradient(135deg, #f6dd97 0%, #cda653 20%, #8a6a2a 50%, #cda653 80%, #f6dd97 100%);
+    box-shadow:
+      0 20px 38px rgba(0, 0, 0, 0.62),
+      inset 0 0 0 1px rgba(255, 244, 210, 0.58),
+      inset 0 0 0 6px rgba(90, 64, 24, 0.42);
+    box-sizing: border-box;
+  }
+
+  .pina-hero-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-sizing: border-box;
+  }
+
+  .pina-hero-frame .pina-madonna-image {
+    object-fit: cover;
+    transform: scale(1.16);
+    transform-origin: center;
+  }
+
+  .pina-hero-frame--framed img {
+    border: 2px solid #15100a;
+  }
+
+  .pina-gallery-arrow {
+    position: absolute;
+    top: 42%;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(240, 200, 115, 0.72);
+    border-radius: 50%;
+    color: #fff7e8;
+    background: rgba(18, 10, 3, 0.58);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(8px);
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .pina-gallery-arrow--prev {
+    left: -48px;
+  }
+
+  .pina-gallery-arrow--next {
+    right: -48px;
+  }
+
+  /* su mobile resta un solo quadro alla volta sul cavalletto */
+  .room-art {
+    display: none;
+  }
+
+  .pina-actions {
+    display: none;
+  }
+
+  .pina-instruction {
+    display: none;
+  }
+
+  .pina-view-switch {
+    right: 16px;
+    bottom: 16px;
+    min-height: 34px;
+    padding: 8px 13px;
+    font-size: 9px;
+    letter-spacing: 1.2px;
   }
 
   .story-rider-stage {
     width: 100%;
-    height: 94px;
-    margin-top: 20px;
+    height: 88px;
+    margin-top: 12px;
   }
 
   .story-rider {
-    width: 78px;
-    bottom: 16px;
+    width: 76px;
+    bottom: 18px;
   }
 
   .story-fireworks {
@@ -804,12 +1414,12 @@
   }
 
   .story-intro-content h1 {
-    font-size: 56px;
+    font-size: 54px;
     line-height: 1;
   }
 
   .story-intro-subtitle {
-    margin-top: 14px;
+    margin-top: 10px;
     font-size: 10px;
     line-height: 1.5;
     letter-spacing: 2px;
@@ -818,7 +1428,7 @@
   .story-event-panel {
     align-self: stretch;
     width: 100%;
-    margin: 20px 0 0;
+    margin: 16px 0 0;
   }
 
   .story-event-card {
@@ -839,8 +1449,10 @@
   }
 
   .story-moment-strip {
+    position: relative;
+    z-index: 5;
     gap: 7px;
-    margin-top: 22px;
+    margin-top: 34px;
     overflow-x: auto;
     padding-bottom: 4px;
   }
@@ -850,11 +1462,6 @@
     width: 46px;
     height: 34px;
     font-size: 9px;
-  }
-
-  .story-intro-cta {
-    width: 100%;
-    margin-top: 26px;
   }
 
   .painting-wrapper {

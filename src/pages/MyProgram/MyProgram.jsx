@@ -36,6 +36,10 @@ const ACTIVITIES = [
     description: 'Assisti alla maestosa processione del Carro Trionfale, trainato da otto muli addobbati, attraverso le vie del centro storico.',
     emoji: '🎭',
     image: 'https://images.unsplash.com/photo-1533504875323-289569ce45cd?q=80&w=1400&auto=format&fit=crop',
+    history: {
+      title: 'La processione dell’alba',
+      text: 'Il 2 luglio comincia prima del sole: la sacra immagine della Bruna attraversa i quartieri tra campane, fuochi e preghiere. È la “processione dei pastori”, il primo atto della festa, con cui Matera si sveglia insieme al suo rito più antico.',
+    },
   },
   {
     id: 2, spotIdx: 1,
@@ -44,6 +48,10 @@ const ACTIVITIES = [
     description: 'Esplora le chiese rupestri e le grotte abitate dei Sassi con una guida esperta. Un viaggio nella storia millenaria.',
     emoji: '🏛️',
     image: '/hud/matera_sassi_sunset.png',
+    history: {
+      title: 'I Sassi, scenario millenario',
+      text: 'Abitati sin dalla preistoria e scavati nel tufo, i Sassi sono il cuore della città e della festa. Tra grotte e chiese rupestri la devozione alla Madonna della Bruna si tramanda da oltre sei secoli, fin dal 1389.',
+    },
   },
   {
     id: 3, spotIdx: 2,
@@ -52,6 +60,10 @@ const ACTIVITIES = [
     description: 'Degusta i piatti tipici lucani in un ristorante scavato nel tufo. Orecchiette, peperoni cruschi e pane di Matera.',
     emoji: '🍷',
     image: '/hud/matera_romantic_dinner.png',
+    history: {
+      title: 'Il Carro di cartapesta',
+      text: 'Ogni anno un maestro cartapestaio modella un nuovo Carro Trionfale: una macchina sacra alta diversi metri, dipinta e dorata a mano. Mesi di lavoro per un capolavoro destinato a vivere una sola giornata.',
+    },
   },
   {
     id: 4, spotIdx: 3,
@@ -60,6 +72,10 @@ const ACTIVITIES = [
     description: 'Crea il tuo souvenir con le tecniche artigianali tradizionali materane. Un pezzo unico fatto da te.',
     emoji: '🎨',
     image: '/hud/matera_hot_air_balloon.png',
+    history: {
+      title: 'Le mani degli artigiani',
+      text: 'La festa vive del lavoro degli artigiani materani: cartapestai, ceramisti e fabbri. Le loro mani custodiscono tecniche antiche che, di anno in anno, danno forma agli ornamenti e ai simboli della Bruna.',
+    },
   },
   {
     id: 5, spotIdx: 0,
@@ -68,6 +84,10 @@ const ACTIVITIES = [
     description: 'Goditi un Aperol Spritz con vista mozzafiato sulla Gravina. Il tramonto sui Sassi è indimenticabile.',
     emoji: '🌅',
     image: '/hud/matera_sassi_sunset.png',
+    history: {
+      title: 'La Cavalcata dei cavalieri',
+      text: 'Nel cuore della giornata sfilano i Cavalieri della Bruna, in costume e con cavalli bardati. La Cavalcata scorta la Madonna e prepara la città al momento più atteso, trasformando le vie in un corteo storico.',
+    },
   },
   {
     id: 6, spotIdx: 1,
@@ -76,8 +96,31 @@ const ACTIVITIES = [
     description: 'Il momento più atteso: la distruzione rituale del Carro della Bruna. Fuochi, folla e adrenalina pura.',
     emoji: '🔥',
     image: 'https://images.unsplash.com/photo-1533504875323-289569ce45cd?q=80&w=1400&auto=format&fit=crop',
+    history: {
+      title: 'Lo Strazzo del Carro',
+      text: 'A notte fonda la folla assale il Carro Trionfale e lo distrugge in pochi istanti: è lo “Strazzo”. Ogni frammento diventa reliquia e buon auspicio. La fine del Carro è già l’inizio della festa dell’anno successivo.',
+    },
   },
 ];
+
+// Storia legata all’opera centrale (la Madonna sul cavalletto)
+const HERO_STORY = {
+  title: 'La Madonna della Bruna',
+  text: 'Patrona di Matera, la Madonna della Bruna è venerata dal 1389, quando fu istituita la festa della Visitazione del 2 luglio. Il nome “Bruna” richiama forse il longobardo “brûni”, difesa, o il colore scuro dell’antica icona: da oltre sei secoli è il simbolo della città.',
+};
+
+const PINACOTECA_WORKS = [
+  { id: 'madonna', image: '/quadro_burna.png', history: HERO_STORY },
+  ...ACTIVITIES.map((activity) => ({
+    id: activity.id,
+    image: activity.image,
+    history: activity.history,
+  })),
+];
+
+// Posizione orizzontale di ogni quadro lungo la parete (% dal bordo esterno).
+// Stacchi non lineari: il 1° è il più largo, quindi serve più spazio dopo di lui.
+const ROOM_ART_POS = [5, 15, 23];
 
 function Loader() {
   const { progress } = useProgress();
@@ -459,6 +502,10 @@ export default function MyProgram() {
   const [curIdx, setCurIdx] = useState(0);
   const [exploreMode, setExploreMode] = useState(false);
   const [nearSpotIdx, setNearSpotIdx] = useState(-1);
+  const [exhibitRevealed, setExhibitRevealed] = useState(false);
+  const [activeArt, setActiveArt] = useState(null); // opera selezionata → spiegazione storica
+  const [pinacotecaIndex, setPinacotecaIndex] = useState(0);
+  const exhibitRef    = useRef(null);
   const routeStageRef = useRef(null);
   const joystickRef   = useRef(null);
   const lookDeltaRef  = useRef(null);
@@ -506,9 +553,29 @@ export default function MyProgram() {
     };
   }, [showGallery, handleNext, handlePrev]);
 
+  // Chiudi la spiegazione storica con Esc + blocca lo scroll mentre è aperta
+  useEffect(() => {
+    if (!activeArt) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setActiveArt(null); };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [activeArt]);
+
   const camStart = useMemo(() => SPOTS[0].pos.clone().add(CAM_OFFSET.clone().multiplyScalar(SPOTS[0].zoom)), []);
   const activeMomentIndex = Math.round(journeyProgress * (STORY_MOMENTS.length - 1));
   const activeMoment = STORY_MOMENTS[activeMomentIndex];
+  const activePinacotecaWork = PINACOTECA_WORKS[pinacotecaIndex];
+  const showPrevPinacotecaWork = useCallback(() => {
+    setPinacotecaIndex((value) => (value === 0 ? PINACOTECA_WORKS.length - 1 : value - 1));
+  }, []);
+  const showNextPinacotecaWork = useCallback(() => {
+    setPinacotecaIndex((value) => (value + 1) % PINACOTECA_WORKS.length);
+  }, []);
   const storyIntroStyle = {
     '--rider-x': `${8 + journeyProgress * 84}%`,
     '--sky-start': activeMoment.skyStart,
@@ -575,6 +642,24 @@ export default function MyProgram() {
     };
   }, [exploreMode]);
 
+  // La mostra si "scopre" da sola quando entra in scena (scroll into view)
+  useEffect(() => {
+    if (showGallery || exhibitRevealed) return undefined;
+    const el = exhibitRef.current;
+    if (!el) return undefined;
+    if (!('IntersectionObserver' in window)) { setExhibitRevealed(true); return undefined; }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.3)) {
+          setExhibitRevealed(true);
+        }
+      },
+      { threshold: [0, 0.3, 0.6] }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [showGallery, exhibitRevealed]);
+
   if (!showGallery) {
     return (
       <>
@@ -621,10 +706,6 @@ export default function MyProgram() {
                 </button>
               ))}
             </div>
-
-            <button className="story-intro-cta" onClick={() => setShowGallery(true)}>
-              Accedi alla galleria
-            </button>
           </section>
 
           <section className="story-event-panel">
@@ -635,7 +716,134 @@ export default function MyProgram() {
             </div>
           </section>
         </main>
-        <section className="story-black-space" aria-hidden="true"></section>
+        <section
+          ref={exhibitRef}
+          className={`pinacoteca ${exhibitRevealed ? 'is-lit' : ''}`}
+          aria-labelledby="pina-title"
+        >
+          <header className="pina-intro">
+            <p className="pina-kicker">La pinacoteca della Bruna</p>
+            <h2 id="pina-title">Le opere del 2 luglio</h2>
+          </header>
+
+          {/* OPERA CENTRALE: Madonna su cavalletto, appoggiato al pavimento */}
+          <figure className="pina-hero">
+            <span className="pina-easel" aria-hidden="true">
+              <span className="easel-leg easel-leg--back"></span>
+              <span className="easel-leg easel-leg--left"></span>
+              <span className="easel-leg easel-leg--right"></span>
+            </span>
+            <button
+              type="button"
+              className={`pina-hero-frame ${activePinacotecaWork.id !== 'madonna' ? 'pina-hero-frame--framed' : ''}`}
+              onClick={() => setActiveArt(activePinacotecaWork)}
+              aria-label={`${activePinacotecaWork.history.title} — scopri la storia`}
+            >
+              <img
+                src={activePinacotecaWork.image}
+                alt={activePinacotecaWork.history.title}
+                className={activePinacotecaWork.id === 'madonna' ? 'pina-madonna-image' : ''}
+              />
+            </button>
+            <button
+              type="button"
+              className="pina-gallery-arrow pina-gallery-arrow--prev"
+              onClick={showPrevPinacotecaWork}
+              aria-label="Quadro precedente"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="pina-gallery-arrow pina-gallery-arrow--next"
+              onClick={showNextPinacotecaWork}
+              aria-label="Quadro successivo"
+            >
+              ›
+            </button>
+          </figure>
+
+          {/* parete sinistra */}
+          {ACTIVITIES.slice(0, 3).map((activity, k) => (
+            <div
+              key={activity.id}
+              className="room-art room-art--left"
+              style={{ '--i': k, '--k': k, left: `${ROOM_ART_POS[k]}%` }}
+            >
+              <span className="room-art-num" aria-hidden="true">{k + 1}</span>
+              <button
+                type="button"
+                className="pina-frame pina-work-frame"
+                onClick={() => setActiveArt(activity)}
+                aria-label={`${activity.history.title} — scopri la storia`}
+              >
+                <img src={activity.image} alt={activity.history.title} loading="lazy" />
+              </button>
+            </div>
+          ))}
+
+          {/* parete destra */}
+          {ACTIVITIES.slice(3, 6).map((activity, k) => (
+            <div
+              key={activity.id}
+              className="room-art room-art--right"
+              style={{ '--i': k + 3, '--k': k, right: `${ROOM_ART_POS[k]}%` }}
+            >
+              <span className="room-art-num" aria-hidden="true">{6 - k}</span>
+              <button
+                type="button"
+                className="pina-frame pina-work-frame"
+                onClick={() => setActiveArt(activity)}
+                aria-label={`${activity.history.title} — scopri la storia`}
+              >
+                <img src={activity.image} alt={activity.history.title} loading="lazy" />
+              </button>
+            </div>
+          ))}
+
+          <div className="pina-actions">
+            <p className="pina-instruction">
+              Cliccare su ogni quadro per scoprire pezzi di storia di Matera
+            </p>
+          </div>
+
+          <button type="button" className="pina-view-switch" onClick={() => setShowGallery(true)}>
+            Cambio visuale
+          </button>
+        </section>
+
+        {activeArt && (
+          <div
+            className="art-lore-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label={activeArt.history.title}
+            onClick={() => setActiveArt(null)}
+          >
+            <div className="art-lore-card" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="art-lore-close"
+                onClick={() => setActiveArt(null)}
+                aria-label="Chiudi"
+              >
+                ×
+              </button>
+              <div className="art-lore-media">
+                <img
+                  src={activeArt.image}
+                  alt={activeArt.history.title}
+                  className={activeArt.id === 'madonna' ? 'art-lore-madonna-image' : ''}
+                />
+              </div>
+              <div className="art-lore-body">
+                <span className="art-lore-kicker">Un pezzo di storia</span>
+                <h3 className="art-lore-title">{activeArt.history.title}</h3>
+                <p className="art-lore-text">{activeArt.history.text}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }

@@ -126,7 +126,7 @@ export default function Navbar() {
         
         {/* TOP BAR */}
         <div className="omnibar-top">
-          <a href="#" className="nav-logo" onClick={() => { setExpanded(false); setMenuOpen(false); }}>
+          <a href="/" className="nav-logo" onClick={(e) => handleLinkClick(e, '/')}>
             <img src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png" alt="Festa della Bruna" className="nav-logo-png" />
           </a>
           
@@ -166,13 +166,11 @@ export default function Navbar() {
         {menuOpen && (
           <div className="traditional-menu-dropdown fade-in-up">
             <ul className="traditional-nav-links">
-              <li><a href="/" onClick={(e) => handleLinkClick(e, '/')}>Mappa Iniziale</a></li>
-              <li><a href="/attivita" onClick={(e) => handleLinkClick(e, '/attivita')}>Esplora Attività</a></li>
+              <li><a href="/" onClick={(e) => handleLinkClick(e, '/')}>Home</a></li>
               <li><a href="/la-storia" onClick={(e) => handleLinkClick(e, '/la-storia')}>La Storia</a></li>
-              <li><a href="/social" onClick={(e) => handleLinkClick(e, '/social')}>Social & Cartoline</a></li>
-              <li><a href="/prova" onClick={(e) => handleLinkClick(e, '/prova')}>HUD Sperimentale</a></li>
-              <li><a href="#" onClick={(e) => handleLinkClick(e, null)}>Linee Guida Traffico</a></li>
-              <li><a href="#" onClick={(e) => handleLinkClick(e, null)}>Aziende Coinvolte</a></li>
+              <li><a href="/prova" onClick={(e) => handleLinkClick(e, '/prova')}>Esplora Attività</a></li>
+              <li><a href="/viabilita" onClick={(e) => handleLinkClick(e, '/viabilita')}>Viabilità</a></li>
+              <li><a href="/social" onClick={(e) => handleLinkClick(e, '/social')}>Social</a></li>
             </ul>
           </div>
         )}

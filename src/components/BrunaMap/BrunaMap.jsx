@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { MAPBOX_SATELLITE_STYLE, createStreetFallbackStyle, shouldUseFallbackStyle } from '../mapStyleFallback';
 import './BrunaMap.css';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -160,9 +161,47 @@ export default function BrunaMap() {
     // Detect if mobile to zoom out the initial view
     const isMobile = window.innerWidth <= 768;
 
+    let usingFallbackStyle = !mapboxgl.accessToken;
+    let eventMarkers = [];
+
+    const clearEventMarkers = () => {
+      eventMarkers.forEach((marker) => marker.remove());
+      eventMarkers = [];
+    };
+
+    const switchToFallbackStyle = () => {
+      if (usingFallbackStyle || !mapRef.current) return;
+      usingFallbackStyle = true;
+      clearEventMarkers();
+      map.setStyle(createStreetFallbackStyle());
+      setTimeout(() => mapRef.current?.resize(), 100);
+    };
+
+    const addTerrain = () => {
+      if (usingFallbackStyle || !mapboxgl.accessToken || map.getSource('mapbox-dem')) return;
+
+      try {
+        map.addSource('mapbox-dem', {
+          type: 'raster-dem',
+          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          tileSize: 512,
+          maxzoom: 14
+        });
+        map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+      } catch (err) {
+        console.warn('Mapbox terrain unavailable:', err);
+      }
+    };
+
+    const renderEventMarkers = () => {
+      clearEventMarkers();
+      addTerrain();
+      eventMarkers = createEventMarkers(map);
+    };
+
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/standard-satellite', // Stile fotorealistico Standard Satellite (3D vero)
+      style: usingFallbackStyle ? createStreetFallbackStyle() : MAPBOX_SATELLITE_STYLE, // Stile fotorealistico Standard Satellite (3D vero)
       center: [16.6093, 40.6669], // Centro di Matera
       zoom: isMobile ? 13.5 : 14.5,
       pitch: 45, // Un 3D visibile ma non troppo estremo
@@ -191,64 +230,17 @@ export default function BrunaMap() {
     map.addControl(geolocate, 'bottom-right');
 
     map.on('load', () => {
+      // Forza un resize: la mappa può essere inizializzata mentre il contenitore
+      // è ancora in animazione/layout, lasciando la canvas WebGL di dimensione errata.
+      map.resize();
       // Attiva automaticamente la geolocalizzazione appena la mappa e caricata
       geolocate.trigger();
     });
 
-    map.on('style.load', () => {
-      // Aggiungi Terreno 3D reale (Altimetria di Matera)
-      map.addSource('mapbox-dem', {
-        'type': 'raster-dem',
-        'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-        'tileSize': 512,
-        'maxzoom': 14
-      });
-      map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 }); // Enfatizza i dislivelli dei Sassi
-
-      // Aggiungi Marker ed Eventi
-      markersData.forEach((event) => {
-        const el = document.createElement('div');
-        el.className = 'bruna-map-marker';
-        
-        const [lng, lat] = event.coordinates;
-        const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-        const appleMapsUrl = `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(event.title)}`;
-
-        const popupHTML = `
-           <div class="popup-header">
-             <h3 class="popup-title">${event.title}</h3>
-             <button class="popup-close-btn">&times;</button>
-           </div>
-           ${event.place ? `<p class="popup-place">📍 ${event.place}</p>` : ''}
-           <p class="popup-time"><strong>Quando:</strong> ${event.time}</p>
-           <p class="popup-type"><strong>Tipo:</strong> ${event.type}</p>
-           <p class="popup-info">${event.info}</p>
-           <div class="popup-maps-links">
-             <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-map-btn google-btn">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-               Google Maps
-             </a>
-             <a href="${appleMapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-map-btn apple-btn">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.18 1.27-2.16 3.8.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.78M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-               Apple Maps
-             </a>
-           </div>
-        `;
-
-        const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, className: 'bruna-map-popup' })
-          .setHTML(popupHTML);
-
-        // Chiusura via pulsante custom nella card
-        popup.on('open', () => {
-          document.querySelector('.popup-close-btn')?.addEventListener('click', () => popup.remove());
-        });
-
-        new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat(event.coordinates)
-          .setPopup(popup)
-          .addTo(map);
-      });
+    map.on('error', (event) => {
+      if (shouldUseFallbackStyle(event)) switchToFallbackStyle();
     });
+    map.on('style.load', renderEventMarkers);
 
     // Ascoltiamo i movimenti "manuali" o "gesture" dell'utente sulla mappa (trackpad o due dita su mobile)
     map.on('pitch', () => {
@@ -324,6 +316,12 @@ export default function BrunaMap() {
       }
     });
 
+    return () => {
+      clearEventMarkers();
+      map.remove();
+      mapRef.current = null;
+      geolocateControlRef.current = null;
+    };
   }, []);
 
   return (
@@ -363,4 +361,48 @@ export default function BrunaMap() {
       </div>
     </section>
   );
+}
+
+function createEventMarkers(map) {
+  return markersData.map((event) => {
+    const el = document.createElement('div');
+    el.className = 'bruna-map-marker';
+
+    const [lng, lat] = event.coordinates;
+    const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+    const appleMapsUrl = `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(event.title)}`;
+
+    const popupHTML = `
+       <div class="popup-header">
+         <h3 class="popup-title">${event.title}</h3>
+         <button class="popup-close-btn">&times;</button>
+       </div>
+       ${event.place ? `<p class="popup-place">📍 ${event.place}</p>` : ''}
+       <p class="popup-time"><strong>Quando:</strong> ${event.time}</p>
+       <p class="popup-type"><strong>Tipo:</strong> ${event.type}</p>
+       <p class="popup-info">${event.info}</p>
+       <div class="popup-maps-links">
+         <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-map-btn google-btn">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+           Google Maps
+         </a>
+         <a href="${appleMapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-map-btn apple-btn">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.18 1.27-2.16 3.8.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.78M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+           Apple Maps
+         </a>
+       </div>
+    `;
+
+    const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, className: 'bruna-map-popup' })
+      .setHTML(popupHTML);
+
+    popup.on('open', () => {
+      document.querySelector('.popup-close-btn')?.addEventListener('click', () => popup.remove());
+    });
+
+    return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat(event.coordinates)
+      .setPopup(popup)
+      .addTo(map);
+  });
 }

@@ -387,10 +387,17 @@
   margin-top: -2px;
   position: relative;
   transition: all 0.3s ease;
+}
+
+.activity-card.is-linkable {
   cursor: pointer;
 }
 
-.activity-card:hover {
+.activity-card.is-static {
+  cursor: default;
+}
+
+.activity-card.is-linkable:hover {
   background: rgba(139, 69, 19, 0.09);
   box-shadow: 0 6px 15px rgba(139, 69, 19, 0.1);
   border-color: rgba(139, 69, 19, 0.4);
@@ -414,7 +421,7 @@
   transition: transform 0.3s;
 }
 
-.activity-card:hover .explore-cta span {
+.activity-card.is-linkable:hover .explore-cta span {
   transform: translateX(4px);
 }
 

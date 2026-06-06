@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ItineraryResult.css';
 import RouteMapbox from '../RouteMapbox/RouteMapbox';
 
@@ -249,8 +250,9 @@ const ITINERARIES = {
           { time: "05:00", type: "see", title: "Processione dei Pastori", desc: "La città si sveglia all'alba al suono dei botti. Inizio della processione storica dai rioni antichi." },
           { time: "12:30", type: "see", title: "La Scorta del Cavaliere", desc: "I Cavalieri scortano la statua della Madonna nella Fabbrica del Carro a Piccianello." },
           { time: "13:30", type: "eat", title: "Pranzo Tradizionale", desc: "Sosta in trattoria tipica per la 'Crapiata' materana, ricaricando le energie con la comunità." },
+          { time: "18:30", type: "activity", expId: 1, title: "Tour dei Sassi al Tramonto", desc: "Passeggiata guidata nei rioni Sassi mentre la luce dorata accende il tufo, prima del Trionfo del Carro." },
           { time: "20:00", type: "see", title: "Il Trionfo del Carro", desc: "Il Carro in cartapesta attraversa la città illuminata, scortato dai generali e dai fedeli." },
-          { time: "22:30", type: "activity", title: "Lo Strazzo", desc: "Arrivo in Piazza Vittorio Veneto. La folla assalta e distrugge il Carro in pochi secondi. Pura adrenalina." },
+          { time: "22:30", type: "see", title: "Lo Strazzo", desc: "Arrivo in Piazza Vittorio Veneto. La folla assalta e distrugge il Carro in pochi secondi. Pura adrenalina." },
           { time: "00:00", type: "sleep", title: "Notte nel cuore dei Sassi", desc: "Pernottamento consigliato presso 'Sextantio Le Grotte della Civita' per vivere il silenzio dopo la tempesta." }
         ]
       }
@@ -290,8 +292,8 @@ const ITINERARIES = {
       {
         day: "Giorno 1 - Discesa nel Burrone",
         events: [
-          { time: "08:30", type: "activity", title: "Discesa nel Canyon", desc: "Trekking vertiginoso lungo il versante scosceso della Gravina partendo dal fantastico belvedere di Piazzetta Pascoli." },
-          { time: "11:00", type: "activity", title: "Il Ponte Tibetano", desc: "Attraversamento da brivido dell'iconico ponte sospeso che collega i Sassi al selvaggio Parco della Murgia." },
+          { time: "08:30", type: "activity", expId: 4, title: "Discesa nel Canyon", desc: "Trekking vertiginoso lungo il versante scosceso della Gravina partendo dal fantastico belvedere di Piazzetta Pascoli." },
+          { time: "11:00", type: "activity", expId: 4, title: "Il Ponte Tibetano", desc: "Attraversamento da brivido dell'iconico ponte sospeso che collega i Sassi al selvaggio Parco della Murgia." },
           { time: "13:30", type: "eat", title: "Pranzo al Sacco Artigianale", desc: "Focaccia materana goduta all'ombra delle gigantesche Grotte dei Pipistrelli." },
           { time: "16:00", type: "see", title: "Villaggi Neolitici", desc: "Passeggiata tra i reperti trincerati e chiese rupestri remote in cima all'altopiano fiorito." },
           { time: "19:30", type: "sleep", title: "Glamping nel Parco", desc: "Notte indimenticabile in tenda di lusso o antica masseria rurale ('Masseria Fontana di Vite')." }
@@ -314,7 +316,7 @@ const ITINERARIES = {
       {
         day: "Giorno 1 - I Sapori di Grotta",
         events: [
-          { time: "10:00", type: "activity", title: "Il Segreto del Pane IGP", desc: "Laboratorio interattivo in un panificio storico per imparare l'antica arte del cornetto di pane materano." },
+          { time: "10:00", type: "activity", expId: 3, title: "Il Segreto del Pane IGP", desc: "Laboratorio interattivo in un panificio storico per imparare l'antica arte del cornetto di pane materano." },
           { time: "13:00", type: "eat", title: "Degustazione Crusca", desc: "Pranzo indimenticabile con Peperoni Cruschi e Strascinati in un ristorante tipico del centro storico." },
           { time: "16:30", type: "see", title: "Botteghe Artigiane", desc: "Esplorazione dei negozietti in legno e ceramica." },
           { time: "20:30", type: "eat", title: "Cena Sotterranea", desc: "Degustazione di vini strutturati lucani e taglieri presso 'Enoteca dai Tosi', incastonata in una grotta circolare." },
@@ -350,9 +352,21 @@ const ITINERARIES = {
   }
 };
 
-export default function ItineraryResult({ answers, isActive, selectedExperiences = [], hideMap = false }) {
+// Riferimento stabile: un default `= []` inline crea un NUOVO array ad ogni render,
+// facendo scattare l'effect (dipendente da selectedExperiences) all'infinito ->
+// loop di render che ricrea la mappa Mapbox in continuazione (mappa che "lampeggia"
+// e l'altra mappa nera per esaurimento dei contesti WebGL).
+const EMPTY_EXPERIENCES = [];
+
+export default function ItineraryResult({ answers, isActive, selectedExperiences = EMPTY_EXPERIENCES, hideMap = false }) {
+  const navigate = useNavigate();
   const [route, setRoute] = useState(ITINERARIES.spiritual);
   const [draw, setDraw] = useState(false);
+
+  const openActivity = (expId) => {
+    if (!expId) return;
+    navigate(`/attivita?activity=${expId}`);
+  };
 
   useEffect(() => {
     // Logic to select the route based on answers
@@ -382,6 +396,7 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
         return {
           time: `${hour.toString().padStart(2, '0')}:30`,
           type: 'activity',
+          expId: exp.id,
           title: `✦ ${exp.title}`, // Stellina per evidenziare quelli scelti da noi!
           desc: `Esperienza Selezionata: ${exp.duration} • Prezzo: ${exp.price}`,
           image: exp.image
@@ -492,10 +507,23 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
                         {evt.type === 'see'      && <span className="timeline-icon">🏛️</span>}
                         
                         {evt.type === 'activity' ? (
-                          <div className="activity-card">
+                          <div
+                            className={`activity-card ${evt.expId ? 'is-linkable' : 'is-static'}`}
+                            onClick={() => openActivity(evt.expId)}
+                            role={evt.expId ? 'button' : undefined}
+                            tabIndex={evt.expId ? 0 : undefined}
+                            onKeyDown={(e) => {
+                              if (evt.expId && (e.key === 'Enter' || e.key === ' ')) {
+                                e.preventDefault();
+                                openActivity(evt.expId);
+                              }
+                            }}
+                          >
                             <h5 className="timeline-event-title">{evt.title}</h5>
                             <p className="timeline-event-desc">{evt.desc}</p>
-                            <div className="explore-cta">Esplora Attività <span>➔</span></div>
+                            {evt.expId && (
+                              <div className="explore-cta">Esplora Attività <span>➔</span></div>
+                            )}
                           </div>
                         ) : (
                           <>

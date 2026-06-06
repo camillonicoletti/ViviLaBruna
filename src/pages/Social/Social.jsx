@@ -217,6 +217,7 @@ export default function Social() {
   // Sticker attivi
   const [activeStickers, setActiveStickers] = useState(['corona']);
   const [selectedReviewActivity, setSelectedReviewActivity] = useState(0);
+  const [selectedReviewIndex, setSelectedReviewIndex] = useState(0);
 
   // Stati ausiliari
   const [isGenerating, setIsGenerating] = useState(false);
@@ -255,6 +256,10 @@ export default function Social() {
       });
     }
   }, [location.hash, location.search]);
+
+  useEffect(() => {
+    setSelectedReviewIndex(0);
+  }, [selectedReviewActivity]);
 
   // Gestione upload foto
   const handlePhotoUpload = (e) => {
@@ -1023,6 +1028,13 @@ export default function Social() {
   // Ottieni i colori del template corrente per stili inline dinamici nell'editor
   const currTemp = TEMPLATES.find(t => t.id === template) || TEMPLATES[0];
   const activeActivityReview = ACTIVITY_REVIEW_DATA[selectedReviewActivity];
+  const activeReviewItems = activeActivityReview.reviews;
+  const activeMobileReview = activeReviewItems[selectedReviewIndex] || activeReviewItems[0];
+  const updateMobileReview = (direction) => {
+    setSelectedReviewIndex((prev) => (
+      (prev + direction + activeReviewItems.length) % activeReviewItems.length
+    ));
+  };
 
   return (
     <div className="social-page-container">
@@ -1498,7 +1510,10 @@ export default function Social() {
         <div className="reviews-section-header">
           <span className="reviews-kicker">Recensioni esperienze</span>
           <div className="reviews-title-row">
-            <h2 id="activity-reviews-title">Le voci di chi ha gia vissuto le attivita</h2>
+            <h2 id="activity-reviews-title">
+              <span className="reviews-title-desktop">Le voci di chi ha gia vissuto le attivita</span>
+              <span className="reviews-title-mobile">Recensioni esperienze</span>
+            </h2>
             <button
               type="button"
               className="reviews-explore-link"
@@ -1597,6 +1612,40 @@ export default function Social() {
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mobile-review-carousel" aria-label={`Recensioni per ${activeActivityReview.title}`}>
+          <button
+            type="button"
+            className="mobile-review-arrow mobile-review-arrow--prev"
+            onClick={() => updateMobileReview(-1)}
+            aria-label="Recensione precedente"
+            disabled={activeReviewItems.length <= 1}
+          >
+            ‹
+          </button>
+
+          <article className="mobile-review-card">
+            <div className="mobile-review-card-top">
+              <div className="mini-review-stars" aria-label="Valutazione 5 su 5">★★★★★</div>
+              <span>{selectedReviewIndex + 1}/{activeReviewItems.length}</span>
+            </div>
+            <p>“{activeMobileReview.text}”</p>
+            <div className="mobile-review-author">
+              <strong>{activeMobileReview.name}</strong>
+              <span>{activeMobileReview.detail}</span>
+            </div>
+          </article>
+
+          <button
+            type="button"
+            className="mobile-review-arrow mobile-review-arrow--next"
+            onClick={() => updateMobileReview(1)}
+            aria-label="Recensione successiva"
+            disabled={activeReviewItems.length <= 1}
+          >
+            ›
+          </button>
         </div>
       </section>
     </div>

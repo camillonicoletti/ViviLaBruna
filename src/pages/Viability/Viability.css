@@ -120,6 +120,11 @@
 .bus-card--crimson::before { background: #a52a2a; }
 .bus-card--stone::before { background: #a79a7e; }
 
+.bus-card--crimson .stop-dot { background: #a52a2a; box-shadow: 0 0 0 5px rgba(165, 42, 42, 0.13); }
+.bus-card--crimson .stop-line { background: rgba(165, 42, 42, 0.46); }
+.bus-card--stone .stop-dot { background: #a79a7e; box-shadow: 0 0 0 5px rgba(167, 154, 126, 0.15); }
+.bus-card--stone .stop-line { background: rgba(167, 154, 126, 0.48); }
+
 .bus-card-header {
   display: flex;
   gap: 16px;
@@ -393,6 +398,18 @@
   gap: 14px;
 }
 
+.viability-carousel-arrow,
+.mobile-route-finder,
+.parking-map-link,
+.bus-lines-map-panel {
+  display: none;
+}
+
+.mobile-bus-carousel,
+.mobile-parking-carousel {
+  display: block;
+}
+
 .parking-card,
 .camper-card,
 .ordinance-card {
@@ -496,6 +513,19 @@
   font-weight: 800;
 }
 
+.parking-map-page-section {
+  padding-top: 174px;
+}
+
+.parking-map-page .parking-map {
+  min-height: 620px;
+}
+
+.parking-map-page-list {
+  margin-top: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 1080px) {
   .parking-layout,
   .split-section {
@@ -562,5 +592,759 @@
 
   .parking-map {
     min-height: 420px;
+  }
+}
+
+@media (max-width: 720px) {
+  .viability-page {
+    overflow: visible;
+  }
+
+  .viability-section {
+    padding: 34px 16px;
+  }
+
+  .route-section {
+    padding-top: 118px;
+    padding-bottom: 24px;
+  }
+
+  .parking-section {
+    padding-top: 16px;
+  }
+
+  .section-heading,
+  .section-heading.compact {
+    margin-bottom: 16px;
+  }
+
+  .section-heading h2,
+  .section-heading.compact h2 {
+    font-size: clamp(2rem, 10vw, 2.75rem);
+    line-height: 0.96;
+  }
+
+  .section-kicker {
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+  }
+
+  .section-heading.with-action {
+    gap: 10px;
+  }
+
+  .all-lines-link {
+    min-height: auto;
+    padding-bottom: 3px;
+    font-size: 0.72rem;
+  }
+
+  .bus-line-grid,
+  .parking-list,
+  .camper-list,
+  .ordinance-list {
+    gap: 0;
+    padding: 4px 14px;
+    border: 1px solid rgba(201, 168, 76, 0.18);
+    border-radius: 16px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+      rgba(10, 8, 6, 0.62);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
+  }
+
+  .bus-card,
+  .parking-card,
+  .camper-card,
+  .ordinance-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 15px 0;
+  }
+
+  .bus-card:not(:last-child),
+  .parking-card:not(:last-child),
+  .camper-card:not(:last-child),
+  .ordinance-card:not(:last-child) {
+    border-bottom: 1px solid rgba(240, 230, 204, 0.12);
+  }
+
+  .bus-card::before {
+    width: 4px;
+    height: 38px;
+    top: 16px;
+    left: 0;
+    right: auto;
+    border-radius: 999px;
+  }
+
+  .bus-card-header {
+    gap: 11px;
+    padding-left: 14px;
+  }
+
+  .line-code {
+    width: 42px;
+    height: 42px;
+    font-size: 0.84rem;
+  }
+
+  .bus-card h3,
+  .parking-card h3,
+  .camper-card h3,
+  .ordinance-card h3 {
+    font-size: 1.12rem;
+    line-height: 1.08;
+  }
+
+  .bus-card-header p {
+    margin-top: 3px;
+    font-size: 0.76rem;
+  }
+
+  .route-strip {
+    display: none;
+  }
+
+  .line-route {
+    margin-top: 11px;
+    padding-left: 14px;
+    font-size: 0.8rem;
+    line-height: 1.42;
+  }
+
+  .line-meta,
+  .camper-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 11px;
+  }
+
+  .line-meta {
+    padding-left: 14px;
+  }
+
+  .line-meta div,
+  .camper-meta span {
+    padding: 0;
+    background: transparent;
+  }
+
+  .line-meta div {
+    min-width: 112px;
+  }
+
+  .line-meta dt {
+    font-size: 0.6rem;
+  }
+
+  .line-meta dd {
+    margin-top: 2px;
+    font-size: 0.78rem;
+  }
+
+  .parking-layout {
+    gap: 14px;
+  }
+
+  .parking-map {
+    min-height: 300px;
+    border-radius: 16px;
+  }
+
+  .parking-card-top {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .parking-card-top span,
+  .ordinance-card span {
+    margin-bottom: 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+
+  .parking-status {
+    padding: 5px 8px;
+    font-size: 0.64rem;
+  }
+
+  .parking-type-box {
+    margin-top: 8px;
+    padding: 0;
+    border-radius: 0;
+    color: var(--gold-light);
+    background: transparent;
+    font-size: 0.78rem;
+  }
+
+  .parking-card p,
+  .camper-card p,
+  .ordinance-card p {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    line-height: 1.42;
+  }
+
+  .split-section {
+    gap: 26px;
+  }
+
+  .camper-panel,
+  .ordinance-panel {
+    border-top: 0;
+  }
+
+  .camper-meta span {
+    color: rgba(240, 230, 204, 0.72);
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .ordinance-card time {
+    margin-top: 5px;
+    font-size: 0.76rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .bus-lines-map-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 430px);
+    margin: 0 auto 14px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 18px;
+    background: #0b0805;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+  }
+
+  .bus-lines-map-stage {
+    position: relative;
+    width: 100%;
+    height: 226px;
+    overflow: hidden;
+  }
+
+  .bus-lines-map-canvas,
+  .bus-lines-map-fallback {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bus-lines-map-canvas {
+    z-index: 2;
+  }
+
+  .bus-lines-map-fallback {
+    z-index: 1;
+    background:
+      radial-gradient(circle at 22% 22%, rgba(201, 168, 76, 0.18), transparent 28%),
+      radial-gradient(circle at 78% 46%, rgba(165, 42, 42, 0.22), transparent 30%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #0b0805, #151009);
+  }
+
+  .bus-lines-fallback-path {
+    position: absolute;
+    left: 16%;
+    right: 14%;
+    top: calc(34% + (var(--line-index) * 18%));
+    height: 4px;
+    border-radius: 999px;
+    background: var(--gold);
+    transform: rotate(calc(-8deg + (var(--line-index) * 8deg)));
+    opacity: 0.82;
+  }
+
+  .bus-lines-fallback-path--crimson {
+    background: #a52a2a;
+  }
+
+  .bus-lines-fallback-path--stone {
+    background: #a79a7e;
+  }
+
+  .bus-lines-map-status {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 4;
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 1px solid rgba(240, 230, 204, 0.14);
+    border-radius: 999px;
+    background: rgba(8, 6, 4, 0.72);
+    backdrop-filter: blur(12px);
+    color: var(--cream);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .bus-line-map-marker,
+  .bus-line-user-marker {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
+  }
+
+  .bus-line-map-marker {
+    width: 34px;
+    height: 34px;
+    border: 2px solid rgba(255, 248, 231, 0.9);
+    color: #140d06;
+    background: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 900;
+  }
+
+  .bus-line-map-marker--crimson {
+    color: var(--cream);
+    background: #a52a2a;
+  }
+
+  .bus-line-map-marker--stone {
+    color: #17120c;
+    background: #a79a7e;
+  }
+
+  .bus-line-user-marker {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff8e7;
+    background: #40c7b2;
+  }
+
+  .bus-line-user-marker::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(64, 199, 178, 0.24);
+    z-index: -1;
+  }
+
+  /* ── Pulsante "tutto schermo" sulla mappa ── */
+  .bus-map-fullscreen-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1.5px solid rgba(232, 201, 109, 0.55);
+    border-radius: 10px;
+    background: rgba(15, 12, 8, 0.82);
+    color: #e8c96d;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .bus-map-fullscreen-btn:active {
+    background: rgba(232, 201, 109, 0.2);
+    color: #fff8e7;
+  }
+
+  /* ── Tasto indietro (visibile solo a tutto schermo) ── */
+  .bus-map-back-btn {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 40px;
+    padding: 0 16px 0 8px;
+    border: 1.5px solid rgba(232, 201, 109, 0.55);
+    border-radius: 999px;
+    background: rgba(15, 12, 8, 0.88);
+    color: #e8c96d;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 800;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .bus-map-back-btn:active {
+    background: rgba(232, 201, 109, 0.2);
+    color: #fff8e7;
+  }
+
+  /* ── Pallini delle fermate (solo a tutto schermo) ── */
+  .bus-lines-map-panel:not(.is-fullscreen) .bus-stop-dot {
+    display: none;
+  }
+
+  .bus-stop-dot {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 2.5px solid rgba(255, 248, 231, 0.95);
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+
+  .bus-stop-dot--crimson { background: #a52a2a; }
+  .bus-stop-dot--stone { background: #a79a7e; }
+  .bus-stop-dot:active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(232, 201, 109, 0.28);
+  }
+
+  .bus-stop-popup .mapboxgl-popup-content {
+    padding: 10px 13px;
+    border: 1px solid rgba(232, 201, 109, 0.32);
+    border-radius: 10px;
+    background: rgba(12, 8, 5, 0.96);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  }
+
+  .bus-stop-popup .mapboxgl-popup-content strong {
+    display: block;
+    color: #fff8e7;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .bus-stop-popup .mapboxgl-popup-content span {
+    display: block;
+    margin-top: 3px;
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .bus-stop-popup .mapboxgl-popup-tip {
+    border-top-color: rgba(12, 8, 5, 0.96);
+    border-bottom-color: rgba(12, 8, 5, 0.96);
+  }
+
+  /* ── Mappa linee a tutto schermo ── */
+  body.bus-map-fullscreen-active {
+    overflow: hidden;
+  }
+
+  /* La mappa fullscreen deve coprire tutto: la alziamo sopra il footer (che e
+     fuori dalla pagina) e nascondiamo le altre sezioni, altrimenti lo stacking
+     context di .route-section (z-index: 0) le lascia trapelare in basso. */
+  body.bus-map-fullscreen-active .viability-page {
+    position: relative;
+    z-index: 9999;
+  }
+
+  body.bus-map-fullscreen-active .navbar-wrap,
+  body.bus-map-fullscreen-active .footer,
+  body.bus-map-fullscreen-active .parking-section,
+  body.bus-map-fullscreen-active .split-section,
+  body.bus-map-fullscreen-active .route-section > .section-heading,
+  body.bus-map-fullscreen-active .route-section > .mobile-bus-carousel {
+    display: none !important;
+  }
+
+  .bus-lines-map-panel.is-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: -webkit-fill-available;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    z-index: 9999;
+  }
+
+  .bus-lines-map-panel.is-fullscreen .bus-lines-map-stage {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .bus-map-fs-footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(10, 8, 5, 0.97);
+    border-top: 1px solid rgba(232, 201, 109, 0.22);
+  }
+
+  .bus-map-fs-kicker {
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .bus-map-fs-line {
+    color: #fff8e7;
+    font-family: var(--font-serif);
+    font-size: 1.18rem;
+    line-height: 1.1;
+  }
+
+  .bus-map-fs-stop {
+    color: rgba(240, 230, 204, 0.7);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+  }
+
+  .bus-map-fs-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .bus-map-fs-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 46px;
+    border-radius: 12px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .bus-map-fs-btn.google {
+    color: #5ba3f5;
+    background: rgba(66, 133, 244, 0.16);
+    border: 1px solid rgba(66, 133, 244, 0.32);
+  }
+
+  .bus-map-fs-btn.apple {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .mobile-bus-carousel,
+  .mobile-parking-carousel {
+    position: relative;
+    display: block;
+    width: min(100%, 430px);
+    margin: 0 auto;
+  }
+
+  .mobile-bus-carousel .bus-line-grid,
+  .mobile-parking-carousel .parking-list {
+    min-width: 0;
+    width: 100%;
+    padding-left: 38px;
+    padding-right: 38px;
+  }
+
+  .viability-carousel-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--gold-light);
+    font-family: var(--font-serif);
+    font-size: 2.1rem;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .viability-carousel-arrow--prev {
+    left: 3px;
+  }
+
+  .viability-carousel-arrow--next {
+    right: 3px;
+  }
+
+  .viability-carousel-arrow:active {
+    color: #fff8e7;
+  }
+
+  .all-lines-link {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(232, 201, 109, 0.38);
+    border-radius: 999px;
+    background: rgba(201, 168, 76, 0.1);
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .bus-line-grid,
+  .parking-list {
+    border-radius: 18px;
+  }
+
+  .bus-card,
+  .parking-card {
+    display: none;
+    padding: 16px 0;
+    border-bottom: 0;
+  }
+
+  .bus-card.is-mobile-active,
+  .parking-card.is-mobile-active {
+    display: block;
+  }
+
+  .bus-card::before {
+    display: block;
+    top: 18px;
+  }
+
+  .bus-card-header {
+    padding-left: 16px;
+  }
+
+  .route-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: 22px 2px 16px 16px;
+  }
+
+  .route-stop {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-items: start;
+    gap: 7px;
+  }
+
+  .stop-line {
+    top: 6px;
+    left: calc(50% + 9px);
+    width: calc(100% - 18px);
+    height: 2px;
+  }
+
+  .route-stop small {
+    font-size: 0.6rem;
+    line-height: 1.12;
+  }
+
+  .line-route {
+    padding-left: 16px;
+  }
+
+  .line-meta {
+    padding-left: 16px;
+  }
+
+  .mobile-route-finder {
+    display: block;
+    margin-top: 14px;
+    padding: 0 30px;
+  }
+
+  .mobile-route-finder-btn,
+  .parking-map-link {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(232, 201, 109, 0.38);
+    border-radius: 999px;
+    background: rgba(201, 168, 76, 0.11);
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .mobile-route-finder p {
+    margin-top: 8px;
+    color: rgba(240, 230, 204, 0.68);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  .viability-page:not(.parking-map-page) .parking-section .parking-map {
+    display: none;
+  }
+
+  .parking-section .parking-layout {
+    gap: 12px;
+  }
+
+  .parking-map-link {
+    margin-top: 12px;
+    text-decoration: none;
+  }
+
+  .parking-card-top,
+  .parking-type-box,
+  .parking-card p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .parking-map-page-section {
+    padding-top: 118px;
+  }
+
+  .parking-map-page .section-heading.with-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .parking-map-page .parking-map {
+    display: block;
+    min-height: 430px;
+    border-radius: 18px;
+  }
+
+  .parking-map-page .parking-list {
+    display: grid;
+    gap: 0;
+    margin-top: 16px;
+  }
+
+  .parking-map-page .parking-card {
+    display: block;
   }
 }

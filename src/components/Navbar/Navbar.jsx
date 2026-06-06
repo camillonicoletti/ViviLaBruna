@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import './Navbar.css';
 
 const SUGGESTIONS = [
@@ -152,8 +153,11 @@ export default function Navbar() {
             )}
           </form>
 
+          {/* Selettore lingua (bandiera corrente + mini-menu) */}
+          <LanguageSwitcher />
+
           {/* Hamburger */}
-          <button 
+          <button
             className={`nav-burger ${menuOpen ? 'open' : ''}`}
             onClick={() => { setMenuOpen(!menuOpen); setExpanded(false); }}
             aria-label="Menu"

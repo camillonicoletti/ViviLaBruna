@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './Activities.css';
 import BrunaCalendar from '../../components/BrunaCalendar/BrunaCalendar';
 import ItineraryResult from '../../components/ItineraryResult/ItineraryResult';
@@ -85,6 +86,25 @@ export default function Activities() {
   const [wizardAnswers, setWizardAnswers] = useState({});
   const [pendingId, setPendingId] = useState(null);
   const [infoId, setInfoId] = useState(null); // Card info modal
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Apertura automatica della scheda attività quando si arriva dalla pergamena (?activity=ID)
+  useEffect(() => {
+    const activityParam = searchParams.get('activity');
+    if (!activityParam) return;
+
+    const id = Number(activityParam);
+    if (EXPERIENCES.some(e => e.id === id)) {
+      setInfoId(id);
+      setActiveId(id); // Sincronizza anche lo sfondo cinematografico
+    }
+
+    // Pulisce l'URL (con un oggetto NUOVO, non quello del router) così il
+    // refresh non riapre il modale e l'aggiornamento viene registrato.
+    const next = new URLSearchParams(searchParams);
+    next.delete('activity');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Calendar states for the wizard
   const [dateFrom, setDateFrom] = useState(null);
@@ -365,6 +385,38 @@ export default function Activities() {
           </div>
         )}
       </div>
+
+      {/* MODALE INFO ATTIVITÀ (apre la descrizione completa) */}
+      {infoId && (() => {
+        const exp = EXPERIENCES.find(e => e.id === infoId);
+        if (!exp) return null;
+        const isAdded = itinerary.includes(exp.id);
+        return (
+          <div className="info-overlay" onClick={() => setInfoId(null)}>
+            <div className="info-modal fade-in-up" onClick={(e) => e.stopPropagation()}>
+              <button className="info-close" onClick={() => setInfoId(null)}>×</button>
+              <div className="info-modal-img" style={{ backgroundImage: `url(${exp.bgImage})` }}>
+                <span className="category-tag">{exp.category}</span>
+              </div>
+              <div className="info-modal-body">
+                <h2>{exp.title}</h2>
+                <div className="info-modal-meta">
+                  <span>⏱ {exp.duration}</span>
+                  <span>★ {exp.rating} ({exp.reviews})</span>
+                  <span className="info-modal-price">{exp.price}</span>
+                </div>
+                <p className="info-modal-desc">{exp.description}</p>
+                <button
+                  className={`book-btn ${isAdded ? 'selected' : ''}`}
+                  onClick={() => { toggleItinerary(exp.id); setInfoId(null); }}
+                >
+                  {isAdded ? '✓ Aggiunto' : '+ Aggiungi al programma'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );

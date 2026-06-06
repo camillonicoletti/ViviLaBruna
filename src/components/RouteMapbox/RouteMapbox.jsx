@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { MAPBOX_SATELLITE_STYLE, createStreetFallbackStyle, shouldUseFallbackStyle } from '../mapStyleFallback';
 import './RouteMapbox.css';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -46,6 +47,36 @@ function buildAppleMapsUrl(waypoints) {
   const last  = toLngLat(waypoints[waypoints.length - 1]);
   return 'https://maps.apple.com/?saddr=' + first[1] + ',' + first[0] +
          '&daddr=' + last[1] + ',' + last[0] + '&dirflg=w';
+}
+
+function buildRouteGeometry(coordinates) {
+  return { type: 'LineString', coordinates };
+}
+
+function addRouteGeometry(map, geometry) {
+  ['route-line', 'route-glow'].forEach(function(layerId) {
+    if (map.getLayer(layerId)) map.removeLayer(layerId);
+  });
+  if (map.getSource('route')) map.removeSource('route');
+
+  map.addSource('route', {
+    type: 'geojson',
+    data: { type: 'Feature', properties: {}, geometry: geometry }
+  });
+  map.addLayer({ id: 'route-glow', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#00aaff', 'line-width': 20, 'line-opacity': 0.15, 'line-blur': 12 } });
+  map.addLayer({ id: 'route-line', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#00bfff', 'line-width': 5, 'line-opacity': 0.95 } });
+}
+
+function fitRouteBounds(map, coordinates) {
+  if (!coordinates.length) return;
+
+  const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
+  coordinates.forEach(function(coord) { bounds.extend(coord); });
+  map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, pitch: 45, bearing: -17.6, duration: 1200 });
 }
 
 export default function RouteMapbox({ waypoints, draw }) {
@@ -109,9 +140,90 @@ export default function RouteMapbox({ waypoints, draw }) {
     const centerLng = lngLats.reduce(function(s, w) { return s + w[0]; }, 0) / lngLats.length;
     const centerLat = lngLats.reduce(function(s, w) { return s + w[1]; }, 0) / lngLats.length;
 
+    let usingFallbackStyle = !mapboxgl.accessToken;
+    let routeMarkers = [];
+    let drawRequestId = 0;
+
+    function clearRouteMarkers() {
+      routeMarkers.forEach(function(marker) { marker.remove(); });
+      routeMarkers = [];
+    }
+
+    function switchToFallbackStyle() {
+      if (usingFallbackStyle || !mapRef.current) return;
+      usingFallbackStyle = true;
+      drawRequestId += 1;
+      clearRouteMarkers();
+      map.setStyle(createStreetFallbackStyle());
+      setTimeout(function() { if (mapRef.current) mapRef.current.resize(); }, 100);
+    }
+
+    function addTerrain() {
+      if (usingFallbackStyle || !mapboxgl.accessToken || map.getSource('mapbox-dem')) return;
+
+      try {
+        map.addSource('mapbox-dem', {
+          type: 'raster-dem',
+          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          tileSize: 512, maxzoom: 14
+        });
+        map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+      } catch (err) {
+        console.warn('Mapbox terrain unavailable:', err);
+      }
+    }
+
+    function renderFallbackRoute(currentRequestId) {
+      if (currentRequestId !== drawRequestId || !mapRef.current) return;
+
+      addRouteGeometry(map, buildRouteGeometry(lngLats));
+      fitRouteBounds(map, lngLats);
+      routeMarkers = addMarkers(map, waypoints, lngLats, null);
+    }
+
+    function renderRouteForCurrentStyle() {
+      const currentRequestId = ++drawRequestId;
+      // La pergamena si apre con un'animazione: forziamo il resize così la canvas
+      // WebGL non resta bloccata su dimensioni transitorie (mappa bianca/vuota).
+      map.resize();
+      clearRouteMarkers();
+      addTerrain();
+
+      if (!mapboxgl.accessToken) {
+        renderFallbackRoute(currentRequestId);
+        return;
+      }
+
+      const coordsString = lngLats.map(function(w) { return w[0] + ',' + w[1]; }).join(';');
+      const apiUrl = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + coordsString +
+                     '?geometries=geojson&access_token=' + mapboxgl.accessToken;
+
+      fetch(apiUrl)
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('Directions status ' + r.status)); })
+        .then(function(data) {
+          if (currentRequestId !== drawRequestId || !mapRef.current) return;
+
+          if (!data.routes || !data.routes[0]) {
+            renderFallbackRoute(currentRequestId);
+            return;
+          }
+
+          const geometry = data.routes[0].geometry;
+          const snapped  = data.waypoints || [];
+
+          addRouteGeometry(map, geometry);
+          fitRouteBounds(map, geometry.coordinates);
+          routeMarkers = addMarkers(map, waypoints, lngLats, snapped);
+        })
+        .catch(function(err) {
+          console.error('Directions error:', err);
+          renderFallbackRoute(currentRequestId);
+        });
+    }
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/standard-satellite',
+      style: usingFallbackStyle ? createStreetFallbackStyle() : MAPBOX_SATELLITE_STYLE,
       center: [centerLng, centerLat],
       zoom: 14.5,
       pitch: 45,
@@ -123,53 +235,16 @@ export default function RouteMapbox({ waypoints, draw }) {
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-    map.on('style.load', function() {
-      map.addSource('mapbox-dem', {
-        type: 'raster-dem',
-        url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
-        tileSize: 512, maxzoom: 14
-      });
-      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
-
-      const coordsString = lngLats.map(function(w) { return w[0] + ',' + w[1]; }).join(';');
-      const apiUrl = 'https://api.mapbox.com/directions/v5/mapbox/walking/' + coordsString +
-                     '?geometries=geojson&access_token=' + mapboxgl.accessToken;
-
-      fetch(apiUrl)
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (!data.routes || !data.routes[0]) {
-            addMarkers(map, waypoints, lngLats, null);
-            return;
-          }
-
-          const geometry = data.routes[0].geometry;
-          const snapped  = data.waypoints || [];
-
-          map.addSource('route', {
-            type: 'geojson',
-            data: { type: 'Feature', properties: {}, geometry: geometry }
-          });
-          map.addLayer({ id: 'route-glow', type: 'line', source: 'route',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: { 'line-color': '#00aaff', 'line-width': 20, 'line-opacity': 0.15, 'line-blur': 12 } });
-          map.addLayer({ id: 'route-line', type: 'line', source: 'route',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: { 'line-color': '#00bfff', 'line-width': 5, 'line-opacity': 0.95 } });
-
-          var bounds = new mapboxgl.LngLatBounds(lngLats[0], lngLats[0]);
-          geometry.coordinates.forEach(function(c) { bounds.extend(c); });
-          map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, pitch: 45, bearing: -17.6, duration: 2000 });
-
-          addMarkers(map, waypoints, lngLats, snapped);
-        })
-        .catch(function(err) {
-          console.error('Directions error:', err);
-          addMarkers(map, waypoints, lngLats, null);
-        });
+    map.on('error', function(event) {
+      if (shouldUseFallbackStyle(event)) switchToFallbackStyle();
     });
+    map.on('style.load', renderRouteForCurrentStyle);
 
-    return function() { map.remove(); mapRef.current = null; };
+    return function() {
+      clearRouteMarkers();
+      map.remove();
+      mapRef.current = null;
+    };
   }, [draw, waypoints]);
 
   return (
@@ -211,7 +286,7 @@ export default function RouteMapbox({ waypoints, draw }) {
 
 // ── Funzione separata: aggiunge marker sulla mappa ──
 function addMarkers(map, waypoints, lngLats, snappedList) {
-  waypoints.forEach(function(wp, idx) {
+  return waypoints.map(function(wp, idx) {
     const color = STEP_COLORS[Math.min(idx, STEP_COLORS.length - 1)];
     const el    = createPinElement(idx, color);
 
@@ -245,7 +320,7 @@ function addMarkers(map, waypoints, lngLats, snappedList) {
       }, 50);
     });
 
-    new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+    return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat(pos)
       .setPopup(popup)
       .addTo(map);

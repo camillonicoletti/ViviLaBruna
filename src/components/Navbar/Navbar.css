@@ -38,7 +38,7 @@
 .omnibar-top {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px; /* Gap ridotto: più spazio alla barra AI e bandiera vicino al burger */
   padding: 10px 24px 10px 24px;
 }
 
@@ -62,7 +62,7 @@
 /* INPUT SEARCH ESPANSO */
 .omnibar-input-wrapper {
   flex-grow: 1; /* Prende tutto lo spazio tra logo e hamburger */
-  margin: 0 10px; /* Margine per distanziarlo da logo e burger */
+  margin: 0; /* Spazio gestito dal gap: barra AI più larga */
   display: flex;
   align-items: center;
   background: rgba(255, 255, 255, 0.05);
@@ -149,7 +149,7 @@
   border: none;
   cursor: pointer;
   padding: 6px;
-  margin-left: 10px;
+  margin-left: 0; /* Bandiera più vicina al burger (spazio gestito dal gap) */
   transition: var(--trans);
 }
 
@@ -302,13 +302,14 @@
   .omnibar-top {
     flex-wrap: nowrap; /* Mantiene barra e hamburger sulla stessa riga */
     padding: 8px 16px; /* Più stretto per salvare spazio su schermo */
+    gap: 10px; /* Gap ridotto: più spazio alla barra AI e bandiera vicino al burger */
     box-sizing: border-box;
   }
   .omnibar-input-wrapper {
     order: unset; /* Nessun a capo */
-    margin-top: 0; 
+    margin-top: 0;
     margin-left: 0;
-    margin-right: 12px; /* Lascia spazio al burger */
+    margin-right: 0; /* Spazio gestito dal gap: barra Ai più larga */
     max-width: none;
     flex: 1; /* Prende lo spazio ma senza forzare il 100% causando uscite dallo schermo */
     width: auto;

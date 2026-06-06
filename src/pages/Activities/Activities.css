@@ -723,3 +723,129 @@ Let's cancel this and use multi_replace.
 .recalc-cancel-btn:hover {
   color: rgba(255,255,255,0.6);
 }
+
+/* ── BOTTONE INFO SULLE CARD ── */
+.info-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.info-btn:hover {
+  background: rgba(139, 37, 0, 0.85);
+  transform: scale(1.1);
+}
+
+/* ── MODALE INFO ATTIVITÀ ── */
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.info-modal {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fdfaf3;
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.info-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.info-close:hover {
+  background: rgba(139, 37, 0, 0.9);
+}
+
+.info-modal-img {
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+}
+
+.info-modal-body {
+  padding: 24px 26px 28px;
+}
+
+.info-modal-body h2 {
+  margin: 0 0 12px;
+  font-family: Georgia, serif;
+  font-size: 1.6rem;
+  color: #2b1d0e;
+}
+
+.info-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #6b5640;
+  margin-bottom: 16px;
+}
+
+.info-modal-price {
+  margin-left: auto;
+  font-weight: 700;
+  color: #8b2500;
+}
+
+.info-modal-desc {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: #4a3b2a;
+  margin-bottom: 22px;
+}
+
+.info-modal-body .book-btn {
+  width: 100%;
+  padding: 12px 0;
+}

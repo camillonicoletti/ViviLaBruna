@@ -283,14 +283,23 @@
 .bruna-map-marker {
   width: 44px;
   height: 44px;
+  cursor: pointer;
+  /* Nessuna transizione/transform qui: Mapbox usa il transform di questo elemento
+     per ancorare il marker alle coordinate ad ogni frame. Tenendolo "pulito" il
+     punto di riferimento resta fermo durante pan/zoom/inclinazione 3D. */
+}
+
+.bruna-map-marker-pin {
+  width: 100%;
+  height: 100%;
   background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="%23FF2A2A"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>') no-repeat center center;
   background-size: contain;
-  cursor: pointer;
   filter: drop-shadow(0 0 10px rgba(255, 42, 42, 0.9));
+  transform-origin: bottom center;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.bruna-map-marker:hover {
+.bruna-map-marker:hover .bruna-map-marker-pin {
   transform: scale(1.3);
   filter: drop-shadow(0 0 16px rgba(255, 42, 42, 1));
 }
@@ -427,6 +436,52 @@
 
 .popup-type strong, .popup-time strong {
   color: #E8C96D;
+}
+
+/* Popup delle attività */
+.popup-category {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ff9a9a;
+  background: rgba(255, 42, 42, 0.14);
+  border: 1px solid rgba(255, 42, 42, 0.35);
+  padding: 2px 7px;
+  border-radius: 99px;
+  margin-bottom: 4px;
+}
+
+.popup-meta {
+  font-size: 0.75rem;
+  color: #ccc;
+  margin: 4px 0;
+}
+
+.popup-meta strong {
+  color: #E8C96D;
+}
+
+.popup-activity-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(232, 201, 109, 0.5);
+  background: linear-gradient(135deg, rgba(232, 201, 109, 0.18), rgba(232, 201, 109, 0.06));
+  color: #E8C96D;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.popup-activity-btn:hover {
+  background: linear-gradient(135deg, rgba(232, 201, 109, 0.35), rgba(232, 201, 109, 0.15));
+  border-color: rgba(232, 201, 109, 0.8);
 }
 
 .popup-info {

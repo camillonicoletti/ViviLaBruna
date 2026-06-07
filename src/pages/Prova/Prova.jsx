@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import './Prova.css';
 import BrunaCalendar from '../../components/BrunaCalendar/BrunaCalendar';
 import ItineraryResult from '../../components/ItineraryResult/ItineraryResult';
@@ -34,6 +35,20 @@ export default function Prova() {
   const [programOpen, setProgramOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  // True solo quando la scheda è stata aperta arrivando dalla mappa della home:
+  // in quel caso chiudere la descrizione riporta alla mappa, altrimenti resta nell'HUD.
+  const returnToMapRef = useRef(false);
+
+  const closeModal = () => {
+    if (returnToMapRef.current) {
+      returnToMapRef.current = false;
+      navigate('/', { state: { scrollToMap: true } });
+      return;
+    }
+    setModalData(null);
+  };
 
   // ── Wizard "Genera Programma" (stessa logica di Esplora attività) ──
   const [wizardStep, setWizardStep] = useState(false); // false | 0..4 | 'done'
@@ -89,6 +104,7 @@ export default function Prova() {
     if (!container) return;
 
     window.hudOpenModal = function(idx) {
+      returnToMapRef.current = false; // aperta dall'interno dell'HUD → alla chiusura si resta qui
       setModalData(ITEMS[idx]);
     };
 
@@ -462,6 +478,28 @@ export default function Prova() {
     return () => { document.body.classList.remove('hud-modal-open'); };
   }, [modalData]);
 
+  // Arrivando dalla mappa della home (segnaposto → "Scopri di più"): /prova?activity=INDEX
+  // Posiziona l'HUD sull'attività giusta e apre subito la scheda descrizione.
+  // Questo effetto è dichiarato dopo quello principale, quindi window.hudGoTo è già
+  // pronto: agiamo in modo sincrono (niente setTimeout, così ripulendo l'URL non si
+  // annulla nessun timer in sospeso).
+  useEffect(() => {
+    const param = searchParams.get('activity');
+    if (param === null) return;
+
+    const idx = Number(param);
+    if (Number.isInteger(idx) && idx >= 0 && idx < ITEMS.length) {
+      returnToMapRef.current = true; // arrivo dalla mappa → alla chiusura torno alla mappa
+      window.hudGoTo?.(idx);
+      setModalData(ITEMS[idx]);
+    }
+
+    // Ripuliamo l'URL così un refresh non riapre la scheda.
+    const next = new URLSearchParams(searchParams);
+    next.delete('activity');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   return (
     <>
     <div className={`prova-wrapper ${programOpen ? 'mp-open' : ''}`} ref={containerRef}>
@@ -579,16 +617,16 @@ export default function Prova() {
 
       {/* Modal / Scheda */}
       {modalData && (
-        <div 
-          className="hud-modal-overlay" 
-          onClick={() => setModalData(null)}
+        <div
+          className="hud-modal-overlay"
+          onClick={closeModal}
           onWheel={e => e.stopPropagation()}
           onTouchStart={e => e.stopPropagation()}
           onTouchMove={e => e.stopPropagation()}
           onTouchEnd={e => e.stopPropagation()}
         >
           <div className="hud-modal-content modern horizontal" onClick={e => e.stopPropagation()}>
-            <button className="hud-modal-close" onClick={() => setModalData(null)}>✕</button>
+            <button className="hud-modal-close" onClick={closeModal}>✕</button>
             
             <div className="hud-modal-left-pane" style={{ backgroundImage: `url(${modalData.img})` }}>
               <div className="hud-modal-hero-gradient"></div>
@@ -634,6 +672,7 @@ export default function Prova() {
 
               <div className="hud-modal-actions">
                 <div className="hud-modal-cta" onClick={() => {
+                  returnToMapRef.current = false; // azione nell'HUD → resta qui dopo l'aggiunta
                   setModalData(null);
                   const idx = ITEMS.findIndex(i => i.title === modalData.title);
                   if(idx !== -1) window.hudToggleAdd(idx);

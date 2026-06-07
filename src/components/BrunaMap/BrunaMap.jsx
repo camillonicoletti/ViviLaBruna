@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_SATELLITE_STYLE, createStreetFallbackStyle, shouldUseFallbackStyle } from '../mapStyleFallback';
@@ -25,7 +26,80 @@ const markersData = [
   }
 ];
 
+// Segnaposti rossi delle esperienze di "Esplora Attività" (il nuovo HUD su /prova).
+// Titoli, coordinate e dati combaciano con ITEMS di Prova.jsx; `index` è la posizione
+// nell'HUD così il popup apre la scheda descrizione giusta (/prova?activity=index).
+const activitiesData = [
+  {
+    index: 0,
+    coordinates: [16.6105, 40.6664],
+    title: "Tour dei Sassi al Tramonto",
+    category: "Cultura & Storia",
+    place: "Piazza Vittorio Veneto, Matera",
+    duration: "2 ore",
+    price: "da 25€",
+    rating: "4.9"
+  },
+  {
+    index: 1,
+    coordinates: [16.6210, 40.6720],
+    title: "Volo in Mongolfiera all'Alba",
+    category: "Avventura",
+    place: "Contrada Murgia Timone, Matera",
+    duration: "3 ore",
+    price: "da 180€",
+    rating: "5.0"
+  },
+  {
+    index: 2,
+    coordinates: [16.6080, 40.6675],
+    title: "Laboratorio del Pane IGP",
+    category: "Food & Drink",
+    place: "Via Santo Stefano, Matera",
+    duration: "2.5 ore",
+    price: "da 45€",
+    rating: "4.8"
+  },
+  {
+    index: 3,
+    coordinates: [16.6150, 40.6600],
+    title: "Trekking Murgia Materana",
+    category: "Natura",
+    place: "Jazzo Gattini, Parco della Murgia",
+    duration: "4 ore",
+    price: "da 20€",
+    rating: "4.7"
+  },
+  {
+    index: 4,
+    coordinates: [16.6040, 40.6650],
+    title: "E-Bike dalla Cripta",
+    category: "Sport",
+    place: "Piazzetta Pascoli, Matera",
+    duration: "½ Giornata",
+    price: "da 35€",
+    rating: "4.9"
+  },
+  {
+    index: 5,
+    coordinates: [16.6110, 40.6640],
+    title: "Cena Romantica in Grotta",
+    category: "Exclusive",
+    place: "Sasso Caveoso, Matera",
+    duration: "Serata intera",
+    price: "da 90€",
+    rating: "4.9"
+  }
+];
+
 export default function BrunaMap() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate; // sempre aggiornato, usabile dentro l'effetto a deps vuote
+  // Intento "torna alla mappa" catturato al montaggio (resta valido anche dopo aver
+  // ripulito lo state dalla history). Vedi closeModal in Prova.jsx → navigate('/', { scrollToMap }).
+  const wantMapScrollRef = useRef(location.state?.scrollToMap === true);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const geolocateControlRef = useRef(null);
@@ -82,6 +156,58 @@ export default function BrunaMap() {
       document.removeEventListener('fullscreenchange', handleFsChange);
       document.removeEventListener('webkitfullscreenchange', handleFsChange);
     };
+  }, []);
+
+  // Tornando dalla scheda attività dell'HUD (chiusura → navigate('/', { scrollToMap })),
+  // riportiamo la vista sulla mappa invece di restare in cima alla home.
+  // Eseguito UNA volta al montaggio. Lo state viene rimosso dalla history così un refresh
+  // della home non riporta più alla mappa da solo.
+  useEffect(() => {
+    if (!wantMapScrollRef.current) return;
+    // Rimuove scrollToMap dalla history (replace) → un reload non riattiva lo scroll.
+    navigate(location.pathname, { replace: true });
+
+    const wrapper = mapContainerRef.current?.closest('.bruna-map-wrapper');
+    if (!wrapper) return;
+
+    // L'utente può interrompere il "pinning" appena scrolla a mano.
+    let userInterrupted = false;
+    const onUserScroll = () => { userInterrupted = true; };
+    window.addEventListener('wheel', onUserScroll, { passive: true });
+    window.addEventListener('touchmove', onUserScroll, { passive: true });
+
+    const keepInView = (behavior) => {
+      if (userInterrupted) return;
+      wrapper.scrollIntoView({ behavior, block: 'center' });
+    };
+
+    // Primo arrivo fluido sulla mappa.
+    keepInView('smooth');
+
+    // La chat (KnightChat) sta SOPRA la mappa e popola i suoi messaggi ~1s dopo il
+    // montaggio, allungando il contenuto e spingendo la mappa in basso → senza correzione
+    // la vista "scatta verso l'alto". Ri-ancoriamo istantaneamente ad ogni cambio di
+    // layout, ignorando la prima callback (dimensione iniziale) e solo per ~2.5s.
+    let firstObserve = true;
+    const ro = new ResizeObserver(() => {
+      if (firstObserve) { firstObserve = false; return; }
+      keepInView('auto');
+    });
+    ro.observe(document.body);
+
+    const stop = setTimeout(() => {
+      ro.disconnect();
+      window.removeEventListener('wheel', onUserScroll);
+      window.removeEventListener('touchmove', onUserScroll);
+    }, 2500);
+
+    return () => {
+      clearTimeout(stop);
+      ro.disconnect();
+      window.removeEventListener('wheel', onUserScroll);
+      window.removeEventListener('touchmove', onUserScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggle3D = () => {
@@ -196,7 +322,10 @@ export default function BrunaMap() {
     const renderEventMarkers = () => {
       clearEventMarkers();
       addTerrain();
-      eventMarkers = createEventMarkers(map);
+      eventMarkers = [
+        ...createEventMarkers(map),
+        ...createActivityMarkers(map, navigateRef)
+      ];
     };
 
     mapRef.current = new mapboxgl.Map({
@@ -233,8 +362,12 @@ export default function BrunaMap() {
       // Forza un resize: la mappa può essere inizializzata mentre il contenitore
       // è ancora in animazione/layout, lasciando la canvas WebGL di dimensione errata.
       map.resize();
-      // Attiva automaticamente la geolocalizzazione appena la mappa e caricata
-      geolocate.trigger();
+      // Attiva automaticamente la geolocalizzazione appena la mappa è caricata.
+      // MA non quando si torna dalla scheda attività: il GeolocateControl prende fuoco
+      // e fa scrollare la pagina da solo, "litigando" col nostro scrollIntoView (scatto).
+      if (!wantMapScrollRef.current) {
+        geolocate.trigger();
+      }
     });
 
     map.on('error', (event) => {
@@ -367,6 +500,13 @@ function createEventMarkers(map) {
   return markersData.map((event) => {
     const el = document.createElement('div');
     el.className = 'bruna-map-marker';
+    // Il pin visivo va su un figlio interno: Mapbox usa il `transform` dell'elemento
+    // radice per posizionare il marker ad ogni frame, quindi qualsiasi transizione o
+    // scala applicata alla radice lo fa "scivolare". Tenendo la grafica nel figlio,
+    // il punto resta fermo sulle coordinate anche in 3D.
+    const pin = document.createElement('div');
+    pin.className = 'bruna-map-marker-pin';
+    el.appendChild(pin);
 
     const [lng, lat] = event.coordinates;
     const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
@@ -402,6 +542,45 @@ function createEventMarkers(map) {
 
     return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat(event.coordinates)
+      .setPopup(popup)
+      .addTo(map);
+  });
+}
+
+function createActivityMarkers(map, navigateRef) {
+  return activitiesData.map((activity) => {
+    const el = document.createElement('div');
+    el.className = 'bruna-map-marker';
+    // Grafica nel figlio: la radice resta gestita da Mapbox → segnaposto fermo anche in 3D.
+    const pin = document.createElement('div');
+    pin.className = 'bruna-map-marker-pin';
+    el.appendChild(pin);
+
+    const popupHTML = `
+       <div class="popup-header">
+         <h3 class="popup-title">${activity.title}</h3>
+         <button class="popup-close-btn">&times;</button>
+       </div>
+       <span class="popup-category">${activity.category}</span>
+       ${activity.place ? `<p class="popup-place">📍 ${activity.place}</p>` : ''}
+       <p class="popup-meta">⏱ ${activity.duration} &nbsp;·&nbsp; ★ ${activity.rating} &nbsp;·&nbsp; <strong>${activity.price}</strong></p>
+       <button class="popup-activity-btn" type="button">Scopri di più ➔</button>
+    `;
+
+    const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, className: 'bruna-map-popup' })
+      .setHTML(popupHTML);
+
+    popup.on('open', () => {
+      const root = popup.getElement();
+      root?.querySelector('.popup-close-btn')?.addEventListener('click', () => popup.remove());
+      root?.querySelector('.popup-activity-btn')?.addEventListener('click', () => {
+        navigateRef.current(`/prova?activity=${activity.index}`);
+        popup.remove();
+      });
+    });
+
+    return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat(activity.coordinates)
       .setPopup(popup)
       .addTo(map);
   });

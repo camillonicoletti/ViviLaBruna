@@ -23,7 +23,7 @@ Un'esperienza cinematografica e interattiva dedicata alla **Festa della Bruna** 
 1. Clona il repository o scarica il codice sorgente:
    ```bash
    git clone <il-tuo-repo-url>
-   cd ViviLaBruna
+   cd <cartella-del-progetto>
    ```
 
 2. Installa le dipendenze:

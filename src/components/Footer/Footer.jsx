@@ -68,11 +68,11 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-brand">
           <div className="footer-logo">
-            <img src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png" alt="Festa della Bruna" className="footer-logo-png" />
-            <span>VIVI LA <strong>BRUNA</strong></span>
+            <img src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png" alt="Matera da Vivere" className="footer-logo-png" />
+            <span>MATERA DA <strong>VIVERE</strong></span>
           </div>
           <p className="footer-tagline">
-            La tua guida per vivere<br />la Festa della Bruna a Matera.
+            La tua guida per scoprire<br />cosa fare a Matera.
           </p>
           <div className="footer-socials">
             {SOCIAL_LINKS.map((social) => (

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import './Prova.css';
 import BrunaCalendar from '../../components/BrunaCalendar/BrunaCalendar';
-import ItineraryResult from '../../components/ItineraryResult/ItineraryResult';
+import ItineraryResult, { scrollToPergamenaAnchor } from '../../components/ItineraryResult/ItineraryResult';
 
 const getActivityReviewSlug = (title) =>
   title
@@ -11,6 +11,18 @@ const getActivityReviewSlug = (title) =>
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
+
+// Programma e pergamena salvati per la sessione: navigando alle recensioni
+// e tornando indietro, sidebar/wizard/itinerario si ritrovano come lasciati.
+const PROGRAM_STORAGE_KEY = 'provaProgramma';
+
+const readSavedProgram = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem(PROGRAM_STORAGE_KEY) || 'null');
+  } catch {
+    return null;
+  }
+};
 
 // ── DATA ──────────────────────────────────────────────────────────────────
 const ITEMS = [
@@ -30,29 +42,49 @@ const ITEMS = [
 
 export default function Prova() {
   const containerRef = useRef(null);
+  // Stato eventualmente salvato prima di navigare via (es. verso le recensioni)
+  const savedProgramRef = useRef(readSavedProgram());
   const [modalData, setModalData] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]); // indici sincronizzati col Set dell'HUD
-  const [programOpen, setProgramOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState(() => savedProgramRef.current?.selectedItems || []); // indici sincronizzati col Set dell'HUD
+  const [programOpen, setProgramOpen] = useState(() => Boolean(savedProgramRef.current?.programOpen));
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  // True solo quando la scheda è stata aperta arrivando dalla mappa della home:
-  // in quel caso chiudere la descrizione riporta alla mappa, altrimenti resta nell'HUD.
-  const returnToMapRef = useRef(false);
+  const location = useLocation();
+  // Navigate sempre aggiornato, usabile dentro l'effetto a deps vuote (hudOpenReviews)
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+  // Da dove è stata aperta la scheda descrizione, per riportarci l'utente alla chiusura:
+  // null = dall'HUD (si resta qui) · 'map' = mappa della home · 'home' = pergamena
+  // della home · 'prova' = pergamena della sidebar "Il mio programma".
+  const returnTargetRef = useRef(null);
 
   const closeModal = () => {
-    if (returnToMapRef.current) {
-      returnToMapRef.current = false;
+    const target = returnTargetRef.current;
+    returnTargetRef.current = null;
+
+    if (target === 'map') {
       navigate('/', { state: { scrollToMap: true } });
       return;
     }
+    if (target === 'home') {
+      // La pergamena della home viene ripristinata da KnightChat (sessionStorage)
+      navigate('/');
+      return;
+    }
     setModalData(null);
+    if (target === 'prova') {
+      // Si era nella pergamena della sidebar: riaprila e torna alla card
+      // dell'attività appena consultata (l'apertura dura 0.5s)
+      setProgramOpen(true);
+      setTimeout(scrollToPergamenaAnchor, 600);
+    }
   };
 
   // ── Wizard "Genera Programma" (stessa logica di Esplora attività) ──
-  const [wizardStep, setWizardStep] = useState(false); // false | 0..4 | 'done'
-  const [wizardAnswers, setWizardAnswers] = useState({});
+  const [wizardStep, setWizardStep] = useState(() => savedProgramRef.current?.wizardStep ?? false); // false | 0..4 | 'done'
+  const [wizardAnswers, setWizardAnswers] = useState(() => savedProgramRef.current?.wizardAnswers || {});
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
 
@@ -96,15 +128,34 @@ export default function Prova() {
     }
   };
 
+  // Persistenza del programma per la sessione (vedi PROGRAM_STORAGE_KEY)
   useEffect(() => {
+    try {
+      if (selectedItems.length > 0 || wizardStep !== false || programOpen) {
+        sessionStorage.setItem(
+          PROGRAM_STORAGE_KEY,
+          JSON.stringify({ selectedItems, wizardStep, wizardAnswers, programOpen })
+        );
+      } else {
+        sessionStorage.removeItem(PROGRAM_STORAGE_KEY);
+      }
+    } catch { /* ignora */ }
+  }, [selectedItems, wizardStep, wizardAnswers, programOpen]);
+
+  useEffect(() => {
+    // Arrivando da una pagina scrollata (es. la mappa in fondo alla home), senza
+    // questo reset l'HUD si presenta già scrollato sul footer: si riparte dall'alto.
+    window.scrollTo(0, 0);
+
     const N = ITEMS.length;
     let cur = 0, spinning = false;
-    const selected = new Set();
+    // Il Set dell'HUD riparte dalle attività eventualmente ripristinate
+    const selected = new Set(savedProgramRef.current?.selectedItems || []);
     const container = containerRef.current;
     if (!container) return;
 
     window.hudOpenModal = function(idx) {
-      returnToMapRef.current = false; // aperta dall'interno dell'HUD → alla chiusura si resta qui
+      returnTargetRef.current = null; // aperta dall'interno dell'HUD → alla chiusura si resta qui
       setModalData(ITEMS[idx]);
     };
 
@@ -186,6 +237,12 @@ export default function Prova() {
           dotsEl.appendChild(d);
         });
       }
+
+      // Anelli "aggiunto" coerenti col programma (anche dopo un ripristino)
+      ITEMS.forEach((_, i) => {
+        const ring = G(`ring-${i}`);
+        if (ring) ring.classList.toggle('done', selected.has(i));
+      });
 
       setPositions(0, false);
     }
@@ -438,7 +495,9 @@ export default function Prova() {
     window.hudShowToast = showToast;
     window.hudOpenReviews = function() {
       const slug = getActivityReviewSlug(ITEMS[cur].title);
-      window.location.href = `/social?review=${encodeURIComponent(slug)}#recensioni-attivita`;
+      // Navigazione SPA (niente ricarica completa): porta alla sezione
+      // recensioni di Social con l'attività corrente già selezionata.
+      navigateRef.current(`/social?review=${encodeURIComponent(slug)}#recensioni-attivita`);
     };
 
     // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -478,8 +537,10 @@ export default function Prova() {
     return () => { document.body.classList.remove('hud-modal-open'); };
   }, [modalData]);
 
-  // Arrivando dalla mappa della home (segnaposto → "Scopri di più"): /prova?activity=INDEX
-  // Posiziona l'HUD sull'attività giusta e apre subito la scheda descrizione.
+  // Arrivando dalla mappa della home ("Scopri di più") o dalla pergamena
+  // ("Esplora Attività"): /prova?activity=INDEX posiziona l'HUD sull'attività
+  // giusta e apre subito la scheda descrizione. Lo state fromPergamena
+  // ('home' | 'prova') indica dove riportare l'utente alla chiusura.
   // Questo effetto è dichiarato dopo quello principale, quindi window.hudGoTo è già
   // pronto: agiamo in modo sincrono (niente setTimeout, così ripulendo l'URL non si
   // annulla nessun timer in sospeso).
@@ -489,7 +550,10 @@ export default function Prova() {
 
     const idx = Number(param);
     if (Number.isInteger(idx) && idx >= 0 && idx < ITEMS.length) {
-      returnToMapRef.current = true; // arrivo dalla mappa → alla chiusura torno alla mappa
+      returnTargetRef.current = location.state?.fromPergamena || 'map';
+      // La scheda deve stare sopra a tutto: se la sidebar del programma era
+      // aperta (o ripristinata), va chiusa; alla chiusura della scheda si riapre.
+      setProgramOpen(false);
       window.hudGoTo?.(idx);
       setModalData(ITEMS[idx]);
     }
@@ -498,7 +562,7 @@ export default function Prova() {
     const next = new URLSearchParams(searchParams);
     next.delete('activity');
     setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, location.state]);
 
   return (
     <>
@@ -672,10 +736,14 @@ export default function Prova() {
 
               <div className="hud-modal-actions">
                 <div className="hud-modal-cta" onClick={() => {
-                  returnToMapRef.current = false; // azione nell'HUD → resta qui dopo l'aggiunta
+                  // Dopo l'aggiunta si resta qui; ma se si veniva dalla pergamena
+                  // della sidebar, la sidebar si riapre con la nuova attività.
+                  const target = returnTargetRef.current;
+                  returnTargetRef.current = null;
                   setModalData(null);
                   const idx = ITEMS.findIndex(i => i.title === modalData.title);
                   if(idx !== -1) window.hudToggleAdd(idx);
+                  if (target === 'prova') setProgramOpen(true);
                 }}>
                   Aggiungi al programma
                 </div>

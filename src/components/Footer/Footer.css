@@ -36,11 +36,13 @@
 .footer-logo-png {
   height: 45px;
   width: auto;
+  flex-shrink: 0;
   filter: brightness(0) invert(1);
 }
 .footer-logo strong { color: var(--gold); }
 .footer-logo span {
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .footer-tagline {

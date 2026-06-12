@@ -760,7 +760,11 @@ body.hud-modal-open .omnibar-container {
   /* Variabili oro locali: il pannello vive fuori da .prova-wrapper */
   --gold: #C9A84C; --gold-l: #E8C96D; --cream: #F0E6CC; --muted: rgba(240, 230, 204, 0.4);
   position: fixed; top: 0; right: -440px;
-  width: 420px; max-width: 90vw; height: 100vh;
+  width: 420px; max-width: 90vw;
+  /* 100dvh = viewport reale su mobile (con 100vh la barra URL di Safari/Chrome
+     copriva il footer "Genera Programma", visibile solo scrollando) */
+  height: 100vh;
+  height: 100dvh;
   background: rgba(10, 10, 10, 0.85);
   backdrop-filter: blur(25px);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -798,6 +802,14 @@ body.hud-modal-open .omnibar-container {
 
 .mp-sidebar-timeline {
   flex-grow: 1; overflow-y: auto;
+  /* min-height: 0 è OBBLIGATORIO: senza, il flex item non può restringersi
+     sotto l'altezza del contenuto e l'overflow non si attiva mai → con la
+     pergamena dell'itinerario (alta) lo scroll risultava bloccato su mobile. */
+  min-height: 0;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 30px; display: flex; flex-direction: column; gap: 20px;
 }
 .mp-sidebar-empty {

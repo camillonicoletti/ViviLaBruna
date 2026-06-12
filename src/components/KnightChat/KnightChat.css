@@ -500,6 +500,55 @@
   }
 }
 
+/* ───── RIFINITURE DORATE ───── */
+/* Alone caldo dietro al cavaliere, come luce di torce */
+.avatar-video-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 130%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.16) 0%, rgba(139, 26, 26, 0.08) 45%, transparent 68%);
+  z-index: -1;
+  pointer-events: none;
+  animation: glowBreathe 6s ease-in-out infinite alternate;
+}
+
+@keyframes glowBreathe {
+  0%   { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Bordo del quiz box riscaldato con filo d'oro sfumato */
+.ai-quiz-box {
+  border-color: rgba(201, 168, 76, 0.22);
+}
+
+.ai-quiz-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(232, 201, 109, 0.55) 0%, transparent 30%, transparent 70%, rgba(155, 122, 40, 0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.sparkle {
+  animation: sparkleTwinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 1;   text-shadow: 0 0 6px rgba(232, 201, 109, 0.9); }
+  50%      { opacity: 0.5; text-shadow: none; }
+}
+
 /* ───── DYNAMIC INPUTS ───── */
 .dynamic-input-container {
   display: flex;

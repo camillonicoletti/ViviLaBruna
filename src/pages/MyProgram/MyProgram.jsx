@@ -498,7 +498,8 @@ function SpotMarker({ position, visible }) {
 export default function MyProgram() {
   const navigate = useNavigate();
   const [showGallery, setShowGallery] = useState(false);
-  const [journeyProgress, setJourneyProgress] = useState(0.75);
+  // Il cavaliere parte dall'inizio della barra (Alba 05:30), non dalle 18:30
+  const [journeyProgress, setJourneyProgress] = useState(0);
   const [curIdx, setCurIdx] = useState(0);
   const [exploreMode, setExploreMode] = useState(false);
   const [nearSpotIdx, setNearSpotIdx] = useState(-1);

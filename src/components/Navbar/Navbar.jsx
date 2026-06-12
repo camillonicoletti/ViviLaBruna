@@ -128,7 +128,7 @@ export default function Navbar() {
         {/* TOP BAR */}
         <div className="omnibar-top">
           <a href="/" className="nav-logo" onClick={(e) => handleLinkClick(e, '/')}>
-            <img src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png" alt="Festa della Bruna" className="nav-logo-png" />
+            <img src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png" alt="Matera da Vivere" className="nav-logo-png" />
           </a>
           
           <form className="omnibar-input-wrapper" onSubmit={handleSubmit} onClick={() => { setExpanded(true); setMenuOpen(false); }}>
@@ -171,6 +171,7 @@ export default function Navbar() {
           <div className="traditional-menu-dropdown fade-in-up">
             <ul className="traditional-nav-links">
               <li><a href="/" onClick={(e) => handleLinkClick(e, '/')}>Home</a></li>
+              <li><a href="/2-luglio" className="nav-link-festa" onClick={(e) => handleLinkClick(e, '/2-luglio')}>2 Luglio ✦</a></li>
               <li><a href="/la-storia" onClick={(e) => handleLinkClick(e, '/la-storia')}>La Storia</a></li>
               <li><a href="/prova" onClick={(e) => handleLinkClick(e, '/prova')}>Esplora Attività</a></li>
               <li><a href="/viabilita" onClick={(e) => handleLinkClick(e, '/viabilita')}>Viabilità</a></li>

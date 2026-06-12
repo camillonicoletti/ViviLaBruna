@@ -92,14 +92,25 @@ const activitiesData = [
   }
 ];
 
-export default function BrunaMap() {
+// Flag di rientro dalla schermata /mappa: chi preme "Torna indietro" deve
+// riatterrare sulla mappa della home, anche se c'è una pergamena salvata.
+// KnightChat lo legge (senza consumarlo) per saltare il suo scroll automatico
+// all'itinerario; lo consuma BrunaMap nel suo effetto di scroll.
+const RETURN_TO_MAP_KEY = 'brunaMapReturnToMap';
+
+export function readReturnToMapFlag() {
+  try { return sessionStorage.getItem(RETURN_TO_MAP_KEY) === '1'; } catch { return false; }
+}
+
+export default function BrunaMap({ fullscreenPage = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate; // sempre aggiornato, usabile dentro l'effetto a deps vuote
   // Intento "torna alla mappa" catturato al montaggio (resta valido anche dopo aver
-  // ripulito lo state dalla history). Vedi closeModal in Prova.jsx → navigate('/', { scrollToMap }).
-  const wantMapScrollRef = useRef(location.state?.scrollToMap === true);
+  // ripulito lo state dalla history). Arriva da closeModal in Prova.jsx
+  // (navigate('/', { scrollToMap })) oppure dal "Torna indietro" di /mappa.
+  const wantMapScrollRef = useRef(location.state?.scrollToMap === true || readReturnToMapFlag());
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const geolocateControlRef = useRef(null);
@@ -107,36 +118,75 @@ export default function BrunaMap() {
   const [is3D, setIs3D] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Fallback CSS (mobile): il wrapper diventa fixed a tutto schermo.
+  // Blocca anche lo scroll del body, e forza la mappa a riadattarsi
+  // sia all'ingresso che all'uscita (senza resize la canvas WebGL
+  // resta della dimensione sbagliata e la mappa appare "rotta").
+  const enterCssFullscreen = useCallback((wrapper) => {
+    wrapper.classList.add('is-fullscreen');
+    document.body.classList.add('bruna-map-fs-lock');
+    setIsFullscreen(true);
+    setTimeout(() => mapRef.current?.resize(), 50);
+    setTimeout(() => mapRef.current?.resize(), 300);
+  }, []);
+
+  const exitCssFullscreen = useCallback((wrapper) => {
+    wrapper.classList.remove('is-fullscreen');
+    document.body.classList.remove('bruna-map-fs-lock');
+    setIsFullscreen(false);
+    setTimeout(() => mapRef.current?.resize(), 50);
+    setTimeout(() => mapRef.current?.resize(), 300);
+  }, []);
+
   const toggleFullscreen = useCallback(() => {
     const wrapper = mapContainerRef.current?.closest('.bruna-map-wrapper');
     if (!wrapper) return;
 
-    const canFullscreen = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen;
+    // iPhone/iPad: l'API fullscreen sugli elementi non-video non è affidabile
+    // (a volte la funzione esiste ma non fa nulla). Su TUTTO il mobile l'overlay
+    // CSS restava comunque intrappolato negli stacking context della pagina →
+    // si apre una schermata dedicata (/mappa) con solo mappa e "Torna indietro".
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const preferMapPage = isIOS || window.matchMedia('(max-width: 768px)').matches;
+
+    if (preferMapPage) {
+      navigate('/mappa');
+      return;
+    }
+
+    const nativeRequest = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen;
 
     if (!isFullscreen) {
-      if (canFullscreen) {
-        // Desktop - fullscreen nativo
-        const req = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen.bind(wrapper);
-        req.call(wrapper).catch(err => console.warn(err));
+      if (nativeRequest) {
+        try {
+          const result = nativeRequest.call(wrapper);
+          if (result?.catch) {
+            result.catch(() => enterCssFullscreen(wrapper));
+          }
+          // Se dopo un attimo il browser non è davvero in fullscreen
+          // (richiesta ignorata in silenzio), ripieghiamo sul CSS.
+          setTimeout(() => {
+            const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
+            if (!isNativeFs && !wrapper.classList.contains('is-fullscreen')) {
+              enterCssFullscreen(wrapper);
+            }
+          }, 350);
+        } catch {
+          enterCssFullscreen(wrapper);
+        }
       } else {
-        // Mobile fallback - fullscreen CSS
-        wrapper.classList.add('is-fullscreen');
-        setIsFullscreen(true);
-        // Forza la mappa ad adattarsi alle nuove dimensioni
-        setTimeout(() => mapRef.current?.resize(), 50);
-        setTimeout(() => mapRef.current?.resize(), 300);
+        enterCssFullscreen(wrapper);
       }
     } else {
       if (document.fullscreenElement || document.webkitFullscreenElement) {
         const exit = document.exitFullscreen || document.webkitExitFullscreen?.bind(document);
         exit?.call(document);
       } else {
-        // Rimuovi fullscreen CSS
-        wrapper.classList.remove('is-fullscreen');
-        setIsFullscreen(false);
+        exitCssFullscreen(wrapper);
       }
     }
-  }, [isFullscreen]);
+  }, [isFullscreen, enterCssFullscreen, exitCssFullscreen, navigate]);
 
   useEffect(() => {
     const handleFsChange = () => {
@@ -155,6 +205,8 @@ export default function BrunaMap() {
     return () => {
       document.removeEventListener('fullscreenchange', handleFsChange);
       document.removeEventListener('webkitfullscreenchange', handleFsChange);
+      // Se si smonta mentre il fallback CSS è attivo, sblocca la pagina
+      document.body.classList.remove('bruna-map-fs-lock');
     };
   }, []);
 
@@ -164,6 +216,8 @@ export default function BrunaMap() {
   // della home non riporta più alla mappa da solo.
   useEffect(() => {
     if (!wantMapScrollRef.current) return;
+    // Consuma il flag di rientro da /mappa → un reload non riattiva lo scroll.
+    try { sessionStorage.removeItem(RETURN_TO_MAP_KEY); } catch { /* ignora */ }
     // Rimuove scrollToMap dalla history (replace) → un reload non riattiva lo scroll.
     navigate(location.pathname, { replace: true });
 
@@ -209,6 +263,22 @@ export default function BrunaMap() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pagina /mappa: blocca lo scroll della pagina sotto finché la mappa è aperta.
+  useEffect(() => {
+    if (!fullscreenPage) return undefined;
+    document.body.classList.add('bruna-map-fs-lock');
+    return () => document.body.classList.remove('bruna-map-fs-lock');
+  }, [fullscreenPage]);
+
+  // Esce dalla schermata mappa: torna alla pagina di provenienza
+  // (o alla home se /mappa è stata aperta direttamente da un link).
+  // Il flag fa riatterrare l'utente sulla mappa anche se c'è la pergamena.
+  const goBack = () => {
+    try { sessionStorage.setItem(RETURN_TO_MAP_KEY, '1'); } catch { /* ignora */ }
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/');
+  };
 
   const toggle3D = () => {
     if (!mapRef.current) return;
@@ -457,6 +527,18 @@ export default function BrunaMap() {
     };
   }, []);
 
+  // Schermata dedicata (/mappa): solo la mappa a tutto schermo e il tasto per tornare indietro.
+  if (fullscreenPage) {
+    return (
+      <main className="bruna-map-page" aria-label="Mappa degli eventi a tutto schermo">
+        <div ref={mapContainerRef} className="bruna-map-container" />
+        <button className="bruna-map-exit-fs" onClick={goBack}>
+          ← Torna indietro
+        </button>
+      </main>
+    );
+  }
+
   return (
     <section className="bruna-map-section" aria-labelledby="bruna-map-heading">
       <div className="bruna-map-section-inner">
@@ -490,6 +572,11 @@ export default function BrunaMap() {
             </div>
           </div>
           <div ref={mapContainerRef} className="bruna-map-container" />
+          {isFullscreen && (
+            <button className="bruna-map-exit-fs" onClick={toggleFullscreen}>
+              ← Torna indietro
+            </button>
+          )}
         </div>
       </div>
     </section>

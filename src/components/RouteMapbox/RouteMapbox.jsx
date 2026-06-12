@@ -84,9 +84,16 @@ export default function RouteMapbox({ waypoints, draw }) {
   const wrapperRef      = useRef(null);
   const mapRef          = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Pallino selezionato: la sua descrizione appare nel box in basso
+  // al posto dei bottoni Google/Apple Maps (✕ per tornare ai bottoni).
+  const [selectedStep, setSelectedStep] = useState(null);
 
   const googleUrl = useMemo(function() { return buildGoogleMapsUrl(waypoints); }, [waypoints]);
   const appleUrl  = useMemo(function() { return buildAppleMapsUrl(waypoints);  }, [waypoints]);
+
+  const handleStepClick = useCallback(function(idx) { setSelectedStep(idx); }, []);
+
+  useEffect(function() { setSelectedStep(null); }, [waypoints, draw]);
 
   // Logica fullscreen identica a BrunaMap
   const toggleFullscreen = useCallback(function() {
@@ -178,7 +185,7 @@ export default function RouteMapbox({ waypoints, draw }) {
 
       addRouteGeometry(map, buildRouteGeometry(lngLats));
       fitRouteBounds(map, lngLats);
-      routeMarkers = addMarkers(map, waypoints, lngLats, null);
+      routeMarkers = addMarkers(map, waypoints, lngLats, null, handleStepClick);
     }
 
     function renderRouteForCurrentStyle() {
@@ -213,7 +220,7 @@ export default function RouteMapbox({ waypoints, draw }) {
 
           addRouteGeometry(map, geometry);
           fitRouteBounds(map, geometry.coordinates);
-          routeMarkers = addMarkers(map, waypoints, lngLats, snapped);
+          routeMarkers = addMarkers(map, waypoints, lngLats, snapped, handleStepClick);
         })
         .catch(function(err) {
           console.error('Directions error:', err);
@@ -245,7 +252,7 @@ export default function RouteMapbox({ waypoints, draw }) {
       map.remove();
       mapRef.current = null;
     };
-  }, [draw, waypoints]);
+  }, [draw, waypoints, handleStepClick]);
 
   return (
     <div className="route-mapbox-wrapper" ref={wrapperRef}>
@@ -263,7 +270,32 @@ export default function RouteMapbox({ waypoints, draw }) {
           </button>
         )}
       </div>
-      {draw && (
+      {/* Box in basso: descrizione del pallino selezionato, con ✕ per
+          tornare ai bottoni Google/Apple Maps */}
+      {draw && selectedStep !== null && waypoints && waypoints[selectedStep] && (
+        <div className="route-step-panel">
+          <span
+            className="route-step-badge"
+            style={{ background: STEP_COLORS[Math.min(selectedStep, STEP_COLORS.length - 1)] }}
+          >
+            {selectedStep + 1}
+          </span>
+          <div className="route-step-info">
+            <h4 className="route-step-title">{waypoints[selectedStep].title || ('Tappa ' + (selectedStep + 1))}</h4>
+            {waypoints[selectedStep].place && (
+              <p className="route-step-place">📍 {waypoints[selectedStep].place}</p>
+            )}
+            {waypoints[selectedStep].time && (
+              <p className="route-step-time"><strong>Orario:</strong> {waypoints[selectedStep].time}</p>
+            )}
+            {waypoints[selectedStep].desc && (
+              <p className="route-step-desc">{waypoints[selectedStep].desc}</p>
+            )}
+          </div>
+          <button className="route-step-close" onClick={function() { setSelectedStep(null); }} aria-label="Chiudi descrizione">✕</button>
+        </div>
+      )}
+      {draw && selectedStep === null && (
         <div className="route-map-actions">
           <span className="route-map-actions-label">Vedi il percorso su</span>
           <a href={googleUrl} target="_blank" rel="noopener noreferrer" className="route-ext-btn google">
@@ -285,7 +317,9 @@ export default function RouteMapbox({ waypoints, draw }) {
 }
 
 // ── Funzione separata: aggiunge marker sulla mappa ──
-function addMarkers(map, waypoints, lngLats, snappedList) {
+// Niente popup sulla mappa: il click sul pallino apre la descrizione
+// nel box in basso (onStepClick → pannello sotto la mappa).
+function addMarkers(map, waypoints, lngLats, snappedList, onStepClick) {
   return waypoints.map(function(wp, idx) {
     const color = STEP_COLORS[Math.min(idx, STEP_COLORS.length - 1)];
     const el    = createPinElement(idx, color);
@@ -295,34 +329,13 @@ function addMarkers(map, waypoints, lngLats, snappedList) {
       ? snappedList[idx].location
       : lngLats[idx];
 
-    const titleStr = wp.title || ('Tappa ' + (idx + 1));
-    const placeStr = wp.place ? '<p class="popup-place">\uD83D\uDCCD ' + wp.place + '</p>' : '';
-    const timeStr  = wp.time  ? '<p class="popup-time"><strong>Orario:</strong> ' + wp.time + '</p>' : '';
-    const descStr  = wp.desc  ? '<p class="popup-info">' + wp.desc + '</p>' : '';
-
-    const html = '<div class="popup-header">'
-      + '<h3 class="popup-title">' + titleStr + '</h3>'
-      + '<button class="popup-close-btn">&times;</button>'
-      + '</div>'
-      + placeStr + timeStr + descStr;
-
-    const popup = new mapboxgl.Popup({
-      offset: [0, -44],
-      closeButton: false,
-      className: 'bruna-map-popup',
-      maxWidth: '240px'
-    }).setHTML(html);
-
-    popup.on('open', function() {
-      setTimeout(function() {
-        var btn = document.querySelector('.popup-close-btn');
-        if (btn) btn.addEventListener('click', function() { popup.remove(); });
-      }, 50);
+    el.addEventListener('click', function(event) {
+      event.stopPropagation();
+      if (onStepClick) onStepClick(idx);
     });
 
     return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat(pos)
-      .setPopup(popup)
       .addTo(map);
   });
 }

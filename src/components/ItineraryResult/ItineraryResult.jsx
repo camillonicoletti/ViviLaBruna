@@ -145,7 +145,7 @@ const getGoogleCalendarUrl = (route, answers) => {
   const { start, end } = getCalendarDateRange(answers, route);
   const params = new URLSearchParams({
     action: 'TEMPLATE',
-    text: `${route.title} - Vivi La Bruna`,
+    text: `${route.title} - Matera da Vivere`,
     dates: `${formatGoogleAllDayDate(start)}/${formatGoogleAllDayDate(addDays(end, 1))}`,
     details: buildCalendarDetails(route),
     location: CALENDAR_LOCATION,
@@ -183,7 +183,7 @@ const getTimedCalendarEvents = (route, answers) => {
         start,
         end,
         dayTitle: dayData.day,
-        uid: `${dateOnlyFromDate(start)}-${dayIndex}-${eventIndex}-${slugify(event.title)}@vivilabruna.local`
+        uid: `${dateOnlyFromDate(start)}-${dayIndex}-${eventIndex}-${slugify(event.title)}@materadavivere.local`
       };
     })
   ));
@@ -199,7 +199,7 @@ const createAppleCalendarFile = (route, answers) => {
     `DTSTAMP:${now}`,
     `DTSTART;TZID=${CALENDAR_TIMEZONE}:${formatIcsLocalDateTime(event.start)}`,
     `DTEND;TZID=${CALENDAR_TIMEZONE}:${formatIcsLocalDateTime(event.end)}`,
-    `SUMMARY:${escapeIcsText(`${event.title} - Vivi La Bruna`)}`,
+    `SUMMARY:${escapeIcsText(`${event.title} - Matera da Vivere`)}`,
     `LOCATION:${escapeIcsText(CALENDAR_LOCATION)}`,
     `DESCRIPTION:${escapeIcsText(`${event.dayTitle}\n${event.desc}`)}`,
     'END:VEVENT'
@@ -208,10 +208,10 @@ const createAppleCalendarFile = (route, answers) => {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Vivi La Bruna//Itinerario//IT',
+    'PRODID:-//Matera da Vivere//Itinerario//IT',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:${escapeIcsText(`Vivi La Bruna - ${route.title}`)}`,
+    `X-WR-CALNAME:${escapeIcsText(`Matera da Vivere - ${route.title}`)}`,
     `X-WR-TIMEZONE:${CALENDAR_TIMEZONE}`,
     ...eventBlocks,
     'END:VCALENDAR'
@@ -225,7 +225,7 @@ const downloadAppleCalendarFile = (route, answers) => {
   const link = document.createElement('a');
 
   link.href = url;
-  link.download = `${slugify(route.title)}-vivi-la-bruna.ics`;
+  link.download = `${slugify(route.title)}-matera-da-vivere.ics`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -358,14 +358,60 @@ const ITINERARIES = {
 // e l'altra mappa nera per esaurimento dei contesti WebGL).
 const EMPTY_EXPERIENCES = [];
 
+// Titoli delle attività di "Esplora Attività" (/prova, menu hamburger), in ordine
+// di indice HUD (0-5): l'expId 1-6 dei percorsi corrisponde all'indice expId-1.
+// Servono perché su /attivita esistono attività con nomi quasi uguali ma diverse:
+// il link della pergamena deve aprire SEMPRE la scheda di quelle del menu hamburger.
+const PROVA_ACTIVITY_TITLES = [
+  'Tour dei Sassi al Tramonto',
+  "Volo in Mongolfiera all'Alba",
+  'Laboratorio del Pane IGP',
+  'Trekking Murgia Materana',
+  'E-Bike dalla Cripta',
+  'Cena Romantica in Grotta',
+];
+
+// Ancora di ritorno: ricorda quale attività era stata aperta dalla pergamena,
+// così al rientro la pagina scrolla esattamente sulla sua card della timeline.
+export const PERGAMENA_ANCHOR_KEY = 'pergamenaAnchor';
+
+export function scrollToPergamenaAnchor() {
+  let anchor = null;
+  try {
+    anchor = sessionStorage.getItem(PERGAMENA_ANCHOR_KEY);
+    sessionStorage.removeItem(PERGAMENA_ANCHOR_KEY);
+  } catch {
+    return false;
+  }
+  if (!anchor) return false;
+  const cards = document.querySelectorAll('[data-pergamena-anchor]');
+  for (const el of cards) {
+    if (el.dataset.pergamenaAnchor === anchor) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return true;
+    }
+  }
+  return false;
+}
+
 export default function ItineraryResult({ answers, isActive, selectedExperiences = EMPTY_EXPERIENCES, hideMap = false }) {
   const navigate = useNavigate();
   const [route, setRoute] = useState(ITINERARIES.spiritual);
   const [draw, setDraw] = useState(false);
 
-  const openActivity = (expId) => {
-    if (!expId) return;
-    navigate(`/attivita?activity=${expId}`);
+  // Apre la scheda "Leggi descrizione" dell'attività giusta su /prova (Esplora
+  // Attività del menu hamburger). Lo state fromPergamena dice a /prova dove
+  // riportare l'utente alla chiusura: sulla pergamena da cui è partito.
+  const openActivity = (evt) => {
+    const title = evt.reviewTitle
+      || PROVA_ACTIVITY_TITLES[evt.expId - 1]
+      || String(evt.title || '').replace(/^✦\s*/, '');
+    const idx = PROVA_ACTIVITY_TITLES.indexOf(title);
+    if (idx === -1) return;
+    // Al ritorno si scrolla direttamente sulla card di QUESTA attività
+    try { sessionStorage.setItem(PERGAMENA_ANCHOR_KEY, title); } catch { /* ignora */ }
+    const origin = window.location.pathname === '/prova' ? 'prova' : 'home';
+    navigate(`/prova?activity=${idx}`, { state: { fromPergamena: origin } });
   };
 
   useEffect(() => {
@@ -397,6 +443,7 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
           time: `${hour.toString().padStart(2, '0')}:30`,
           type: 'activity',
           expId: exp.id,
+          reviewTitle: exp.title, // titolo originale → link alle recensioni giuste
           title: `✦ ${exp.title}`, // Stellina per evidenziare quelli scelti da noi!
           desc: `Esperienza Selezionata: ${exp.duration} • Prezzo: ${exp.price}`,
           image: exp.image
@@ -508,20 +555,21 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
                         
                         {evt.type === 'activity' ? (
                           <div
-                            className={`activity-card ${evt.expId ? 'is-linkable' : 'is-static'}`}
-                            onClick={() => openActivity(evt.expId)}
-                            role={evt.expId ? 'button' : undefined}
-                            tabIndex={evt.expId ? 0 : undefined}
+                            className={`activity-card ${(evt.expId || evt.reviewTitle) ? 'is-linkable' : 'is-static'}`}
+                            data-pergamena-anchor={evt.reviewTitle || PROVA_ACTIVITY_TITLES[evt.expId - 1] || String(evt.title || '').replace(/^✦\s*/, '')}
+                            onClick={() => openActivity(evt)}
+                            role={(evt.expId || evt.reviewTitle) ? 'button' : undefined}
+                            tabIndex={(evt.expId || evt.reviewTitle) ? 0 : undefined}
                             onKeyDown={(e) => {
-                              if (evt.expId && (e.key === 'Enter' || e.key === ' ')) {
+                              if ((evt.expId || evt.reviewTitle) && (e.key === 'Enter' || e.key === ' ')) {
                                 e.preventDefault();
-                                openActivity(evt.expId);
+                                openActivity(evt);
                               }
                             }}
                           >
                             <h5 className="timeline-event-title">{evt.title}</h5>
                             <p className="timeline-event-desc">{evt.desc}</p>
-                            {evt.expId && (
+                            {(evt.expId || evt.reviewTitle) && (
                               <div className="explore-cta">Esplora Attività <span>➔</span></div>
                             )}
                           </div>

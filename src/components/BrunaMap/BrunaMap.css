@@ -255,7 +255,9 @@
   flex: 1;
 }
 
-/* Fullscreen Mobile (fallback CSS) */
+/* Fullscreen Mobile (fallback CSS): solo mappa + navbar + "Torna indietro".
+   z-index 150 = sopra tutta la pagina (footer compreso) ma SOTTO la navbar (200),
+   che deve restare visibile. Il padding-top lascia spazio alla navbar fissa. */
 .bruna-map-wrapper.is-fullscreen {
   position: fixed !important;
   top: 0 !important;
@@ -264,13 +266,86 @@
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  height: 100dvh !important; /* viewport reale anche con la barra URL di Safari/Chrome */
   min-height: -webkit-fill-available !important;
   max-width: 100% !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  z-index: 9999 !important;
+  padding-top: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  background: #080604 !important;
+  z-index: 150 !important;
   display: flex;
   flex-direction: column;
+}
+
+/* Tasto di uscita dal fullscreen, sempre a portata di pollice */
+.bruna-map-exit-fs {
+  position: absolute;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  padding: 12px 28px;
+  border: 1.5px solid rgba(232, 201, 109, 0.6);
+  border-radius: 9999px;
+  background: rgba(15, 12, 8, 0.92);
+  color: #E8C96D;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.bruna-map-exit-fs:hover {
+  background: rgba(232, 201, 109, 0.2);
+  color: #fff;
+}
+
+/* ── Pagina /mappa: schermata dedicata con solo la mappa e "Torna indietro".
+   Fixed a livello di route (nessun antenato con transform/z-index che la
+   intrappola) e sopra navbar e footer. ── */
+.bruna-map-page {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: #080604;
+}
+
+.bruna-map-page .bruna-map-container {
+  width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  min-height: -webkit-fill-available !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+}
+
+/* Nella pagina /mappa il "Torna indietro" sta in alto a sinistra */
+.bruna-map-page .bruna-map-exit-fs {
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+  left: 16px;
+  transform: none;
+}
+
+/* Mentre la mappa è a tutto schermo (fallback CSS), la pagina sotto non scrolla */
+body.bruna-map-fs-lock {
+  overflow: hidden !important;
+}
+
+/* In fullscreen la sezione NON deve creare uno stacking context (isolation):
+   altrimenti lo z-index 9999 del wrapper vale solo DENTRO la sezione e la
+   navbar (z-index 200, a livello root) resterebbe disegnata sopra la mappa.
+   Questo era il motivo per cui il fullscreen mobile sembrava "non funzionare". */
+body.bruna-map-fs-lock .bruna-map-section {
+  isolation: auto !important;
+  overflow: visible !important;
 }
 
 .bruna-map-wrapper.is-fullscreen .bruna-map-container {
@@ -644,4 +719,73 @@
     align-items: center;
     justify-content: flex-end;
   }
+}
+
+/* ───── Popup come pannello fisso in basso, dentro la mappa (desktop E mobile) ─────
+   Il popup non segue il marker: si ancora al fondo della mappa, a tutta
+   larghezza e ad altezza fissa per ogni evento/attività. Il transform inline che
+   Mapbox ricalcola ad ogni frame viene neutralizzato con !important. */
+.bruna-map-container .mapboxgl-popup {
+  position: absolute !important;
+  transform: none !important;
+  top: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  z-index: 25;
+  animation: popupPanelFade 0.3s ease;
+}
+
+.bruna-map-container .mapboxgl-popup-tip {
+  display: none !important;
+}
+
+.bruna-map-container .bruna-map-popup .mapboxgl-popup-content {
+  width: 100% !important;
+  max-width: none !important;
+  height: 215px; /* grandezza fissa per tutti gli eventi */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid rgba(232, 201, 109, 0.45);
+  background: rgba(8, 6, 4, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 18px 28px 20px;
+  box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* Contenuto incolonnato al centro per non sgranare su pannello largo */
+.bruna-map-container .bruna-map-popup .mapboxgl-popup-content > * {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bruna-map-container .bruna-map-popup .popup-title {
+  font-size: 1.1rem;
+}
+
+.bruna-map-container .bruna-map-popup .popup-info {
+  font-size: 0.85rem;
+}
+
+/* Su mobile il pannello è più compatto per non coprire tutta la mappa */
+@media (max-width: 768px) {
+  .bruna-map-container .bruna-map-popup .mapboxgl-popup-content {
+    height: 195px;
+    padding: 13px 16px 15px;
+  }
+
+  .bruna-map-container .bruna-map-popup .popup-title {
+    font-size: 1rem;
+  }
+}
+
+@keyframes popupPanelFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

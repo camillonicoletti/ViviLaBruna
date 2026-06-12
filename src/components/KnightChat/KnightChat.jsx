@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './KnightChat.css';
 import BrunaCalendar from '../BrunaCalendar/BrunaCalendar';
-import ItineraryResult from '../ItineraryResult/ItineraryResult';
+import ItineraryResult, { scrollToPergamenaAnchor } from '../ItineraryResult/ItineraryResult';
 import CarroOverlay from '../CarroOverlay/CarroOverlay';
-import BrunaMap from '../BrunaMap/BrunaMap';
+import BrunaMap, { readReturnToMapFlag } from '../BrunaMap/BrunaMap';
 import WeatherAdvisor from '../WeatherAdvisor/WeatherAdvisor';
 
 /* ── Conversation script ── */
@@ -34,6 +34,15 @@ const FLOW = [
 
 const FINALE_MSG = () =>
   `Ho tutto ciò che mi serve. Sto tracciando il vostro percorso segreto tra i Sassi e la Cavalcata.\n\nPreparatevi, Matera vi aspetta.`;
+
+// Su mobile la conversazione è istantanea: niente fase "sta scrivendo…",
+// così il box non si contrae mai e la domanda successiva appare subito.
+const isInstantMobile = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+
+// Pergamena generata salvata per la sessione: navigando altrove (es. recensioni
+// di un'attività) e tornando indietro, si riatterra sull'itinerario, non sul quiz.
+const ITINERARY_STORAGE_KEY = 'knightChatItinerary';
 
 /* ── Countdown Hook ── */
 function useCountdown(targetDate) {
@@ -106,6 +115,10 @@ export default function KnightChat() {
   const videoRef      = useRef(null);
   const startedRef    = useRef(false);
   const itineraryRef  = useRef(null);
+  // Rientro dal "Torna indietro" di /mappa: l'utente deve riatterrare sulla
+  // mappa, quindi niente scroll automatico alla pergamena. Letto qui in render,
+  // prima che BrunaMap (figlio) consumi il flag nel suo effetto di montaggio.
+  const returningToMapRef = useRef(readReturnToMapFlag());
   const handleWeatherChange = useCallback((report) => {
     setWeatherReport(report);
   }, []);
@@ -118,14 +131,54 @@ export default function KnightChat() {
 
   /* Init */
   useEffect(() => {
-    if (!startedRef.current) {
-      startedRef.current = true;
-      startStep(0);
-    }
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    // Itinerario già generato in questa sessione → ripristina la pergamena
+    // e portaci sopra l'utente (caso tipico: back dalle recensioni attività).
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(ITINERARY_STORAGE_KEY) || 'null');
+      if (saved?.showResult && saved.answers) {
+        setAnswers(saved.answers);
+        setStep(FLOW.length);
+        setDone(true);
+        setShowResult(true);
+        // Se si torna da una scheda attività, scrolla dritto sulla SUA card
+        // nella timeline; altrimenti sull'inizio della pergamena.
+        // Se invece si rientra dal fullscreen /mappa, si resta sulla mappa:
+        // lo scroll lo gestisce BrunaMap, qui non si tocca nulla.
+        if (!returningToMapRef.current) {
+          setTimeout(() => {
+            if (!scrollToPergamenaAnchor()) {
+              itineraryRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
+          }, 600);
+        }
+        return;
+      }
+    } catch { /* sessionStorage non disponibile: si riparte dal quiz */ }
+
+    startStep(0);
   }, []);
+
+  // Salva la pergamena generata; "Ricomincia" (showResult=false) la dimentica.
+  useEffect(() => {
+    try {
+      if (showResult) {
+        sessionStorage.setItem(ITINERARY_STORAGE_KEY, JSON.stringify({ answers, showResult: true }));
+      } else {
+        sessionStorage.removeItem(ITINERARY_STORAGE_KEY);
+      }
+    } catch { /* ignora */ }
+  }, [showResult, answers]);
 
   function startStep(idx) {
     if (idx >= FLOW.length) return;
+    // Mobile: la domanda esce subito, il box non si contrae mai
+    if (isInstantMobile()) {
+      setTyping(false);
+      return;
+    }
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
@@ -134,22 +187,23 @@ export default function KnightChat() {
 
   function choose(text, extraAnswers = {}) {
     if (typing) return;
-    
+
     // Play video animazione
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(e => console.log('Video play interrupted:', e));
     }
-    
-    // Salva risposta e vai avanti con un piccolo delay per l'animazione
-    setTimeout(() => {
+
+    const instant = isInstantMobile();
+
+    const advance = () => {
       const current = FLOW[step];
       const newAnswers = { ...answers, [current.id]: text, ...extraAnswers };
       setAnswers(newAnswers);
 
       const next = step + 1;
       setStep(next);
-      
+
       // Reset temporanei
       setGroupSelection(null);
       setDateFrom(null);
@@ -157,6 +211,10 @@ export default function KnightChat() {
 
       if (next < FLOW.length) {
         startStep(next);
+      } else if (instant) {
+        // Mobile: anche il messaggio finale appare senza attese
+        setTyping(false);
+        setDone(true);
       } else {
         setTyping(true);
         setTimeout(() => {
@@ -164,7 +222,14 @@ export default function KnightChat() {
           setDone(true);
         }, 1200);
       }
-    }, 600);
+    };
+
+    // Mobile: avanzamento immediato; desktop: piccolo delay per l'animazione
+    if (instant) {
+      advance();
+    } else {
+      setTimeout(advance, 600);
+    }
   }
 
   const currentMsg = done ? FINALE_MSG() : (!typing && FLOW[step]) ? FLOW[step].msg : '';

@@ -214,8 +214,8 @@ export default function Social() {
   const [photoY, setPhotoY] = useState(0);
   const [photoRotate, setPhotoRotate] = useState(0);
   
-  // Sticker attivi
-  const [activeStickers, setActiveStickers] = useState(['corona']);
+  // Sticker attivi (nessuno preselezionato)
+  const [activeStickers, setActiveStickers] = useState([]);
   const [selectedReviewActivity, setSelectedReviewActivity] = useState(0);
   const [selectedReviewIndex, setSelectedReviewIndex] = useState(0);
 
@@ -227,9 +227,14 @@ export default function Social() {
   const previewCardRef = useRef(null);
   const photoContainerRef = useRef(null);
 
-  // Forza lo scroll in cima alla pagina all'avvio
+  // Forza lo scroll in cima alla pagina all'avvio,
+  // MA non quando si arriva qui per vedere le recensioni (tasto "Vedi Recensioni")
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const params = new URLSearchParams(window.location.search);
+    const wantsReviews = params.get('review') || window.location.hash === '#recensioni-attivita';
+    if (!wantsReviews) {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   useEffect(() => {
@@ -248,12 +253,17 @@ export default function Social() {
     }
 
     if (reviewSlug || shouldScrollToReviews) {
-      window.requestAnimationFrame(() => {
+      const scrollToSection = () => {
         document.getElementById('recensioni-attivita')?.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
-      });
+      };
+      // Primo tentativo subito dopo il paint, secondo a layout assestato
+      // (immagini/sezioni sopra possono spostare la posizione della sezione).
+      window.requestAnimationFrame(scrollToSection);
+      const retry = setTimeout(scrollToSection, 600);
+      return () => clearTimeout(retry);
     }
   }, [location.hash, location.search]);
 
@@ -355,11 +365,11 @@ export default function Social() {
           const isMobileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'storia.png', { type: 'image/png' })] });
 
           if (isMobileShare) {
-            const file = new File([blob], 'cartolina-vivi-la-bruna.png', { type: 'image/png' });
+            const file = new File([blob], 'cartolina-matera-da-vivere.png', { type: 'image/png' });
             navigator.share({
               files: [file],
               title: 'Cartolina della Bruna',
-              text: 'Guarda la cartolina che ho creato con Vivi la Bruna! 🎆',
+              text: 'Guarda la cartolina che ho creato con Matera da Vivere! 🎆',
             })
             .catch((err) => {
               console.log("Condivisione annullata, procedo con il download diretto:", err);
@@ -755,7 +765,7 @@ export default function Social() {
         ctx.fillStyle = '#C9A84C';
         ctx.font = 'italic 36px Lemonde, serif, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText("Vivi La Bruna", canvas.width / 2, frameY + frameH / 2 - 20);
+        ctx.fillText("Matera da Vivere", canvas.width / 2, frameY + frameH / 2 - 20);
         ctx.font = '24px Century Gothic, sans-serif';
         ctx.fillStyle = 'rgba(240, 230, 204, 0.6)';
         ctx.fillText("Personalizza questa storia con la tua foto", canvas.width / 2, frameY + frameH / 2 + 30);
@@ -934,30 +944,19 @@ export default function Social() {
 
       ctx.restore();
 
-      // ── Step 7: Branding Piè di Pagina (Vivi La Bruna Logo) ──
-      try {
-        const logoPng = await loadImage('/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png');
-        ctx.save();
-        ctx.globalAlpha = 0.85;
-        // Posizionato in basso al centro
-        const logoW = 160;
-        const logoH = 64;
-        ctx.drawImage(logoPng, canvas.width / 2 - logoW / 2, canvas.height - 180, logoW, logoH);
-        
-        // Hashtag / Testo footer
-        ctx.fillStyle = 'rgba(240, 230, 204, 0.4)';
-        ctx.font = '500 20px Century Gothic, sans-serif';
-        ctx.letterSpacing = '4px';
-        ctx.textAlign = 'center';
-        ctx.fillText("#VIVILABRUNA", canvas.width / 2, canvas.height - 90);
-        ctx.restore();
-      } catch {
-        // Fallback testuale se il logo non carica
-        ctx.fillStyle = '#C9A84C';
-        ctx.font = '800 22px Century Gothic, sans-serif';
-        ctx.letterSpacing = '5px';
-        ctx.fillText("VIVI LA BRUNA", canvas.width / 2, canvas.height - 130);
-      }
+      // ── Step 7: Branding Piè di Pagina (Matera da Vivere) ──
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = '#C9A84C';
+      ctx.font = '800 24px Century Gothic, sans-serif';
+      ctx.letterSpacing = '5px';
+      ctx.textAlign = 'center';
+      ctx.fillText("MATERA DA VIVERE", canvas.width / 2, canvas.height - 130);
+      ctx.fillStyle = 'rgba(240, 230, 204, 0.4)';
+      ctx.font = '500 20px Century Gothic, sans-serif';
+      ctx.letterSpacing = '4px';
+      ctx.fillText("#MATERADAVIVERE", canvas.width / 2, canvas.height - 90);
+      ctx.restore();
 
       // Converti Canvas in Blob e apri download/condivisione
       canvas.toBlob((blob) => {
@@ -973,11 +972,11 @@ export default function Social() {
         const isMobileShare = navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'storia.png', { type: 'image/png' })] });
 
         if (isMobileShare) {
-          const file = new File([blob], 'cartolina-vivi-la-bruna.png', { type: 'image/png' });
+          const file = new File([blob], 'cartolina-matera-da-vivere.png', { type: 'image/png' });
           navigator.share({
             files: [file],
             title: 'Cartolina della Bruna',
-            text: 'Guarda la cartolina che ho creato con Vivi la Bruna! 🎆',
+            text: 'Guarda la cartolina che ho creato con Matera da Vivere! 🎆',
           })
           .catch((err) => {
             console.log("Condivisione annullata, procedo con il download diretto:", err);
@@ -1001,7 +1000,7 @@ export default function Social() {
 
   const triggerDownload = (url) => {
     const link = document.createElement('a');
-    link.download = `cartolina-vivi-la-bruna-${Date.now()}.png`;
+    link.download = `cartolina-matera-da-vivere-${Date.now()}.png`;
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -1205,12 +1204,8 @@ export default function Social() {
                     <div className="cartolina-footer">
                       <div className="cartolina-ornament-line" />
                       <div className="cartolina-footer-inner">
-                        <img
-                          src="/Screenshot_2026-03-27_alle_02.06.14-removebg-preview.png"
-                          alt="Logo"
-                          className="preview-logo-img"
-                        />
-                        <span className="preview-hashtag">#VIVILABRUNA</span>
+                        <span className="preview-brand-text">Matera da Vivere</span>
+                        <span className="preview-hashtag">#MATERADAVIVERE</span>
                       </div>
                     </div>
                   </>

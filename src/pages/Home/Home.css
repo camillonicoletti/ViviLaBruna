@@ -1,0 +1,41 @@
+/* ───── DIVISORE ORNAMENTALE TRA HERO E CAVALIERE ───── */
+.home-ornament-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #000;
+  padding: 10px 24px 0;
+  margin-bottom: -60px; /* compensa il padding-top della sezione chat */
+  position: relative;
+  z-index: 6;
+}
+
+.home-ornament-line {
+  width: min(26vw, 240px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 168, 76, 0.55) 100%);
+}
+
+.home-ornament-line-flip {
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.55) 0%, transparent 100%);
+}
+
+.home-ornament-gem {
+  width: 10px;
+  height: 10px;
+  color: var(--gold);
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 6px rgba(232, 201, 109, 0.7));
+}
+
+@media (max-width: 768px) {
+  .home-ornament-divider {
+    gap: 10px;
+    margin-bottom: -70px;
+  }
+
+  .home-ornament-line {
+    width: 30vw;
+  }
+}

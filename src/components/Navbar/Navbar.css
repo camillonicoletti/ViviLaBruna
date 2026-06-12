@@ -48,6 +48,7 @@
   align-items: center;
   height: 38px; /* Riportato a una misura intermedia più elegante */
   flex-shrink: 0;
+  text-decoration: none;
 }
 
 .nav-logo-png {
@@ -55,7 +56,7 @@
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1);
-  transform: scale(1.15); /* Ridotto lo scale per evitare eccessi */
+  transform: scale(1.15);
   transform-origin: left center;
 }
 
@@ -208,6 +209,13 @@
   background: rgba(201, 168, 76, 0.1);
   color: var(--gold);
   padding-left: 18px; /* piccolo slittamento elegante */
+}
+
+/* Voce speciale "2 Luglio": il giorno della Festa brilla nel menu */
+.traditional-nav-links li a.nav-link-festa {
+  color: var(--gold-light);
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.12), transparent);
+  border-left: 2px solid var(--gold);
 }
 
 

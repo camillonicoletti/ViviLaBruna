@@ -30,3 +30,6 @@ public/italy_matera_sassi_houses.glb
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code agent worktrees (never commit)
+.claude/worktrees/

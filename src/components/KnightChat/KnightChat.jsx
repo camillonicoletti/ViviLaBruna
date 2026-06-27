@@ -3,7 +3,7 @@ import './KnightChat.css';
 import BrunaCalendar from '../BrunaCalendar/BrunaCalendar';
 import ItineraryResult, { scrollToPergamenaAnchor } from '../ItineraryResult/ItineraryResult';
 import CarroOverlay from '../CarroOverlay/CarroOverlay';
-import BrunaMap, { readReturnToMapFlag } from '../BrunaMap/BrunaMap';
+import { readReturnToMapFlag } from '../BrunaMap/BrunaMap';
 import WeatherAdvisor from '../WeatherAdvisor/WeatherAdvisor';
 
 /* ── Conversation script ── */
@@ -11,29 +11,29 @@ const FLOW = [
   {
     id: 'people',
     type: 'people_selection',
-    msg: 'Benvenuto, viandante. Io sono il Cavaliere della Bruna.\nSarò la tua guida attraverso Matera e i misteri della nostra festa.\n\nIn quanti siete in questo viaggio?',
+    msg: 'Ciao! Ti aiuto a organizzare la tua visita a Matera in pochi passi.\n\nIn quante persone siete?',
     chips: ['Solo', 'In coppia', 'Gruppo di amici', 'Famiglia'],
   },
   {
     id: 'period',
     type: 'calendar',
-    msg: 'In quali giorni il vostro cammino toccherà la Murgia?',
+    msg: 'In quali giorni sarai a Matera?',
     chips: [],
   },
   {
     id: 'budget',
-    msg: 'Matera ha strade per ogni viandante, dai vicoli nascosti ai terrazzi più lussuosi.\n\nCome vorreste vivere questo soggiorno?',
+    msg: 'Qual è il tuo budget per la vacanza?',
     chips: ['Risparmio\n(0-80€)', 'Comodo\n(80–150€)', 'Lusso\n(150–250€)', 'Magnifico\n(250€+)'],
   },
   {
     id: 'vibe',
-    msg: 'Ultima domanda.\n\nCosa cerca la vostra anima tra le pietre antiche?',
+    msg: 'Ultima domanda: cosa ti interessa di più?',
     chips: ['Storia e spiritualità', 'Sapori e tradizioni', 'Arte e fotografia', 'Avventura'],
   },
 ];
 
 const FINALE_MSG = () =>
-  `Ho tutto ciò che mi serve. Sto tracciando il vostro percorso segreto tra i Sassi e la Cavalcata.\n\nPreparatevi, Matera vi aspetta.`;
+  `Perfetto, ho tutte le informazioni!\n\nSto preparando il tuo itinerario su misura per Matera. Un attimo e ci siamo.`;
 
 // Su mobile la conversazione è istantanea: niente fase "sta scrivendo…",
 // così il box non si contrae mai e la domanda successiva appare subito.
@@ -399,9 +399,6 @@ export default function KnightChat() {
         </div>
       )}
 
-      {/* MAPPA MAPBOX: Renderizzata una sola volta, si posiziona in basso */}
-      <BrunaMap />
-      
     </div>
   );
 }

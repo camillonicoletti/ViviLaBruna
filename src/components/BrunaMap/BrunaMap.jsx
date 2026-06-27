@@ -98,11 +98,24 @@ const activitiesData = [
 // all'itinerario; lo consuma BrunaMap nel suo effetto di scroll.
 const RETURN_TO_MAP_KEY = 'brunaMapReturnToMap';
 
+// Immagini dei segnaposti dorati usate SOLO nella pagina /geolocalizzati al posto
+// del pin rosso. Vengono assegnate in modo casuale ai marker (stessa logica, stessa
+// posizione/ancoraggio: cambia solo la grafica del pin).
+const geoPinImages = [
+  '/segnaposti/A086C988-29FC-40F1-90C6-AC9FED8335AE.png',
+  '/segnaposti/AD982487-D4C5-4838-8DB6-4B37BA3F6883.png',
+  '/segnaposti/B62D8302-CCD3-4525-AF4F-C04700851792.png',
+  '/segnaposti/B708C0C1-DE01-4E58-BBC1-39FA3BDB5579.png',
+  '/segnaposti/EEE90F3F-399E-417F-9165-A1017C6BFCE2.png',
+  '/segnaposti/F59B54C3-4CF0-4497-9748-7191F0CC422A.png',
+];
+const randomGeoPin = () => geoPinImages[Math.floor(Math.random() * geoPinImages.length)];
+
 export function readReturnToMapFlag() {
   try { return sessionStorage.getItem(RETURN_TO_MAP_KEY) === '1'; } catch { return false; }
 }
 
-export default function BrunaMap({ fullscreenPage = false }) {
+export default function BrunaMap({ fullscreenPage = false, geoPage = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const navigateRef = useRef(navigate);
@@ -117,6 +130,69 @@ export default function BrunaMap({ fullscreenPage = false }) {
   const isManualGeolocateRef = useRef(false); // Flag anti-rimbalzo GPS
   const [is3D, setIs3D] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Pagina /geolocalizzati: elemento selezionato mostrato nella barra in basso
+  const [selected, setSelected] = useState(null);
+  // Pagina /geolocalizzati: box introduttivo all'ingresso
+  const [showGeoIntro, setShowGeoIntro] = useState(true);
+  // Barra in basso: stato "Indicazioni aperte" (mostra Apple/Google Maps al posto di
+  // Indicazioni + Scopri di più) e ref per la chiusura con trascinamento della maniglia.
+  const [directionsOpen, setDirectionsOpen] = useState(false);
+  const geoSheetRef = useRef(null);
+  const sheetDragRef = useRef({ startY: 0, dy: 0, dragging: false });
+
+  // Ogni volta che cambia l'elemento selezionato, ripartiamo dai pulsanti standard.
+  useEffect(() => { setDirectionsOpen(false); }, [selected]);
+
+  // Rientro dalla scheda "Scopri di più": riapriamo la barra sull'attività consultata.
+  useEffect(() => {
+    if (!geoPage) return;
+    const idx = location.state?.reselectActivity;
+    if (idx === undefined || idx === null) return;
+    setShowGeoIntro(false); // si rientra sulla mappa, non rimostrare il box introduttivo
+    const act = activitiesData.find((a) => a.index === idx);
+    if (act) {
+      setSelected({
+        kind: 'activity',
+        title: act.title,
+        category: act.category,
+        meta: `⏱ ${act.duration}  ·  ★ ${act.rating}  ·  ${act.price}`,
+        place: act.place,
+        index: act.index,
+        coordinates: act.coordinates,
+      });
+    }
+    // Ripuliamo lo state così un refresh non riapre la barra da solo.
+    navigate(location.pathname, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geoPage]);
+
+  // Chiusura della barra trascinando la maniglia verso il basso (gesto mobile).
+  const onSheetDragStart = (e) => {
+    sheetDragRef.current = { startY: e.clientY, dy: 0, dragging: true };
+    if (geoSheetRef.current) geoSheetRef.current.style.transition = 'none';
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const onSheetDragMove = (e) => {
+    const drag = sheetDragRef.current;
+    if (!drag.dragging) return;
+    const dy = Math.max(0, e.clientY - drag.startY);
+    drag.dy = dy;
+    if (geoSheetRef.current) geoSheetRef.current.style.transform = `translateY(${dy}px)`;
+  };
+  const onSheetDragEnd = () => {
+    const drag = sheetDragRef.current;
+    if (!drag.dragging) return;
+    drag.dragging = false;
+    if (drag.dy > 80) {
+      setSelected(null); // oltre la soglia: chiudi la barra
+      return;
+    }
+    // Sotto la soglia: torna su con un breve scatto morbido.
+    if (geoSheetRef.current) {
+      geoSheetRef.current.style.transition = 'transform 0.25s ease';
+      geoSheetRef.current.style.transform = 'translateY(0)';
+    }
+  };
 
   // Fallback CSS (mobile): il wrapper diventa fixed a tutto schermo.
   // Blocca anche lo scroll del body, e forza la mappa a riadattarsi
@@ -264,12 +340,13 @@ export default function BrunaMap({ fullscreenPage = false }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pagina /mappa: blocca lo scroll della pagina sotto finché la mappa è aperta.
+  // Pagine a tutto schermo (/mappa e /geolocalizzati): blocca lo scroll
+  // della pagina sotto finché la mappa è aperta.
   useEffect(() => {
-    if (!fullscreenPage) return undefined;
+    if (!fullscreenPage && !geoPage) return undefined;
     document.body.classList.add('bruna-map-fs-lock');
     return () => document.body.classList.remove('bruna-map-fs-lock');
-  }, [fullscreenPage]);
+  }, [fullscreenPage, geoPage]);
 
   // Esce dalla schermata mappa: torna alla pagina di provenienza
   // (o alla home se /mappa è stata aperta direttamente da un link).
@@ -330,8 +407,7 @@ export default function BrunaMap({ fullscreenPage = false }) {
         const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         if (distance > 11) {
-          // Se sei troppo lontano, IL BOTTONE SI FERMA QUI e manda un avviso (non vola)
-          alert("📍 Sei troppo lontano da Matera!\n\nQuesta funzione 3D si attiva solo se ti trovi nel raggio di 11km dagli eventi della Festa della Bruna.");
+          // Se sei troppo lontano il bottone si ferma qui in modo silenzioso (non vola, nessun avviso).
           return;
         }
 
@@ -389,12 +465,15 @@ export default function BrunaMap({ fullscreenPage = false }) {
       }
     };
 
+    // Su /geolocalizzati i marker non aprono il popup di Mapbox ma la barra in basso.
+    const onSelect = geoPage ? setSelected : null;
+
     const renderEventMarkers = () => {
       clearEventMarkers();
       addTerrain();
       eventMarkers = [
-        ...createEventMarkers(map),
-        ...createActivityMarkers(map, navigateRef)
+        ...createEventMarkers(map, onSelect),
+        ...createActivityMarkers(map, navigateRef, onSelect)
       ];
     };
 
@@ -444,6 +523,9 @@ export default function BrunaMap({ fullscreenPage = false }) {
       if (shouldUseFallbackStyle(event)) switchToFallbackStyle();
     });
     map.on('style.load', renderEventMarkers);
+
+    // Toccando la mappa (fuori dai marker) si chiude la barra in basso.
+    if (geoPage) map.on('click', () => setSelected(null));
 
     // Ascoltiamo i movimenti "manuali" o "gesture" dell'utente sulla mappa (trackpad o due dita su mobile)
     map.on('pitch', () => {
@@ -495,7 +577,7 @@ export default function BrunaMap({ fullscreenPage = false }) {
           });
         }, 100);
       } else {
-        // Sei a Matera: Annulliamo il comportamento predefinito del browser che
+        // Sei a Matera: annulliamo il comportamento predefinito del browser che
         // causa blocchi a metà strada e gestiamo noi il volo con i parametri perfetti.
         map.flyTo({
           center: [userLon, userLat],
@@ -525,7 +607,156 @@ export default function BrunaMap({ fullscreenPage = false }) {
       mapRef.current = null;
       geolocateControlRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pagina /geolocalizzati: mappa a tutto schermo (sotto la navbar, senza footer)
+  // con la stessa logica della home: punti rossi, 3D, "Geolocalizzati in 3D".
+  if (geoPage) {
+    return (
+      <main className="bruna-geo-page" aria-label="Mappa geolocalizzata a tutto schermo">
+        <div ref={mapContainerRef} className="bruna-map-container" />
+
+        {/* Tasto Home in alto */}
+        <button className="bruna-geo-home-btn" onClick={() => navigate('/')} aria-label="Torna alla Home">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3 3 11h2v9h5v-6h4v6h5v-9h2L12 3z" />
+          </svg>
+        </button>
+
+        {/* Toggle 2D/3D in alto a destra */}
+        <button className={`toggle-3d-btn bruna-geo-3d-btn ${is3D ? 'active' : ''}`} onClick={toggle3D}>
+          {is3D ? 'Vista 2D' : 'Vista 3D'}
+        </button>
+
+        {/* Box introduttivo in sovraimpressione all'ingresso nella pagina */}
+        {showGeoIntro && (
+          <div className="bruna-geo-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="geo-intro-title">
+            <div className="bruna-geo-intro-card">
+              <button
+                className="bruna-geo-intro-close"
+                onClick={() => setShowGeoIntro(false)}
+                aria-label="Chiudi"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 6 L18 18 M18 6 L6 18" />
+                </svg>
+              </button>
+              <img className="bruna-geo-intro-icon" src="/logo geolocalizzati.png" alt="" aria-hidden="true" />
+              <h2 className="bruna-geo-intro-title" id="geo-intro-title">Cosa accade attorno a te</h2>
+              <p className="bruna-geo-intro-text">
+                Geolocalizzati per vedere in <strong>tempo reale</strong> gli eventi
+                che accadono a Matera attorno a te.
+              </p>
+              <button
+                className="magic-geolocate-btn bruna-geo-intro-cta"
+                onClick={() => { setShowGeoIntro(false); triggerGeolocate(); }}
+              >
+                Geolocalizzati
+                <span className="btn-glow"></span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* La geolocalizzazione si avvia solo dal box introduttivo: nessun CTA
+            fisso sulla mappa (se l'utente chiude il box o rifiuta, resta la mappa). */}
+
+        {/* Barra in basso con i dettagli dell'evento/attività selezionato */}
+        {selected && (() => {
+          const [lng, lat] = selected.coordinates;
+          // Apriamo direttamente le APP native (non i siti web):
+          // - Apple Maps: schema maps:// (sempre presente su iPhone)
+          // - Google Maps: schema comgooglemaps:// con fallback al web se l'app non c'è.
+          const openAppleMaps = () => { window.location.href = `maps://?daddr=${lat},${lng}`; };
+          const openGoogleMaps = () => {
+            const appUrl = `comgooglemaps://?daddr=${lat},${lng}&directionsmode=walking`;
+            const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            const start = Date.now();
+            window.location.href = appUrl;
+            // Se l'app non si apre (siamo ancora qui dopo ~1.2s), usiamo il web.
+            setTimeout(() => {
+              if (!document.hidden && Date.now() - start < 1600) window.location.href = webUrl;
+            }, 1200);
+          };
+          // Coppia di pulsanti Google Maps / Apple Maps (per gli eventi e per
+          // l'attività dopo aver premuto "Indicazioni").
+          const mapsButtons = (
+            <>
+              <button type="button" className="geo-sheet-btn google" onClick={openGoogleMaps}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" /></svg>
+                Google Maps
+              </button>
+              <button type="button" className="geo-sheet-btn apple" onClick={openAppleMaps}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16.365 1.43c0 1.14-.42 2.2-1.12 2.98-.78.87-2.05 1.54-3.1 1.46-.13-1.1.45-2.27 1.1-3 .73-.82 2.02-1.43 3.12-1.44zM20.5 17.2c-.55 1.27-.82 1.84-1.53 2.97-.99 1.57-2.39 3.53-4.12 3.54-1.54.01-1.94-1.01-4.03-1-2.09.01-2.53 1.02-4.07 1.01-1.73-.02-3.05-1.78-4.04-3.35C1.5 16.45 1.18 11.13 3.92 8.5c.97-.95 2.24-1.5 3.58-1.5 1.36 0 2.22.74 3.34.74 1.09 0 1.75-.74 3.33-.74 1.19 0 2.45.65 3.35 1.77-2.94 1.61-2.46 5.81.98 7.13z" /></svg>
+                Apple Maps
+              </button>
+            </>
+          );
+          const backVisible = selected.kind === 'activity' && directionsOpen;
+          return (
+          <div className={`geo-sheet${backVisible ? ' has-back' : ''}`} role="dialog" aria-label={selected.title} ref={geoSheetRef}>
+            <span
+              className="geo-sheet-handle"
+              onPointerDown={onSheetDragStart}
+              onPointerMove={onSheetDragMove}
+              onPointerUp={onSheetDragEnd}
+              onPointerCancel={onSheetDragEnd}
+            />
+            {/* Freccia per tornare ai pulsanti Indicazioni / Scopri di più (solo attività) */}
+            {backVisible && (
+              <button className="geo-sheet-back" onClick={() => setDirectionsOpen(false)} aria-label="Indietro">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 5 L8 12 L15 19" />
+                </svg>
+              </button>
+            )}
+            <button className="geo-sheet-close" onClick={() => setSelected(null)} aria-label="Chiudi">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 6 L18 18 M18 6 L6 18" />
+              </svg>
+            </button>
+
+            <div className="geo-sheet-main">
+              <span className={`geo-sheet-icon ${selected.kind}`} aria-hidden="true">
+                {selected.kind === 'activity' ? '✦' : '📍'}
+              </span>
+              <div className="geo-sheet-info">
+                <h3 className="geo-sheet-title">{selected.title}</h3>
+                {selected.category && <span className="geo-sheet-cat">{selected.category}</span>}
+                {selected.meta && <p className="geo-sheet-meta">{selected.meta}</p>}
+                {selected.place && <p className="geo-sheet-place">📍 {selected.place}</p>}
+              </div>
+            </div>
+
+            <div className="geo-sheet-actions">
+              {selected.kind !== 'activity' ? (
+                // Eventi (Lo Strazzo, 3 Giri): direttamente Apple Maps + Google Maps.
+                mapsButtons
+              ) : directionsOpen ? (
+                // Attività dopo "Indicazioni": Apple Maps + Google Maps al loro posto.
+                mapsButtons
+              ) : (
+                <>
+                  <button className="geo-sheet-btn ghost" onClick={() => setDirectionsOpen(true)}>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2 4.5 20.3l.8.8L12 18l6.7 3.1.8-.8z" /></svg>
+                    Indicazioni
+                  </button>
+                  <button
+                    className="geo-sheet-btn primary"
+                    onClick={() => navigate(`/prova?activity=${selected.index}`, { state: { fromGeo: true } })}
+                  >
+                    Scopri di più →
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          );
+        })()}
+      </main>
+    );
+  }
 
   // Schermata dedicata (/mappa): solo la mappa a tutto schermo e il tasto per tornare indietro.
   if (fullscreenPage) {
@@ -583,7 +814,7 @@ export default function BrunaMap({ fullscreenPage = false }) {
   );
 }
 
-function createEventMarkers(map) {
+function createEventMarkers(map, onSelect) {
   return markersData.map((event) => {
     const el = document.createElement('div');
     el.className = 'bruna-map-marker';
@@ -594,6 +825,32 @@ function createEventMarkers(map) {
     const pin = document.createElement('div');
     pin.className = 'bruna-map-marker-pin';
     el.appendChild(pin);
+
+    // Pagina /geolocalizzati: niente popup, apre la barra in basso.
+    if (onSelect) {
+      // Stesso ancoraggio del pin rosso: sostituiamo l'immagine con un segnaposto
+      // dorato casuale e ingrandiamo il marker (anchor bottom invariato).
+      const geoPinUrl = randomGeoPin();
+      el.classList.add('geo-photo-marker');
+      // Questo segnaposto ha più margine trasparente → reso un po' più grande per pareggiarlo agli altri.
+      if (geoPinUrl.includes('AD982487')) el.classList.add('geo-photo-marker-lg');
+      pin.classList.add('geo-photo-pin');
+      pin.style.backgroundImage = `url("${geoPinUrl}")`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onSelect({
+          kind: 'event',
+          title: event.title,
+          category: event.type,
+          meta: event.time,
+          place: event.place,
+          coordinates: event.coordinates,
+        });
+      });
+      return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat(event.coordinates)
+        .addTo(map);
+    }
 
     const [lng, lat] = event.coordinates;
     const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
@@ -634,7 +891,7 @@ function createEventMarkers(map) {
   });
 }
 
-function createActivityMarkers(map, navigateRef) {
+function createActivityMarkers(map, navigateRef, onSelect) {
   return activitiesData.map((activity) => {
     const el = document.createElement('div');
     el.className = 'bruna-map-marker';
@@ -642,6 +899,33 @@ function createActivityMarkers(map, navigateRef) {
     const pin = document.createElement('div');
     pin.className = 'bruna-map-marker-pin';
     el.appendChild(pin);
+
+    // Pagina /geolocalizzati: niente popup, apre la barra in basso.
+    if (onSelect) {
+      // Stesso ancoraggio del pin rosso: sostituiamo l'immagine con un segnaposto
+      // dorato casuale e ingrandiamo il marker (anchor bottom invariato).
+      const geoPinUrl = randomGeoPin();
+      el.classList.add('geo-photo-marker');
+      // Questo segnaposto ha più margine trasparente → reso un po' più grande per pareggiarlo agli altri.
+      if (geoPinUrl.includes('AD982487')) el.classList.add('geo-photo-marker-lg');
+      pin.classList.add('geo-photo-pin');
+      pin.style.backgroundImage = `url("${geoPinUrl}")`;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onSelect({
+          kind: 'activity',
+          title: activity.title,
+          category: activity.category,
+          meta: `⏱ ${activity.duration}  ·  ★ ${activity.rating}  ·  ${activity.price}`,
+          place: activity.place,
+          index: activity.index,
+          coordinates: activity.coordinates,
+        });
+      });
+      return new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat(activity.coordinates)
+        .addTo(map);
+    }
 
     const popupHTML = `
        <div class="popup-header">

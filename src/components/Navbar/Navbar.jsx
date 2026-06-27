@@ -174,6 +174,7 @@ export default function Navbar() {
               <li><a href="/2-luglio" className="nav-link-festa" onClick={(e) => handleLinkClick(e, '/2-luglio')}>2 Luglio ✦</a></li>
               <li><a href="/la-storia" onClick={(e) => handleLinkClick(e, '/la-storia')}>La Storia</a></li>
               <li><a href="/prova" onClick={(e) => handleLinkClick(e, '/prova')}>Esplora Attività</a></li>
+              <li><a href="/geolocalizzati" onClick={(e) => handleLinkClick(e, '/geolocalizzati')}>Eventi Live</a></li>
               <li><a href="/viabilita" onClick={(e) => handleLinkClick(e, '/viabilita')}>Viabilità</a></li>
               <li><a href="/social" onClick={(e) => handleLinkClick(e, '/social')}>Social</a></li>
             </ul>

@@ -1,10 +1,10 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './index.css';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import BrunaMap from './components/BrunaMap/BrunaMap';
-import Walkthrough from './components/Walkthrough/Walkthrough';
 import Home from './pages/Home/Home';
+import Geolocalizzati from './pages/Geolocalizzati/Geolocalizzati';
 import DueLuglio from './pages/DueLuglio/DueLuglio';
 import Activities from './pages/Activities/Activities';
 import Prova from './pages/Prova/Prova';
@@ -13,10 +13,13 @@ import Social from './pages/Social/Social';
 import Viability, { ParkingMapPage } from './pages/Viability/Viability';
 
 export default function App() {
+  const location = useLocation();
+  // La pagina GEOLOCALIZZATI è a tutto schermo: niente footer.
+  const hideFooter = location.pathname === '/geolocalizzati';
+
   return (
     <>
       <Navbar />
-      <Walkthrough />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/2-luglio" element={<DueLuglio />} />
@@ -27,9 +30,10 @@ export default function App() {
         <Route path="/viabilita" element={<Viability />} />
         <Route path="/viabilita/parcheggi" element={<ParkingMapPage />} />
         <Route path="/mappa" element={<BrunaMap fullscreenPage />} />
+        <Route path="/geolocalizzati" element={<Geolocalizzati />} />
         <Route path="/social" element={<Social />} />
       </Routes>
-      <Footer />
+      {!hideFooter && <Footer />}
     </>
   );
 }

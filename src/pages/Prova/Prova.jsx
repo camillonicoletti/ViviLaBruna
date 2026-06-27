@@ -59,11 +59,21 @@ export default function Prova() {
   // null = dall'HUD (si resta qui) · 'map' = mappa della home · 'home' = pergamena
   // della home · 'prova' = pergamena della sidebar "Il mio programma".
   const returnTargetRef = useRef(null);
+  // Indice dell'attività da riselezionare tornando sulla mappa /geolocalizzati.
+  const geoReturnIndexRef = useRef(null);
 
   const closeModal = () => {
     const target = returnTargetRef.current;
     returnTargetRef.current = null;
 
+    if (target === 'geo') {
+      // Si arrivava dalla mappa /geolocalizzati: torniamo lì riaprendo la barra
+      // sull'evento/attività appena consultato (non in home page).
+      const idx = geoReturnIndexRef.current;
+      geoReturnIndexRef.current = null;
+      navigate('/geolocalizzati', { state: { reselectActivity: idx } });
+      return;
+    }
     if (target === 'map') {
       navigate('/', { state: { scrollToMap: true } });
       return;
@@ -550,7 +560,13 @@ export default function Prova() {
 
     const idx = Number(param);
     if (Number.isInteger(idx) && idx >= 0 && idx < ITEMS.length) {
-      returnTargetRef.current = location.state?.fromPergamena || 'map';
+      if (location.state?.fromGeo) {
+        // Arrivo dalla mappa /geolocalizzati: alla chiusura ci si torna riaprendo la barra.
+        returnTargetRef.current = 'geo';
+        geoReturnIndexRef.current = idx;
+      } else {
+        returnTargetRef.current = location.state?.fromPergamena || 'map';
+      }
       // La scheda deve stare sopra a tutto: se la sidebar del programma era
       // aperta (o ripristinata), va chiusa; alla chiusura della scheda si riapre.
       setProgramOpen(false);

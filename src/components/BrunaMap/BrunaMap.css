@@ -334,6 +334,433 @@
   transform: none;
 }
 
+/* ── Pagina /geolocalizzati: mappa a tutto schermo SOTTO la navbar (che resta
+   visibile), senza footer. La stessa logica della home, in fullscreen. ── */
+.bruna-geo-page {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* sotto la navbar (z-index 200) così resta sopra la mappa */
+  background: #080604;
+  overflow: hidden;
+}
+
+.bruna-geo-page .bruna-map-container {
+  width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  min-height: -webkit-fill-available !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+}
+
+/* Tasto Home in alto a sinistra */
+.bruna-geo-home-btn {
+  position: absolute;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  left: 18px;
+  z-index: 150; /* sotto la navbar/menu (200), sopra la mappa */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid rgba(232, 201, 109, 0.6);
+  border-radius: 50%;
+  background: rgba(15, 12, 8, 0.92);
+  color: #E8C96D;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.bruna-geo-home-btn:hover {
+  background: rgba(232, 201, 109, 0.2);
+  color: #fff;
+}
+
+.bruna-geo-home-btn svg {
+  display: block;
+}
+
+/* Toggle 2D/3D in alto a destra */
+.bruna-geo-3d-btn {
+  position: absolute;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  right: 18px;
+  z-index: 150; /* sotto la navbar/menu (200), sopra la mappa */
+  padding: 10px 18px;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* CTA geolocalizzazione in basso al centro */
+.bruna-geo-cta {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  z-index: 210;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(92%, 560px);
+  text-align: center;
+  pointer-events: none; /* lascia i clic alla mappa tranne sui figli interattivi */
+}
+
+.bruna-geo-cta .magic-geolocate-btn {
+  pointer-events: auto;
+  margin-top: 16px;
+}
+
+.bruna-geo-title {
+  pointer-events: none;
+}
+
+/* ── Box introduttivo in sovraimpressione (all'ingresso nella pagina) ── */
+.bruna-geo-intro-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(5, 4, 3, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: geoIntroFade 0.3s ease;
+}
+
+@keyframes geoIntroFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.bruna-geo-intro-card {
+  position: relative;
+  width: min(340px, 100%);
+  box-sizing: border-box;
+  padding: 22px 20px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(12, 10, 8, 0.97) 0%, rgba(5, 4, 3, 0.98) 100%);
+  border: 1px solid rgba(232, 201, 109, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  animation: geoIntroPop 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes geoIntroPop {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.bruna-geo-intro-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.bruna-geo-intro-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+.bruna-geo-intro-icon {
+  display: block;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+
+.bruna-geo-intro-title {
+  margin: 0 0 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bruna-geo-intro-text {
+  margin: 0 0 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.8);
+}
+.bruna-geo-intro-text strong { color: #E8C96D; }
+
+.bruna-geo-intro-cta {
+  width: 100%;
+}
+
+/* Desktop: tasto un po' più piccolo e non a tutta larghezza. */
+@media (min-width: 769px) {
+  .bruna-geo-intro-cta {
+    width: auto;
+    margin-top: 6px;
+    padding: 12px 34px;
+    font-size: 0.98rem;
+  }
+}
+
+/* ── Barra in basso (bottom sheet) con i dettagli dell'evento selezionato ── */
+.geo-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+  box-sizing: border-box;
+  padding: 16px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(12, 10, 8, 0.97) 0%, rgba(5, 4, 3, 0.98) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(232, 201, 109, 0.22);
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.55);
+  color: #fff;
+  animation: geoSheetUp 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes geoSheetUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.geo-sheet-handle {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 26px;            /* area di presa ampia per il trascinamento */
+  margin: -6px 0 8px;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;      /* il drag non fa scrollare la pagina */
+  -webkit-user-select: none;
+  user-select: none;
+}
+.geo-sheet-handle::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.28);
+  transition: background 0.2s ease;
+}
+.geo-sheet-handle:active { cursor: grabbing; }
+.geo-sheet-handle:active::before { background: rgba(255, 255, 255, 0.5); }
+
+.geo-sheet-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.geo-sheet-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Freccia "indietro": stessa riga della X, lato sinistro. Riporta ai pulsanti
+   Indicazioni / Scopri di più. */
+.geo-sheet-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.geo-sheet-back:hover { background: rgba(255, 255, 255, 0.2); }
+
+.geo-sheet-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 30px;
+}
+
+.geo-sheet-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(232, 201, 109, 0.16);
+  border: 1px solid rgba(232, 201, 109, 0.4);
+}
+.geo-sheet-icon.event {
+  background: rgba(214, 64, 64, 0.18);
+  border-color: rgba(214, 64, 64, 0.5);
+}
+
+.geo-sheet-info { min-width: 0; }
+
+.geo-sheet-title {
+  margin: 0 0 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.geo-sheet-cat {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #E8C96D;
+}
+
+.geo-sheet-meta {
+  margin: 6px 0 2px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.86rem;
+  color: #E8C96D;
+}
+
+.geo-sheet-place {
+  margin: 2px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.geo-sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.geo-sheet-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.geo-sheet-btn:active { transform: scale(0.98); }
+
+.geo-sheet-btn.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.geo-sheet-btn.ghost:hover { background: rgba(255, 255, 255, 0.16); }
+
+.geo-sheet-btn.primary {
+  background: linear-gradient(135deg, #E8C96D 0%, #c9a84c 100%);
+  color: #1a140a;
+  box-shadow: 0 8px 22px rgba(232, 201, 109, 0.3);
+}
+.geo-sheet-btn.primary:hover { box-shadow: 0 12px 28px rgba(232, 201, 109, 0.45); }
+
+/* Pulsante Google Maps: blu (pin + testo azzurri su fondo blu scuro). */
+.geo-sheet-btn.google {
+  background: rgba(43, 60, 102, 0.55);
+  border: 1px solid rgba(96, 142, 240, 0.55);
+  color: #6e9bff;
+}
+.geo-sheet-btn.google:hover { background: rgba(54, 76, 130, 0.7); }
+
+/* Pulsante Apple Maps: grigio neutro con logo e testo bianchi. */
+.geo-sheet-btn.apple {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f2f2f3;
+}
+.geo-sheet-btn.apple:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Desktop: card flottante più stondata e centrata */
+@media (min-width: 769px) {
+  .geo-sheet {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 24px;
+    width: min(560px, 92%);
+    border-radius: 26px;
+    border: 1px solid rgba(232, 201, 109, 0.22);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.6);
+    animation: geoSheetUpDesktop 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes geoSheetUpDesktop {
+    from { opacity: 0; transform: translate(-50%, 24px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .geo-sheet-handle { display: none; }
+
+  /* Su desktop la freccia "indietro" va in alto a destra, accanto alla X (così non
+     si sovrappone all'icona e il box non cambia dimensioni). */
+  .geo-sheet-back {
+    left: auto;
+    right: 52px;
+  }
+}
+
+/* Su mobile la navbar è a tutta larghezza: spingiamo i tasti sotto di essa */
+@media (max-width: 768px) {
+  .bruna-geo-home-btn,
+  .bruna-geo-3d-btn {
+    top: calc(78px + env(safe-area-inset-top, 0px));
+  }
+}
+
 /* Mentre la mappa è a tutto schermo (fallback CSS), la pagina sotto non scrolla */
 body.bruna-map-fs-lock {
   overflow: hidden !important;
@@ -377,6 +804,53 @@ body.bruna-map-fs-lock .bruna-map-section {
 .bruna-map-marker:hover .bruna-map-marker-pin {
   transform: scale(1.3);
   filter: drop-shadow(0 0 16px rgba(255, 42, 42, 1));
+}
+
+/* Pagina /geolocalizzati: marker con immagine dorata, più grande del pin rosso.
+   L'ancoraggio (bottom center) resta invariato perché Mapbox usa transform in %. */
+.bruna-map-marker.geo-photo-marker {
+  width: 78px;
+  height: 78px;
+}
+/* Questo segnaposto specifico ha più margine trasparente: lo ingrandiamo un po'
+   così appare delle stesse dimensioni degli altri. */
+.bruna-map-marker.geo-photo-marker.geo-photo-marker-lg {
+  width: 90px;
+  height: 90px;
+}
+
+/* Pagina /geolocalizzati: pin con immagine dorata. Per staccarlo dallo sfondo
+   satellitare aggiungiamo un alone (bianco morbido + oro) che segue la forma del pin,
+   più un'ombra per la profondità. Un leggero "respiro" lo rende più individuabile. */
+.bruna-map-marker-pin.geo-photo-pin {
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.85))
+    drop-shadow(0 0 10px rgba(232, 201, 109, 0.75))
+    drop-shadow(0 4px 7px rgba(0, 0, 0, 0.55));
+  animation: geoPinGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes geoPinGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 4px rgba(255, 255, 255, 0.8))
+      drop-shadow(0 0 9px rgba(232, 201, 109, 0.65))
+      drop-shadow(0 4px 7px rgba(0, 0, 0, 0.55));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 7px rgba(255, 255, 255, 0.95))
+      drop-shadow(0 0 18px rgba(232, 201, 109, 0.95))
+      drop-shadow(0 4px 7px rgba(0, 0, 0, 0.55));
+  }
+}
+
+.bruna-map-marker:hover .bruna-map-marker-pin.geo-photo-pin {
+  animation: none;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 255, 255, 1))
+    drop-shadow(0 0 22px rgba(232, 201, 109, 1))
+    drop-shadow(0 5px 9px rgba(0, 0, 0, 0.6));
 }
 
 /* ── Marker a goccia classica per i percorsi nella pergamena ── */

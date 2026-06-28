@@ -269,6 +269,37 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 0px; /* Azzerato per far salire il calendario/opzioni verso il testo */
+  position: relative;
+}
+
+/* Manina che suggerisce di cliccare un'opzione */
+.quiz-tap-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  animation: quiz-tap-float 2s ease-in-out infinite;
+}
+
+.quiz-tap-hint img {
+  display: block;
+  width: clamp(54px, 6vw, 76px);
+  height: auto;
+  opacity: 0.95;
+}
+
+@keyframes quiz-tap-float {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-tap-hint {
+    animation: none;
+  }
 }
 
 .quiz-option-btn {

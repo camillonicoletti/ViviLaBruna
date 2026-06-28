@@ -75,6 +75,7 @@ function calculateTimeLeft(targetDate) {
 /* ── Component ── */
 export default function KnightChat() {
   const [step,     setStep]     = useState(0);
+  const [showTapHint, setShowTapHint] = useState(true);
   const [answers,  setAnswers]  = useState({});
   const [weatherReport, setWeatherReport] = useState(null);
   const [typing,   setTyping]   = useState(false);
@@ -339,17 +340,25 @@ export default function KnightChat() {
                       </div>
                     </div>
                   ) : (
-                    (FLOW[step].chips || []).map((chip) => (
-                      <button key={chip} className="quiz-option-btn" onClick={() => {
-                        if (FLOW[step].type === 'people_selection' && (chip === 'Gruppo di amici' || chip === 'Famiglia')) {
-                          setGroupSelection(chip);
-                        } else {
-                          choose(chip);
-                        }
-                      }}>
-                        {chip}
-                      </button>
-                    ))
+                    <>
+                      {(FLOW[step].chips || []).map((chip) => (
+                        <button key={chip} className="quiz-option-btn" onClick={() => {
+                          setShowTapHint(false);
+                          if (FLOW[step].type === 'people_selection' && (chip === 'Gruppo di amici' || chip === 'Famiglia')) {
+                            setGroupSelection(chip);
+                          } else {
+                            choose(chip);
+                          }
+                        }}>
+                          {chip}
+                        </button>
+                      ))}
+                      {showTapHint && (
+                        <span className="quiz-tap-hint" aria-hidden="true">
+                          <img src="/tap-hint-white.webp" alt="" draggable="false" />
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               )}

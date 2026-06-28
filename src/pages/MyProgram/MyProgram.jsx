@@ -500,6 +500,8 @@ export default function MyProgram() {
   const [showGallery, setShowGallery] = useState(false);
   // Il cavaliere parte dall'inizio della barra (Alba 05:30), non dalle 18:30
   const [journeyProgress, setJourneyProgress] = useState(0);
+  const [showDragHint, setShowDragHint] = useState(true);
+  const [showTapHint, setShowTapHint] = useState(true);
   const [curIdx, setCurIdx] = useState(0);
   const [exploreMode, setExploreMode] = useState(false);
   const [nearSpotIdx, setNearSpotIdx] = useState(-1);
@@ -596,6 +598,7 @@ export default function MyProgram() {
   const handleRoutePointerDown = useCallback((e) => {
     e.preventDefault();
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    setShowDragHint(false);
     updateJourneyFromPointer(e.clientX);
   }, [updateJourneyFromPointer]);
 
@@ -607,6 +610,7 @@ export default function MyProgram() {
   const handleRouteKeyDown = useCallback((e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     e.preventDefault();
+    setShowDragHint(false);
     setJourneyProgress((value) => clamp01(value + (e.key === 'ArrowRight' ? 0.04 : -0.04)));
   }, []);
 
@@ -693,6 +697,11 @@ export default function MyProgram() {
               >
                 <span className="story-rider-shadow"></span>
                 <img src="/knight_transparent.png" alt="Cavaliere della Bruna" draggable="false" />
+                {showDragHint && (
+                  <span className="story-drag-hint" aria-hidden="true">
+                    <img src="/icons8-trascinamento-a-mano-80.png" alt="" draggable="false" />
+                  </span>
+                )}
               </div>
             </section>
 
@@ -701,7 +710,7 @@ export default function MyProgram() {
                 <button
                   key={moment.time}
                   className={`story-moment-dot ${index === activeMomentIndex ? 'active' : ''}`}
-                  onClick={() => setJourneyProgress(index / (STORY_MOMENTS.length - 1))}
+                  onClick={() => { setShowDragHint(false); setJourneyProgress(index / (STORY_MOMENTS.length - 1)); }}
                 >
                   <span>{moment.time}</span>
                 </button>
@@ -737,7 +746,7 @@ export default function MyProgram() {
             <button
               type="button"
               className={`pina-hero-frame ${activePinacotecaWork.id !== 'madonna' ? 'pina-hero-frame--framed' : ''}`}
-              onClick={() => setActiveArt(activePinacotecaWork)}
+              onClick={() => { setShowTapHint(false); setActiveArt(activePinacotecaWork); }}
               aria-label={`${activePinacotecaWork.history.title} — scopri la storia`}
             >
               <img
@@ -745,6 +754,11 @@ export default function MyProgram() {
                 alt={activePinacotecaWork.history.title}
                 className={activePinacotecaWork.id === 'madonna' ? 'pina-madonna-image' : ''}
               />
+              {showTapHint && (
+                <span className="pina-tap-hint" aria-hidden="true">
+                  <img src="/tap-hint-white.webp" alt="" draggable="false" />
+                </span>
+              )}
             </button>
             <button
               type="button"
@@ -775,7 +789,7 @@ export default function MyProgram() {
               <button
                 type="button"
                 className="pina-frame pina-work-frame"
-                onClick={() => setActiveArt(activity)}
+                onClick={() => { setShowTapHint(false); setActiveArt(activity); }}
                 aria-label={`${activity.history.title} — scopri la storia`}
               >
                 <img src={activity.image} alt={activity.history.title} loading="lazy" />
@@ -794,7 +808,7 @@ export default function MyProgram() {
               <button
                 type="button"
                 className="pina-frame pina-work-frame"
-                onClick={() => setActiveArt(activity)}
+                onClick={() => { setShowTapHint(false); setActiveArt(activity); }}
                 aria-label={`${activity.history.title} — scopri la storia`}
               >
                 <img src={activity.image} alt={activity.history.title} loading="lazy" />

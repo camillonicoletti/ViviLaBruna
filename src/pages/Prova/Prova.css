@@ -401,6 +401,28 @@
 }
 
 /* ── NAVIGATION HINTS ─────────────────────────────────────────────────────── */
+/* Manina che invita a scorrere — al centro dello schermo */
+.hud-scroll-hint {
+  position: fixed;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 350;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+  animation: hudScrollHintIn .5s ease both;
+}
+.hud-scroll-hint img {
+  display: block;
+  width: clamp(56px, 6vw, 88px);
+  height: auto;
+  opacity: 0.95;
+}
+@keyframes hudScrollHintIn { from { opacity: 0; } to { opacity: 0.95; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-scroll-hint { animation: none; }
+}
+
 .nav-hint {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
   z-index: 300; display: flex; align-items: center; gap: 20px;

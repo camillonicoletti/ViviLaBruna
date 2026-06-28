@@ -205,6 +205,36 @@
   width: auto;
 }
 
+/* Manina che suggerisce di cliccare il quadro */
+.pina-tap-hint {
+  position: absolute;
+  top: 46%;
+  left: 43%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  animation: pina-tap-float 2s ease-in-out infinite;
+}
+
+.pina-tap-hint img {
+  display: block;
+  width: clamp(54px, 6vw, 78px);
+  height: auto;
+  opacity: 0.95;
+}
+
+@keyframes pina-tap-float {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pina-tap-hint {
+    animation: none;
+  }
+}
+
 .pina-gallery-arrow {
   display: none;
 }
@@ -732,6 +762,45 @@
   width: 100%;
   height: auto;
   pointer-events: none;
+}
+
+/* Manina che suggerisce di trascinare il cavaliere */
+.story-drag-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -34px;
+  z-index: 4;
+  pointer-events: none;
+  animation:
+    drag-hint-swipe 1.6s ease-in-out infinite,
+    drag-hint-in 0.5s ease both;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+}
+
+.story-drag-hint img {
+  display: block;
+  width: clamp(40px, 4.4vw, 56px);
+  height: auto;
+  /* l'icona è scura: la schiarisco per renderla "grigia" sul fondo scuro */
+  filter: invert(1) brightness(0.92);
+  opacity: 0.9;
+}
+
+@keyframes drag-hint-swipe {
+  0%   { transform: translateX(-24px); }
+  50%  { transform: translateX(22px); }
+  100% { transform: translateX(-24px); }
+}
+
+@keyframes drag-hint-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-drag-hint {
+    animation: drag-hint-in 0.5s ease both;
+  }
 }
 
 .story-rider-shadow {

@@ -45,6 +45,7 @@ export default function Prova() {
   // Stato eventualmente salvato prima di navigare via (es. verso le recensioni)
   const savedProgramRef = useRef(readSavedProgram());
   const [modalData, setModalData] = useState(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
   const [selectedItems, setSelectedItems] = useState(() => savedProgramRef.current?.selectedItems || []); // indici sincronizzati col Set dell'HUD
   const [programOpen, setProgramOpen] = useState(() => Boolean(savedProgramRef.current?.programOpen));
   const [searchQuery, setSearchQuery] = useState('');
@@ -280,6 +281,7 @@ export default function Prova() {
     // ── NAVIGATE ──────────────────────────────────────────────────────────────────
     window.hudGoTo = function(idx) {
       if (spinning || idx === cur || idx < 0 || idx >= N) return;
+      setShowScrollHint(false);
       spinning = true;
       cur = idx;
 
@@ -407,6 +409,7 @@ export default function Prova() {
     let lastWheelTime = 0;
     
     function wheelHandler(e) {
+      setShowScrollHint(false);
       if (document.querySelector('.hud-modal-overlay')) {
         e.preventDefault(); // Blocca scrolling nativo del body se il modale è aperto
         return;
@@ -459,7 +462,7 @@ export default function Prova() {
 
     // ── SWIPE ─────────────────────────────────────────────────────────────────────
     let ty0 = 0;
-    function tStart(e) { ty0 = e.touches[0].clientY; }
+    function tStart(e) { setShowScrollHint(false); ty0 = e.touches[0].clientY; }
     
     function tMove(e) {
       if (document.querySelector('.hud-modal-overlay')) {
@@ -687,6 +690,13 @@ export default function Prova() {
           <div className="band-track" id="track-3"></div>
         </div>
       </div>
+
+      {/* Hint: scorri per navigare */}
+      {showScrollHint && (
+        <div className="hud-scroll-hint" aria-hidden="true">
+          <img src="/scroll-hint-white.webp?v=2" alt="" draggable="false" />
+        </div>
+      )}
 
       {/* Bottom nav hints */}
       <div className="nav-hint">

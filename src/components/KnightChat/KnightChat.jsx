@@ -124,8 +124,8 @@ export default function KnightChat() {
     setWeatherReport(report);
   }, []);
 
-  // Hardcoded for La Bruna 2026
-  const timeLeft = useCountdown('2026-07-02T00:00:00');
+  // Hardcoded for La Bruna 2027
+  const timeLeft = useCountdown('2027-07-02T00:00:00');
   const answersWithWeather = useMemo(() => (
     weatherReport ? { ...answers, weather: weatherReport } : answers
   ), [answers, weatherReport]);

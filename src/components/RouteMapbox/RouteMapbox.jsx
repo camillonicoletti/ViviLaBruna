@@ -150,6 +150,10 @@ export default function RouteMapbox({ waypoints, draw }) {
     let usingFallbackStyle = !mapboxgl.accessToken;
     let routeMarkers = [];
     let drawRequestId = 0;
+    // La mappa viene ricreata quando cambiano i waypoints (es. cambio giorno):
+    // le fetch delle Directions ancora in volo non devono disegnare sulla
+    // mappa rimossa (map.getLayer su stile undefined → TypeError in console).
+    let disposed = false;
 
     function clearRouteMarkers() {
       routeMarkers.forEach(function(marker) { marker.remove(); });
@@ -181,7 +185,7 @@ export default function RouteMapbox({ waypoints, draw }) {
     }
 
     function renderFallbackRoute(currentRequestId) {
-      if (currentRequestId !== drawRequestId || !mapRef.current) return;
+      if (disposed || currentRequestId !== drawRequestId || !mapRef.current) return;
 
       addRouteGeometry(map, buildRouteGeometry(lngLats));
       fitRouteBounds(map, lngLats);
@@ -208,7 +212,7 @@ export default function RouteMapbox({ waypoints, draw }) {
       fetch(apiUrl)
         .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('Directions status ' + r.status)); })
         .then(function(data) {
-          if (currentRequestId !== drawRequestId || !mapRef.current) return;
+          if (disposed || currentRequestId !== drawRequestId || !mapRef.current) return;
 
           if (!data.routes || !data.routes[0]) {
             renderFallbackRoute(currentRequestId);
@@ -223,6 +227,7 @@ export default function RouteMapbox({ waypoints, draw }) {
           routeMarkers = addMarkers(map, waypoints, lngLats, snapped, handleStepClick);
         })
         .catch(function(err) {
+          if (disposed) return;
           console.error('Directions error:', err);
           renderFallbackRoute(currentRequestId);
         });
@@ -248,6 +253,7 @@ export default function RouteMapbox({ waypoints, draw }) {
     map.on('style.load', renderRouteForCurrentStyle);
 
     return function() {
+      disposed = true;
       clearRouteMarkers();
       map.remove();
       mapRef.current = null;

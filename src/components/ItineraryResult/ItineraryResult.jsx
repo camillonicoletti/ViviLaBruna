@@ -344,7 +344,7 @@ const ITINERARIES = {
         tip: 'Oggi ti ho organizzato l\'arrivo perfetto: tu pensa solo a camminare e assaggiare, alle prenotazioni ci pensiamo noi. Un tocco sul telefono e il tavolo è tuo.',
         cost: { risparmio: 40, comodo: 65, lusso: 110, magnifico: 190 },
         waypoints: [
-          { 0: 16.6074, 1: 40.6665, place: 'Panificio storico, Sasso Barisano', title: 'Laboratorio del Pane IGP', desc: 'Mani in pasta nel forno storico del Barisano.', time: '11:00', icon: '🥖' },
+          { 0: 16.6074, 1: 40.6665, place: 'Panificio storico, Sasso Barisano', title: 'Laboratorio del Pane IGP', desc: 'Mani in pasta nel forno storico del Barisano.', time: '11:00', icon: '🥖', expId: 3 },
           { 0: 16.6101, 1: 40.6662, place: 'Trattoria del centro storico', title: 'Pranzo di benvenuto', desc: 'Strascinati con peperoni cruschi e pane caldo.', time: '13:30', icon: '🍽️' },
           { 0: 16.6095, 1: 40.6650, place: 'Piazza del Sedile', title: 'Botteghe artigiane', desc: 'Legno, ceramica e cartapesta dei maestri materani.', time: '16:00', icon: '🎨' },
           { 0: 16.6066, 1: 40.6663, place: 'Piazza Vittorio Veneto', title: 'Calice sotto le stelle', desc: 'Aglianico del Vulture per chiudere la prima giornata.', time: '22:00', icon: '🍷' }
@@ -373,7 +373,7 @@ const ITINERARIES = {
           { 0: 16.6113, 1: 40.6634, place: 'Sasso Caveoso', title: 'Casa Grotta', desc: 'La vita contadina dentro una grotta arredata d\'epoca.', time: '09:00', icon: '🏠' },
           { 0: 16.6055, 1: 40.6668, place: 'Piazza Ascanio Persio', title: 'Mercato cittadino', desc: 'Cruschi, ortaggi e panzerotti al volo.', time: '11:00', icon: '🍅' },
           { 0: 16.6066, 1: 40.6663, place: 'Piazza Vittorio Veneto', title: 'Palombaro Lungo', desc: 'La cisterna monumentale sotto la piazza.', time: '16:00', icon: '💧' },
-          { 0: 16.6105, 1: 40.6647, place: 'Piazzetta Pascoli', title: 'Tramonto sui Sassi', desc: 'Il belvedere del tour serale.', time: '18:30', icon: '🌅' }
+          { 0: 16.6105, 1: 40.6647, place: 'Piazzetta Pascoli', title: 'Tramonto sui Sassi', desc: 'Il belvedere del tour serale.', time: '18:30', icon: '🌅', expId: 1 }
         ],
         events: [
           { time: '09:00', type: 'see', title: 'Casa Grotta del Casalnuovo', desc: 'La vita contadina di un tempo: come si viveva (e si cucinava) dentro una grotta.' },
@@ -443,7 +443,7 @@ const ITINERARIES = {
         tip: 'Mezza giornata in e-bike senza fatica: pedalata assistita, guida e transfer inclusi. Tu porta solo l\'appetito per l\'agriturismo.',
         cost: { risparmio: 45, comodo: 75, lusso: 125, magnifico: 200 },
         waypoints: [
-          { 0: 16.6066, 1: 40.6663, place: 'Centro storico', title: 'Partenza e-bike', desc: 'Ritrovo del tour in pedalata assistita.', time: '09:00', icon: '🚲' },
+          { 0: 16.6066, 1: 40.6663, place: 'Centro storico', title: 'Partenza e-bike', desc: 'Ritrovo del tour in pedalata assistita.', time: '09:00', icon: '🚲', expId: 5 },
           { 0: 16.5570, 1: 40.6205, place: 'Contrada Pietrapenta', title: 'Cripta del Peccato Originale', desc: 'La "Cappella Sistina rupestre".', time: '11:00', icon: '🎨' },
           { 0: 16.6082, 1: 40.6670, place: 'Belvedere Luigi Guerricchio', title: 'Riposo e terrazze', desc: 'Granita e affaccio sui Sassi.', time: '16:30', icon: '🌇' },
           { 0: 16.6101, 1: 40.6662, place: 'Centro storico', title: 'Cena di pesce ionico', desc: 'Il mare della Basilicata in tavola.', time: '20:30', icon: '🐟' }
@@ -552,6 +552,24 @@ const PROVA_ACTIVITY_TITLES = [
   'E-Bike dalla Cripta',
   'Cena Romantica in Grotta',
 ];
+
+// ── Design "Registro del Cavaliere": numerali e metadati per tipo evento ──
+const ROMAN_DAYS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+
+const EVENT_TYPE_META = {
+  see:      { icon: '🏛️', label: 'Da vedere' },
+  eat:      { icon: '🍽️', label: 'A tavola' },
+  drink:    { icon: '🍷', label: 'La sera' },
+  activity: { icon: '✦',  label: 'Esperienza' },
+  sleep:    { icon: '🌙', label: 'La notte' }
+};
+
+// Nei percorsi multi-giorno il titolo è "Giorno N — Nome capitolo":
+// il numero lo mostra già il selettore, qui resta solo il nome.
+const chapterName = (day = '') => {
+  const parts = String(day).split('—');
+  return parts.length > 1 ? parts.slice(1).join('—').trim() : day;
+};
 
 // Ancora di ritorno: ricorda quale attività era stata aperta dalla pergamena,
 // così al rientro la pagina scrolla esattamente sulla sua card della timeline.
@@ -735,26 +753,30 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
           </div>
         )}
 
-        <div className="itinerary-content" style={{ textAlign: 'left', paddingLeft: '20px', paddingRight: '20px', marginBottom: '40px' }}>
-          <h3 className="route-title">{route.title}</h3>
-          <h4 className="route-subtitle">{route.subtitle}</h4>
-          {route.desc && <p className="route-desc">{route.desc}</p>}
+        {/* Frontespizio dell'itinerario */}
+        <div className="rg-header">
+          <span className="rg-kicker">Itinerario personale del Cavaliere</span>
+          <h3 className="rg-title">{route.title}</h3>
+          <div className="rg-ornament" aria-hidden="true"><i></i><span>✦</span><i></i></div>
+          {route.subtitle && <h4 className="rg-subtitle">{route.subtitle}</h4>}
+          {route.desc && <p className="rg-desc">{route.desc}</p>}
         </div>
 
         {/* Selettore del giorno (solo percorsi multi-giorno), sopra la mappa:
             cambiando giorno cambiano sia la piantina che il programma */}
         {route.multiDay && scheduleDays.length > 1 && (
-          <div className="day-tabs" role="tablist" aria-label="Scegli il giorno">
+          <div className="rg-days" role="tablist" aria-label="Scegli il giorno">
             {scheduleDays.map((dayData, dIdx) => (
               <button
                 key={dIdx}
                 type="button"
                 role="tab"
                 aria-selected={dIdx === safeDay}
-                className={`day-tab ${dIdx === safeDay ? 'is-active' : ''}`}
+                className={`rg-day ${dIdx === safeDay ? 'is-active' : ''}`}
                 onClick={() => setSelectedDay(dIdx)}
               >
-                Giorno {dIdx + 1}
+                <span className="rg-day-num">{ROMAN_DAYS[dIdx] || dIdx + 1}</span>
+                <span className="rg-day-label">Giorno {dIdx + 1}</span>
               </button>
             ))}
           </div>
@@ -769,42 +791,50 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
           </div>
         )}
 
-        {/* Programma Giornaliero (Timeline) */}
+        {/* Programma Giornaliero — Registro del Cavaliere */}
         {visibleDays.length > 0 && (
-          <div className="timeline-container">
+          <div className="rg-book">
             {visibleDays.map((dayData, dIdx) => (
-              <div key={route.multiDay ? dayData.day : dIdx} className="timeline-day-block">
-                <h3 className="timeline-day-title">{dayData.day}</h3>
+              <div key={route.multiDay ? dayData.day : dIdx} className="rg-chapter">
+
+                {/* Testata del capitolo */}
+                <div className="rg-chapter-head">
+                  {route.multiDay && (
+                    <span className="rg-chapter-kicker">Capitolo {ROMAN_DAYS[safeDay] || safeDay + 1}</span>
+                  )}
+                  <h3 className="rg-chapter-title">{route.multiDay ? chapterName(dayData.day) : dayData.day}</h3>
+                </div>
+
+                {/* Nota del concierge */}
                 {dayData.tip && (
-                  <p className="timeline-day-tip"><span aria-hidden="true">⚔️</span> {dayData.tip}</p>
+                  <div className="rg-note">
+                    <span className="rg-note-badge" aria-hidden="true">⚔️</span>
+                    <div className="rg-note-body">
+                      <span className="rg-note-label">Il Cavaliere consiglia</span>
+                      <p className="rg-note-text">{dayData.tip}</p>
+                    </div>
+                  </div>
                 )}
-                <div className="timeline-events-list">
+
+                {/* Tappe del giorno lungo il filo del percorso */}
+                <div className="rg-timeline">
                   {dayData.events.map((evt, eIdx) => (
                     evt.type === 'move' ? (
-                      /* Spostamento: connettore compatto tra un'attività e l'altra */
-                      <div key={eIdx} className="timeline-event timeline-transfer">
-                        <div className="timeline-time">{evt.time}</div>
-                        <div className="transfer-pill">
-                          <span className="transfer-icon" aria-hidden="true">{evt.mode === 'bus' ? '🚌' : '🚶'}</span>
-                          <div className="transfer-text">
-                            <h5 className="transfer-title">{evt.title}</h5>
-                            <p className="transfer-desc">{evt.desc}</p>
-                          </div>
+                      /* Spostamento: passaggio compatto tra una tappa e l'altra */
+                      <div key={eIdx} className="rg-transfer">
+                        <span className="rg-transfer-dot" aria-hidden="true">{evt.mode === 'bus' ? '🚌' : '🚶'}</span>
+                        <div className="rg-transfer-body">
+                          <span className="rg-transfer-title">{evt.time} · {evt.title}</span>
+                          <p className="rg-transfer-desc">{evt.desc}</p>
                         </div>
                       </div>
                     ) : (
-                    <div key={eIdx} className="timeline-event">
-                      <div className="timeline-time">{evt.time}</div>
-                      <div className="timeline-content">
-                        {evt.type === 'eat'      && <span className="timeline-icon">🍽️</span>}
-                        {evt.type === 'sleep'    && <span className="timeline-icon">🌙</span>}
-                        {evt.type === 'activity' && <span className="timeline-icon">🥾</span>}
-                        {evt.type === 'see'      && <span className="timeline-icon">🏛️</span>}
-                        {evt.type === 'drink'    && <span className="timeline-icon">🍷</span>}
-                        
+                      <article key={eIdx} className={`rg-event rg-type-${evt.type}`}>
+                        <span className="rg-dot" aria-hidden="true">{(EVENT_TYPE_META[evt.type] || EVENT_TYPE_META.see).icon}</span>
+
                         {evt.type === 'activity' ? (
                           <div
-                            className={`activity-card ${(evt.expId || evt.reviewTitle) ? 'is-linkable' : 'is-static'}`}
+                            className={`rg-card rg-card-activity ${(evt.expId || evt.reviewTitle) ? 'is-linkable' : ''}`}
                             data-pergamena-anchor={evt.reviewTitle || PROVA_ACTIVITY_TITLES[evt.expId - 1] || String(evt.title || '').replace(/^✦\s*/, '')}
                             onClick={() => openActivity(evt)}
                             role={(evt.expId || evt.reviewTitle) ? 'button' : undefined}
@@ -816,38 +846,45 @@ export default function ItineraryResult({ answers, isActive, selectedExperiences
                               }
                             }}
                           >
-                            <h5 className="timeline-event-title">{evt.title}</h5>
-                            <p className="timeline-event-desc">{evt.desc}</p>
+                            <div className="rg-meta">
+                              <span className="rg-time">{evt.time}</span>
+                              <span className="rg-type-label">{EVENT_TYPE_META.activity.label}</span>
+                            </div>
+                            <h5 className="rg-event-title">{evt.title}</h5>
+                            <p className="rg-event-desc">{evt.desc}</p>
                             {(evt.expId || evt.reviewTitle) && (
-                              <div className="explore-cta">Esplora Attività <span>➔</span></div>
+                              <div className="rg-cta">Scopri e prenota <span aria-hidden="true">➔</span></div>
                             )}
                           </div>
                         ) : (
-                          <>
-                            <h5 className="timeline-event-title">{evt.title}</h5>
-                            <p className="timeline-event-desc">{evt.desc}</p>
+                          <div className="rg-card">
+                            <div className="rg-meta">
+                              <span className="rg-time">{evt.time}</span>
+                              <span className="rg-type-label">{(EVENT_TYPE_META[evt.type] || EVENT_TYPE_META.see).label}</span>
+                            </div>
+                            <h5 className="rg-event-title">{evt.title}</h5>
+                            <p className="rg-event-desc">{evt.desc}</p>
                             {evt.phone && (
-                              <a
-                                className="call-place-btn"
-                                href={`tel:${evt.phone.replace(/\s+/g, '')}`}
-                              >
+                              <a className="rg-call" href={`tel:${evt.phone.replace(/\s+/g, '')}`}>
                                 📞 {evt.type === 'eat' ? 'Prenota un tavolo' : 'Chiama'}{evt.place ? ` — ${evt.place}` : ''}
                               </a>
                             )}
-                          </>
+                          </div>
                         )}
-                      </div>
-                    </div>
+                      </article>
                     )
                   ))}
                 </div>
+
+                {/* Conto stimato del giorno, stile registro contabile */}
                 {dayData.cost && (
-                  <div className="day-budget">
-                    <span className="day-budget-icon" aria-hidden="true">💰</span>
-                    <p className="day-budget-text">
-                      Oggi spenderai circa <strong>{dayData.cost[route.budgetTier] || dayData.cost.comodo}€ a persona</strong>
-                      <span className="day-budget-tier"> · fascia {BUDGET_TIER_LABELS[route.budgetTier] || 'Comodo'}</span>
-                    </p>
+                  <div className="rg-ledger">
+                    <span className="rg-ledger-label">Conto stimato del giorno</span>
+                    <span className="rg-ledger-dots" aria-hidden="true"></span>
+                    <span className="rg-ledger-amount">
+                      {dayData.cost[route.budgetTier] || dayData.cost.comodo}€
+                      <small> a persona · {BUDGET_TIER_LABELS[route.budgetTier] || 'Comodo'}</small>
+                    </span>
                   </div>
                 )}
               </div>

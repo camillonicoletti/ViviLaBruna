@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_SATELLITE_STYLE, createStreetFallbackStyle, shouldUseFallbackStyle } from '../mapStyleFallback';
@@ -6,23 +7,49 @@ import './RouteMapbox.css';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-const STEP_COLORS = ['#4caf50', '#ffd600', '#ff9800', '#f44336', '#9c27b0', '#2196f3'];
+// Coppie chiaro/scuro per il gradiente dei pin numerati
+const STEP_COLORS = [
+  { light: '#81c784', dark: '#2e7d32' },
+  { light: '#ffd54f', dark: '#f57f17' },
+  { light: '#ffb74d', dark: '#e65100' },
+  { light: '#e57373', dark: '#b71c1c' },
+  { light: '#ba68c8', dark: '#6a1b9a' },
+  { light: '#64b5f6', dark: '#0d47a1' }
+];
+
+const stepColor = (idx) => STEP_COLORS[Math.min(idx, STEP_COLORS.length - 1)];
 
 // Helper: estrae [lng, lat] da qualunque forma di waypoint (array o oggetto con chiavi 0/1)
 function toLngLat(wp) {
   return [Number(wp[0]), Number(wp[1])];
 }
 
-function createPinElement(index, color) {
+// Pin numerato "premium": goccia con gradiente, ombra morbida e
+// badge bianco col numero della tappa (id univoci per gradiente/filtro).
+function createPinElement(index, colors) {
   const el = document.createElement('div');
-  el.style.cssText = 'width:32px;height:44px;cursor:pointer;user-select:none;display:block;line-height:0;';
+  el.className = 'route-pin';
+  el.style.cssText = 'width:38px;height:52px;cursor:pointer;user-select:none;display:block;line-height:0;';
+  const uid = 'route-pin-' + index + '-' + Math.random().toString(36).slice(2, 7);
   el.innerHTML =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44" style="display:block;">' +
-    '<path d="M16 0C8.268 0 2 6.268 2 14c0 10.56 14 30 14 30S30 24.56 30 14C30 6.268 23.732 0 16 0z"' +
-    ' fill="' + color + '" stroke="white" stroke-width="2.5"/>' +
-    '<circle cx="16" cy="14" r="6" fill="rgba(255,255,255,0.25)"/>' +
-    '<text x="16" y="14" text-anchor="middle" dominant-baseline="central"' +
-    ' fill="white" font-weight="800" font-size="13" font-family="Inter,Arial,sans-serif">' + (index + 1) + '</text>' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="38" height="52" viewBox="0 0 38 52" style="display:block;overflow:visible;">' +
+      '<defs>' +
+        '<linearGradient id="' + uid + '-g" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="' + colors.light + '"/>' +
+          '<stop offset="100%" stop-color="' + colors.dark + '"/>' +
+        '</linearGradient>' +
+        '<filter id="' + uid + '-s" x="-40%" y="-20%" width="180%" height="150%">' +
+          '<feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-color="#000" flood-opacity="0.4"/>' +
+        '</filter>' +
+      '</defs>' +
+      '<g filter="url(#' + uid + '-s)">' +
+        '<path d="M19 2C10.7 2 4 8.7 4 17c0 10.8 15 31 15 31s15-20.2 15-31C34 8.7 27.3 2 19 2z"' +
+        ' fill="url(#' + uid + '-g)" stroke="#fff" stroke-width="2"/>' +
+        '<circle cx="19" cy="17" r="10" fill="#fff"/>' +
+        '<circle cx="19" cy="17" r="10" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>' +
+        '<text x="19" y="17.5" text-anchor="middle" dominant-baseline="central"' +
+        ' fill="' + colors.dark + '" font-weight="800" font-size="12.5" font-family="Inter,Arial,sans-serif">' + (index + 1) + '</text>' +
+      '</g>' +
     '</svg>';
   return el;
 }
@@ -79,14 +106,36 @@ function fitRouteBounds(map, coordinates) {
   map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, pitch: 45, bearing: -17.6, duration: 1200 });
 }
 
+// Su mobile la mappa nella pergamena resta "ferma": si può solo toccare i
+// marker, non scorrere/zoomare. A tutto schermo torna completamente interattiva.
+const MAP_GESTURES = ['scrollZoom', 'boxZoom', 'dragRotate', 'dragPan', 'keyboard', 'doubleClickZoom', 'touchZoomRotate', 'touchPitch'];
+
+function isMobileViewport() {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+}
+
+function setMapGestures(map, enabled) {
+  MAP_GESTURES.forEach(function(handler) {
+    if (map[handler]) enabled ? map[handler].enable() : map[handler].disable();
+  });
+}
+
 export default function RouteMapbox({ waypoints, draw }) {
+  const navigate = useNavigate();
   const mapContainerRef = useRef(null);
   const wrapperRef      = useRef(null);
   const mapRef          = useRef(null);
+  // Coordinate del percorso attuale: servono a re-inquadrare il centro quando
+  // si entra/esce dal fullscreen (la mappa non deve restare dove l'hai lasciata).
+  const routeCoordsRef  = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  // Pallino selezionato: la sua descrizione appare nel box in basso
+  // Pin selezionato: apre la scheda scura stile "Esplora Attività"
   // al posto dei bottoni Google/Apple Maps (✕ per tornare ai bottoni).
   const [selectedStep, setSelectedStep] = useState(null);
+  // Dentro la scheda: "Indicazioni" mostra i bottoni Google/Apple per la tappa,
+  // "Scopri di più" espande la descrizione (o apre l'attività se collegata).
+  const [directionsOpen, setDirectionsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const googleUrl = useMemo(function() { return buildGoogleMapsUrl(waypoints); }, [waypoints]);
   const appleUrl  = useMemo(function() { return buildAppleMapsUrl(waypoints);  }, [waypoints]);
@@ -94,6 +143,7 @@ export default function RouteMapbox({ waypoints, draw }) {
   const handleStepClick = useCallback(function(idx) { setSelectedStep(idx); }, []);
 
   useEffect(function() { setSelectedStep(null); }, [waypoints, draw]);
+  useEffect(function() { setDirectionsOpen(false); setMoreOpen(false); }, [selectedStep]);
 
   // Logica fullscreen identica a BrunaMap
   const toggleFullscreen = useCallback(function() {
@@ -138,6 +188,21 @@ export default function RouteMapbox({ waypoints, draw }) {
       document.body.classList.remove('route-map-fullscreen-active');
     };
   }, []);
+
+  // Entrando/uscendo dal fullscreen: (ri)blocca i gesti su mobile e riporta
+  // sempre l'inquadratura al centro del percorso (non dove l'utente si era spostato).
+  useEffect(function() {
+    var map = mapRef.current;
+    if (!map) return;
+    setMapGestures(map, !isMobileViewport() || isFullscreen);
+    var coords = routeCoordsRef.current;
+    var timer = setTimeout(function() {
+      if (!mapRef.current) return;
+      mapRef.current.resize();
+      if (coords && coords.length) fitRouteBounds(mapRef.current, coords);
+    }, 260);
+    return function() { clearTimeout(timer); };
+  }, [isFullscreen]);
 
   useEffect(function() {
     if (!draw || !waypoints || waypoints.length < 2) return;
@@ -188,6 +253,7 @@ export default function RouteMapbox({ waypoints, draw }) {
       if (disposed || currentRequestId !== drawRequestId || !mapRef.current) return;
 
       addRouteGeometry(map, buildRouteGeometry(lngLats));
+      routeCoordsRef.current = lngLats;
       fitRouteBounds(map, lngLats);
       routeMarkers = addMarkers(map, waypoints, lngLats, null, handleStepClick);
     }
@@ -223,6 +289,7 @@ export default function RouteMapbox({ waypoints, draw }) {
           const snapped  = data.waypoints || [];
 
           addRouteGeometry(map, geometry);
+          routeCoordsRef.current = geometry.coordinates;
           fitRouteBounds(map, geometry.coordinates);
           routeMarkers = addMarkers(map, waypoints, lngLats, snapped, handleStepClick);
         })
@@ -244,6 +311,10 @@ export default function RouteMapbox({ waypoints, draw }) {
       interactive: true
     });
     mapRef.current = map;
+
+    // Stato iniziale dei gesti: su mobile la mappa parte "bloccata" (solo marker
+    // toccabili); resta interattiva su desktop e quando andrà a tutto schermo.
+    setMapGestures(map, !isMobileViewport() || isFullscreen);
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
 
@@ -276,31 +347,91 @@ export default function RouteMapbox({ waypoints, draw }) {
           </button>
         )}
       </div>
-      {/* Box in basso: descrizione del pallino selezionato, con ✕ per
-          tornare ai bottoni Google/Apple Maps */}
-      {draw && selectedStep !== null && waypoints && waypoints[selectedStep] && (
-        <div className="route-step-panel">
-          <span
-            className="route-step-badge"
-            style={{ background: STEP_COLORS[Math.min(selectedStep, STEP_COLORS.length - 1)] }}
-          >
-            {selectedStep + 1}
-          </span>
-          <div className="route-step-info">
-            <h4 className="route-step-title">{waypoints[selectedStep].title || ('Tappa ' + (selectedStep + 1))}</h4>
-            {waypoints[selectedStep].place && (
-              <p className="route-step-place">📍 {waypoints[selectedStep].place}</p>
+      {/* Scheda scura della tappa selezionata (stesso stile di Esplora Attività),
+          con ✕ per tornare ai bottoni Google/Apple Maps del percorso completo */}
+      {draw && selectedStep !== null && waypoints && waypoints[selectedStep] && (() => {
+        const wp = waypoints[selectedStep];
+        const [lng, lat] = toLngLat(wp);
+        const colors = stepColor(selectedStep);
+        // App native prima (come la mappa geolocalizzati): maps:// su iPhone,
+        // comgooglemaps:// con fallback web per Google.
+        const openAppleMaps = () => { window.location.href = `maps://?daddr=${lat},${lng}`; };
+        const openGoogleMaps = () => {
+          const appUrl = `comgooglemaps://?daddr=${lat},${lng}&directionsmode=walking`;
+          const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+          const start = Date.now();
+          window.location.href = appUrl;
+          setTimeout(() => {
+            if (!document.hidden && Date.now() - start < 1600) window.location.href = webUrl;
+          }, 1200);
+        };
+        const onDiscover = () => {
+          if (wp.expId) {
+            navigate(`/prova?activity=${wp.expId - 1}`);
+            return;
+          }
+          setMoreOpen((open) => !open);
+        };
+        return (
+          <div className="route-sheet" role="dialog" aria-label={wp.title || `Tappa ${selectedStep + 1}`}>
+            {directionsOpen && (
+              <button className="route-sheet-back" onClick={() => setDirectionsOpen(false)} aria-label="Indietro">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 5 L8 12 L15 19" />
+                </svg>
+              </button>
             )}
-            {waypoints[selectedStep].time && (
-              <p className="route-step-time"><strong>Orario:</strong> {waypoints[selectedStep].time}</p>
-            )}
-            {waypoints[selectedStep].desc && (
-              <p className="route-step-desc">{waypoints[selectedStep].desc}</p>
-            )}
+            <button className="route-sheet-close" onClick={() => setSelectedStep(null)} aria-label="Chiudi">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 6 L18 18 M18 6 L6 18" />
+              </svg>
+            </button>
+
+            <div className="route-sheet-main">
+              <span
+                className="route-sheet-icon"
+                style={{ background: `linear-gradient(160deg, ${colors.light}, ${colors.dark})` }}
+                aria-hidden="true"
+              >
+                {selectedStep + 1}
+              </span>
+              <div className="route-sheet-info">
+                <h3 className="route-sheet-title">{wp.title || `Tappa ${selectedStep + 1}`}</h3>
+                <span className="route-sheet-cat">Tappa {selectedStep + 1}{wp.time ? ` · ore ${wp.time}` : ''}</span>
+                {wp.place && <p className="route-sheet-place">📍 {wp.place}</p>}
+                {wp.desc && (
+                  <p className={`route-sheet-meta ${moreOpen ? 'is-open' : ''}`}>{wp.desc}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="route-sheet-actions">
+              {directionsOpen ? (
+                <>
+                  <button type="button" className="route-sheet-btn ghost" onClick={openGoogleMaps}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" /></svg>
+                    Google Maps
+                  </button>
+                  <button type="button" className="route-sheet-btn primary" onClick={openAppleMaps}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M16.365 1.43c0 1.14-.42 2.2-1.12 2.98-.78.87-2.05 1.54-3.1 1.46-.13-1.1.45-2.27 1.1-3 .73-.82 2.02-1.43 3.12-1.44zM20.5 17.2c-.55 1.27-.82 1.84-1.53 2.97-.99 1.57-2.39 3.53-4.12 3.54-1.54.01-1.94-1.01-4.03-1-2.09.01-2.53 1.02-4.07 1.01-1.73-.02-3.05-1.78-4.04-3.35C1.5 16.45 1.18 11.13 3.92 8.5c.97-.95 2.24-1.5 3.58-1.5 1.36 0 2.22.74 3.34.74 1.09 0 1.75-.74 3.33-.74 1.19 0 2.45.65 3.35 1.77-2.94 1.61-2.46 5.81.98 7.13z" /></svg>
+                    Apple Maps
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" className="route-sheet-btn ghost" onClick={() => setDirectionsOpen(true)}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2 4.5 20.3l.8.8L12 18l6.7 3.1.8-.8z" /></svg>
+                    Indicazioni
+                  </button>
+                  <button type="button" className="route-sheet-btn primary" onClick={onDiscover}>
+                    {wp.expId ? 'Scopri di più →' : (moreOpen ? 'Mostra meno' : 'Scopri di più →')}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-          <button className="route-step-close" onClick={function() { setSelectedStep(null); }} aria-label="Chiudi descrizione">✕</button>
-        </div>
-      )}
+        );
+      })()}
       {draw && selectedStep === null && (
         <div className="route-map-actions">
           <span className="route-map-actions-label">Vedi il percorso su</span>

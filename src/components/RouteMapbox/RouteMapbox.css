@@ -21,6 +21,8 @@
 .route-mapbox-wrapper:fullscreen,
 .route-mapbox-wrapper:-webkit-full-screen {
   background: #000;
+  /* Contesto di posizionamento per la scheda tappa galleggiante */
+  position: relative;
 }
 .route-mapbox-wrapper:fullscreen .route-mapbox-container,
 .route-mapbox-wrapper:-webkit-full-screen .route-mapbox-container {
@@ -34,6 +36,20 @@ body.route-map-fullscreen-active .navbar-wrap {
   display: none !important;
 }
 
+/* ── MAPPA "FERMA" NELLA PERGAMENA SU MOBILE ──
+   Fuori dal fullscreen nascondiamo i pulsanti di zoom: la mappa non si sposta,
+   restano toccabili solo i marker. A tutto schermo lo zoom ricompare. */
+@media (max-width: 900px) {
+  .route-mapbox-container .mapboxgl-ctrl-group {
+    display: none;
+  }
+  .route-mapbox-wrapper.is-fullscreen .mapboxgl-ctrl-group,
+  .route-mapbox-wrapper:fullscreen .mapboxgl-ctrl-group,
+  .route-mapbox-wrapper:-webkit-full-screen .mapboxgl-ctrl-group {
+    display: block;
+  }
+}
+
 /* Gestione SafeArea per iPhone (Tacche/Barra inferiore) quando è fullscreen */
 .route-mapbox-wrapper.is-fullscreen .route-map-actions {
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -44,7 +60,7 @@ body.route-map-fullscreen-active .navbar-wrap {
   height: 300px;
   position: relative;
   overflow: hidden;
-  border-radius: 8px 8px 0 0;
+  border-radius: 20px 20px 0 0;
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -54,7 +70,7 @@ body.route-map-fullscreen-active .navbar-wrap {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 8px 8px 0 0;
+  border-radius: 20px 20px 0 0;
 }
 
 /* ── Bottone Fullscreen (identico a BrunaMap) ── */
@@ -198,7 +214,7 @@ body.route-map-fullscreen-active .navbar-wrap {
   background: rgba(15, 15, 15, 0.85);
   border: 1px solid rgba(232, 201, 109, 0.15);
   border-top: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 20px 20px;
   backdrop-filter: blur(10px);
 }
 
@@ -269,5 +285,218 @@ body.route-map-fullscreen-active .navbar-wrap {
     justify-content: center;
     padding: 8px 5px;
     font-size: 0.75rem;
+  }
+}
+
+/* ── PIN NUMERATI: leggero ingrandimento al passaggio ── */
+.route-pin svg {
+  transition: transform 0.2s ease;
+  transform-origin: 50% 100%;
+}
+
+.route-pin:hover svg {
+  transform: scale(1.12);
+}
+
+/* ── SCHEDA TAPPA (stesso stile della scheda attività di Esplora Attività) ── */
+.route-sheet {
+  position: relative;
+  padding: 18px 52px 16px 18px;
+  background: rgba(16, 13, 10, 0.96);
+  border: 1px solid rgba(232, 201, 109, 0.22);
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  backdrop-filter: blur(10px);
+  animation: routeStepIn 0.25s ease;
+}
+
+/* In fullscreen la scheda galleggia al centro, tutta stondata */
+.route-mapbox-wrapper.is-fullscreen .route-sheet,
+.route-mapbox-wrapper:fullscreen .route-sheet,
+.route-mapbox-wrapper:-webkit-full-screen .route-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  border: 1px solid rgba(232, 201, 109, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+  animation: routeSheetFloatIn 0.3s ease;
+  z-index: 20;
+}
+
+@keyframes routeSheetFloatIn {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.route-sheet-close,
+.route-sheet-back {
+  position: absolute;
+  top: 12px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #eaeaea;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.route-sheet-close {
+  right: 12px;
+}
+
+.route-sheet-back {
+  left: 12px;
+}
+
+.route-sheet-close:hover,
+.route-sheet-back:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.route-sheet.has-back,
+.route-sheet .route-sheet-back ~ .route-sheet-main {
+  padding-left: 0;
+}
+
+.route-sheet-main {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.route-sheet-icon {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 201, 109, 0.55);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.route-sheet-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.route-sheet-title {
+  margin: 2px 0 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.12rem;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.route-sheet-cat {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #E8C96D;
+  margin-bottom: 6px;
+}
+
+.route-sheet-place {
+  margin: 0 0 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.route-sheet-meta {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #d8d2c4;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.route-sheet-meta.is-open {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+.route-sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.route-sheet-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.route-sheet-btn.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.route-sheet-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.route-sheet-btn.primary {
+  background: linear-gradient(160deg, #f0d689, #E8C96D 55%, #cfa94e);
+  border: 1px solid rgba(232, 201, 109, 0.8);
+  color: #1c150c;
+  box-shadow: 0 4px 14px rgba(232, 201, 109, 0.25);
+}
+
+.route-sheet-btn.primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* SafeArea iPhone in fullscreen: gestita dall'offset bottom della scheda galleggiante */
+
+@media (max-width: 600px) {
+  .route-sheet {
+    padding: 16px 48px 14px 14px;
+  }
+
+  .route-sheet-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 1.05rem;
+  }
+
+  .route-sheet-btn {
+    padding: 11px 8px;
+    font-size: 0.8rem;
   }
 }

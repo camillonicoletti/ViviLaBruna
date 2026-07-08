@@ -391,12 +391,21 @@
 
 /* ───── RESPONSIVE ───── */
 @media (max-width: 900px) {
+  /* Senza cavaliere il box non deve galleggiare a metà pagina:
+     niente 100vh (footer più su) e box attaccato al countdown */
+  .bruna-ai-app {
+    min-height: auto;
+    gap: 18px;
+  }
+
   .app-split-section {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     gap: 12px;
     margin-left: auto;
     margin-right: auto;
+    flex: 0 0 auto;
+    align-items: start;
   }
   
   .countdown-divider {
@@ -420,16 +429,13 @@
     font-size: 1rem;
   }
 
+  /* Su mobile il cavaliere a cavallo sparisce: resta solo il box domande */
   .split-left {
-    order: 2;
+    display: none;
   }
   .split-right {
     order: 1;
     justify-content: center;
-  }
-  
-  .avatar-video-wrapper {
-    max-width: 280px;
   }
   
   .ai-quiz-box {
@@ -465,7 +471,7 @@
 @media (max-width: 768px) {
   .bruna-ai-app {
     gap: 28px;
-    padding-bottom: 96px;
+    padding-bottom: 140px;
   }
 
   .app-countdown-section {

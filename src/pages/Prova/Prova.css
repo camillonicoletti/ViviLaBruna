@@ -272,6 +272,24 @@
   filter: brightness(.55) saturate(1.3);
   transition: transform .1s ease;
 }
+/* ── UNICO VIDEO DI SFONDO (band-1 + band-2, fino a sotto il nome) ──
+   Un solo <video> alto quanto le due bande insieme, dietro ai loro contenuti.
+   Si vede solo per le attività con video (contenitore .bg-video-on): band-1
+   resta trasparente e band-2 diventa trasparente, così il video prosegue
+   senza tagli fino a sotto il titolo. Muto, in loop. */
+.hud-bg-video {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: calc(var(--h1) + var(--gap) + var(--h2));
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(.55) saturate(1.3);
+  z-index: 0;
+  opacity: 0; /* mostrato via JS (syncBgVideo) solo sulle attività con video */
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
 /* Category label — top-left */
 .slide-cat {
   position: absolute; bottom: 20px; left: 32px; z-index: 3;

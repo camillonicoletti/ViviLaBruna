@@ -27,17 +27,17 @@ const readSavedProgram = () => {
 // ── DATA ──────────────────────────────────────────────────────────────────
 const ITEMS = [
       { title:"Tour dei Sassi al Tramonto", cat:"Cultura & Storia", price:"25€", rating:"4.9", reviews:1240, duration:"2 ore",
-        img:"/hud/matera_sassi_sunset.png", desc: "Scopri la magia dei Sassi di Matera al calar del sole in un suggestivo percorso guidato tra i rioni storici. Visiteremo antiche cisterne e chiese rupestri avvolti dalla luce dorata del tramonto.", map: "Piazza Vittorio Veneto, Matera", cont: "+39 333 1234567 | info@materatours.it", dates: "Tutti i giorni, h 18:00", coords: [16.6105, 40.6664] },
+        img:"/hud/matera_sassi_sunset.png", video:"/matera_tramonto.mp4", desc: "Scopri la magia dei Sassi di Matera al calar del sole in un suggestivo percorso guidato tra i rioni storici. Visiteremo antiche cisterne e chiese rupestri avvolti dalla luce dorata del tramonto.", map: "Piazza Vittorio Veneto, Matera", cont: "+39 333 1234567 | info@materatours.it", dates: "Tutti i giorni, h 18:00", coords: [16.6105, 40.6664] },
       { title:"Volo in Mongolfiera all'Alba", cat:"Avventura", price:"180€", rating:"5.0", reviews:312, duration:"3 ore",
-        img:"/hud/matera_hot_air_balloon.png", desc: "Sorvola i Sassi e il Parco della Murgia alle prime luci dell'alba in un'esperienza mozzafiato. Al termine del volo nel silenzio più assoluto, brinderemo con deliziosi prodotti tipici locali.", map: "Contrada Murgia Timone, Matera", cont: "+39 340 9876543 | voli@matera-balloons.com", dates: "Mar, Gio, Sab, Dom, h 05:30", coords: [16.6210, 40.6720] },
+        img:"/hud/matera_hot_air_balloon.png", video:"/matera_tramonto.mp4", desc: "Sorvola i Sassi e il Parco della Murgia alle prime luci dell'alba in un'esperienza mozzafiato. Al termine del volo nel silenzio più assoluto, brinderemo con deliziosi prodotti tipici locali.", map: "Contrada Murgia Timone, Matera", cont: "+39 340 9876543 | voli@matera-balloons.com", dates: "Mar, Gio, Sab, Dom, h 05:30", coords: [16.6210, 40.6720] },
       { title:"Laboratorio del Pane IGP", cat:"Food & Drink", price:"45€", rating:"4.8", reviews:580, duration:"2.5 ore",
-        img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1400&auto=format&fit=crop", desc: "Metti le mani in pasta e scopri i segreti della panificazione tradizionale materana in un antico forno. Impara la storia del Pane di Matera IGP e gusta la tua forma calda appena sfornata.", map: "Via Santo Stefano, Matera", cont: "+39 0835 123456 | panificio@materabread.it", dates: "Lun, Mer, Ven, h 10:00", coords: [16.6080, 40.6675] },
+        img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1400&auto=format&fit=crop", video:"/matera_tramonto.mp4", desc: "Metti le mani in pasta e scopri i segreti della panificazione tradizionale materana in un antico forno. Impara la storia del Pane di Matera IGP e gusta la tua forma calda appena sfornata.", map: "Via Santo Stefano, Matera", cont: "+39 0835 123456 | panificio@materabread.it", dates: "Lun, Mer, Ven, h 10:00", coords: [16.6080, 40.6675] },
       { title:"Trekking Murgia Materana", cat:"Natura", price:"20€", rating:"4.7", reviews:890, duration:"4 ore",
-        img:"https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1400&auto=format&fit=crop", desc: "Avventurati attraverso il canyon della Gravina, tra ponti tibetani e antiche chiese rupestri. Un'escursione indimenticabile che unisce la natura selvaggia del Parco Archeologico alla spiritualità.", map: "Jazzo Gattini, Parco della Murgia", cont: "+39 320 1122334 | trekking@murgiapark.it", dates: "Sabato e Domenica, h 09:00", coords: [16.6150, 40.6600] },
+        img:"https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1400&auto=format&fit=crop", video:"/matera_tramonto.mp4", desc: "Avventurati attraverso il canyon della Gravina, tra ponti tibetani e antiche chiese rupestri. Un'escursione indimenticabile che unisce la natura selvaggia del Parco Archeologico alla spiritualità.", map: "Jazzo Gattini, Parco della Murgia", cont: "+39 320 1122334 | trekking@murgiapark.it", dates: "Sabato e Domenica, h 09:00", coords: [16.6150, 40.6600] },
       { title:"E-Bike dalla Cripta", cat:"Sport", price:"35€", rating:"4.9", reviews:420, duration:"½ Giornata",
-        img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop", desc: "Esplora senza fatica le magnifiche campagne materane fino alla Cripta del Peccato Originale, la 'Cappella Sistina' dell'arte rupestre. Un tour in E-Bike immersivo, panoramico e green.", map: "Piazzetta Pascoli, Matera", cont: "+39 331 4455667 | rent@ebikematera.it", dates: "Tutti i giorni, h 09:00 e 15:00", coords: [16.6040, 40.6650] },
+        img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1400&auto=format&fit=crop", video:"/matera_tramonto.mp4", desc: "Esplora senza fatica le magnifiche campagne materane fino alla Cripta del Peccato Originale, la 'Cappella Sistina' dell'arte rupestre. Un tour in E-Bike immersivo, panoramico e green.", map: "Piazzetta Pascoli, Matera", cont: "+39 331 4455667 | rent@ebikematera.it", dates: "Tutti i giorni, h 09:00 e 15:00", coords: [16.6040, 40.6650] },
       { title:"Cena Romantica in Grotta", cat:"Exclusive", price:"90€", rating:"4.9", reviews:215, duration:"Serata intera",
-        img:"/hud/matera_romantic_dinner.png", desc: "Goditi un esclusivo menu degustazione a lume di candela in un raffinato ristorante scavato direttamente nel tufo del Sasso Caveoso. Un'atmosfera intima e suggestiva per una serata speciale.", map: "Sasso Caveoso, Matera", cont: "+39 0835 987654 | ristorante@grottamatera.it", dates: "Tutte le sere, su prenotazione", coords: [16.6110, 40.6640] },
+        img:"/hud/matera_romantic_dinner.png", video:"/matera_tramonto.mp4", desc: "Goditi un esclusivo menu degustazione a lume di candela in un raffinato ristorante scavato direttamente nel tufo del Sasso Caveoso. Un'atmosfera intima e suggestiva per una serata speciale.", map: "Sasso Caveoso, Matera", cont: "+39 0835 987654 | ristorante@grottamatera.it", dates: "Tutte le sere, su prenotazione", coords: [16.6110, 40.6640] },
 ];
 
 export default function Prova() {
@@ -195,8 +195,13 @@ export default function Prova() {
         const s1 = document.createElement('div');
         s1.className = 'band-slide';
         s1.style.height = h1 + 'px';
+        // Se l'attività ha un video, band-1 resta trasparente: al suo posto si
+        // vede l'unico video di sfondo (.hud-bg-video) che copre band-1 + band-2.
+        const media1 = it.video
+          ? ''
+          : `<div class="slide-img" style="background-image:url(${it.img})"></div>`;
         s1.innerHTML = `
-          <div class="slide-img" style="background-image:url(${it.img})"></div>
+          ${media1}
           <div class="slide-cat">${it.cat}</div>
           <div class="slide-counter">${String(i+1).padStart(2,'0')}</div>
         `;
@@ -206,6 +211,8 @@ export default function Prova() {
         const s2 = document.createElement('div');
         s2.className = 'band-slide';
         s2.style.height = h2 + 'px';
+        // Per le attività con video band-2 diventa trasparente (classe sul contenitore),
+        // così l'unico video di sfondo prosegue anche dietro al nome dell'attività.
         s2.innerHTML = `
           <div class="slide-title-bg">${it.title}</div>
           <h2 class="slide-title">${it.title}</h2>
@@ -256,6 +263,7 @@ export default function Prova() {
       });
 
       setPositions(0, false);
+      syncBgVideo();
     }
 
     // ── POSITION TRACKS ───────────────────────────────────────────────────────────
@@ -278,12 +286,28 @@ export default function Prova() {
       apply(G('track-1'), h1, 0.17, 0.60);
     }
 
+    // Mostra l'unico video di sfondo (e rende band-2 trasparente) solo sulle
+    // attività che hanno un video. Agisce direttamente sugli elementi così React
+    // non azzera lo stato a ogni re-render del wrapper.
+    function syncBgVideo() {
+      const hasVideo = !!ITEMS[cur].video;
+      const bg = G('hud-bg-video');
+      if (bg) bg.style.opacity = hasVideo ? '1' : '0';
+      const b2 = G('band-2');
+      if (b2) b2.style.background = hasVideo ? 'transparent' : '';
+      // Il gradiente scuro a fondo band-1 spezzerebbe in due il video continuo:
+      // per le attività col video lo spegniamo (resta quello in alto per la navbar).
+      const grad = container.querySelector('.band1-grad');
+      if (grad) grad.style.opacity = hasVideo ? '0' : '';
+    }
+
     // ── NAVIGATE ──────────────────────────────────────────────────────────────────
     window.hudGoTo = function(idx) {
       if (spinning || idx === cur || idx < 0 || idx >= N) return;
       setShowScrollHint(false);
       spinning = true;
       cur = idx;
+      syncBgVideo();
 
       setPositions(cur, true);
 
@@ -675,6 +699,11 @@ export default function Prova() {
 
       {/* 3 BANDS */}
       <div className="slots">
+        {/* Unico video di sfondo: copre band-1 + band-2 (visibile solo per le
+            attività con video, es. Tour dei Sassi al Tramonto). Muto, in loop. */}
+        <video className="hud-bg-video" id="hud-bg-video" autoPlay muted loop playsInline preload="auto" poster="/hud/matera_sassi_sunset.png">
+          <source src="/matera_tramonto.mp4" type="video/mp4" />
+        </video>
         {/* Band 1: IMAGE */}
         <div className="band" id="band-1">
           <div className="band-track" id="track-1"></div>

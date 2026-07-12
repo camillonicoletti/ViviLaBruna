@@ -34,3 +34,6 @@ public/italy_matera_sassi_houses.glb
 # Claude Code agent worktrees (never commit)
 .claude/worktrees/
 .claude/
+
+# Codex isolated worktrees
+.worktrees/

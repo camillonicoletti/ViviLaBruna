@@ -1,0 +1,101 @@
+export const ACTIVITY_CATEGORIES = [
+  { value: 'all', label: 'Tutte' },
+  { value: 'cultura', label: 'Cultura' },
+  { value: 'sapori', label: 'Sapori' },
+  { value: 'natura', label: 'Natura' },
+  { value: 'sport', label: 'Sport' },
+  { value: 'speciali', label: 'Speciali' }
+];
+
+export const ACTIVITIES = [
+  {
+    id: 1,
+    title: 'Tour dei Sassi al Tramonto',
+    category: 'cultura',
+    categoryLabel: 'Cultura & storia',
+    price: 'da 25€',
+    rating: '4.9',
+    reviews: 1240,
+    image: '/hud/matera_sassi_sunset.png',
+    duration: '2 ore',
+    summary: 'Cammina con una guida tra grotte e vicoli dei Sassi nella luce dorata del tramonto.',
+    location: 'Piazza Vittorio Veneto, Matera',
+    phone: '+39 333 123 4567',
+    coords: [16.6105, 40.6664]
+  },
+  {
+    id: 2,
+    title: "Volo in Mongolfiera all'Alba",
+    category: 'speciali',
+    categoryLabel: 'Esperienza speciale',
+    price: 'da 180€',
+    rating: '5.0',
+    reviews: 312,
+    image: '/hud/matera_hot_air_balloon.png',
+    duration: '3 ore',
+    summary: 'Sorvola i Sassi e la Murgia alle prime luci del giorno con brindisi al rientro.',
+    location: 'Contrada Murgia Timone, Matera',
+    phone: '+39 340 987 6543',
+    coords: [16.621, 40.672]
+  },
+  {
+    id: 3,
+    title: 'Laboratorio del Pane IGP',
+    category: 'sapori',
+    categoryLabel: 'Sapori & tradizioni',
+    price: 'da 45€',
+    rating: '4.8',
+    reviews: 580,
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1200&auto=format&fit=crop',
+    duration: '2,5 ore',
+    summary: 'Impasta e cuoci il Pane di Matera IGP con un fornaio del centro storico.',
+    location: 'Via Santo Stefano, Matera',
+    phone: '+39 0835 123 456',
+    coords: [16.608, 40.6675]
+  },
+  {
+    id: 4,
+    title: 'Trekking Murgia Materana',
+    category: 'natura',
+    categoryLabel: 'Natura',
+    price: 'da 20€',
+    rating: '4.7',
+    reviews: 890,
+    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1200&auto=format&fit=crop',
+    duration: '4 ore',
+    summary: 'Attraversa la Gravina e raggiungi chiese rupestri e punti panoramici della Murgia.',
+    location: 'Jazzo Gattini, Parco della Murgia',
+    phone: '+39 320 112 2334',
+    coords: [16.615, 40.66]
+  },
+  {
+    id: 5,
+    title: 'E-Bike dalla Cripta',
+    category: 'sport',
+    categoryLabel: 'Sport & mobilità',
+    price: 'da 35€',
+    rating: '4.9',
+    reviews: 420,
+    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1200&auto=format&fit=crop',
+    duration: 'Mezza giornata',
+    summary: 'Pedala senza fatica dai Sassi alla campagna materana con percorso digitale incluso.',
+    location: 'Piazzetta Pascoli, Matera',
+    phone: '+39 331 445 5667',
+    coords: [16.604, 40.665]
+  },
+  {
+    id: 6,
+    title: 'Cena Romantica in Grotta',
+    category: 'speciali',
+    categoryLabel: 'Esperienza speciale',
+    price: 'da 90€',
+    rating: '4.9',
+    reviews: 215,
+    image: '/hud/matera_romantic_dinner.png',
+    duration: 'Serata intera',
+    summary: 'Cena a lume di candela in una grotta di tufo con menu lucano e musica dal vivo.',
+    location: 'Sasso Caveoso, Matera',
+    phone: '+39 0835 987 654',
+    coords: [16.611, 40.664]
+  }
+];

@@ -218,6 +218,28 @@
   border-left: 2px solid var(--gold);
 }
 
+.traditional-nav-links li a.nav-link-new {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--gold-light);
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.14), rgba(201, 168, 76, 0.04));
+  border: 1px solid rgba(201, 168, 76, 0.25);
+}
+
+.nav-link-new-badge {
+  flex-shrink: 0;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #181109;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
 
 /* CHAT AI DROPDOWN */
 .omnibar-dropdown {

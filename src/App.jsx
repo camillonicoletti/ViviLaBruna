@@ -7,6 +7,7 @@ import Home from './pages/Home/Home';
 import Geolocalizzati from './pages/Geolocalizzati/Geolocalizzati';
 import DueLuglio from './pages/DueLuglio/DueLuglio';
 import Activities from './pages/Activities/Activities';
+import ActivitiesRedesign from './pages/ActivitiesRedesign/ActivitiesRedesign';
 import Prova from './pages/Prova/Prova';
 import MyProgram from './pages/MyProgram/MyProgram';
 import Social from './pages/Social/Social';
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/2-luglio" element={<DueLuglio />} />
         <Route path="/attivita" element={<Activities />} />
+        <Route path="/esplora-attivita-nuova" element={<ActivitiesRedesign />} />
         <Route path="/prova" element={<Prova />} />
         <Route path="/la-storia" element={<MyProgram />} />
         <Route path="/il-mio-programma" element={<Navigate to="/la-storia" replace />} />

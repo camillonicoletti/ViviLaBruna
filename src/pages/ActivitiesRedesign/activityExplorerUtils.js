@@ -60,3 +60,17 @@ export function buildDirectionsUrl(coords) {
   });
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
+
+export function resolveActivityMedia(activity = {}) {
+  const image = typeof activity.image === 'string' ? activity.image.trim() : '';
+  const video = typeof activity.video === 'string' ? activity.video.trim() : '';
+  const suppliedPoster = typeof activity.videoPoster === 'string'
+    ? activity.videoPoster.trim()
+    : '';
+
+  return {
+    image,
+    video,
+    poster: suppliedPoster || image
+  };
+}

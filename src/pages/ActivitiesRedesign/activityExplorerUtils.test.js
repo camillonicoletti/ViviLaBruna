@@ -6,7 +6,8 @@ import {
   buildTelephoneHref,
   filterActivities,
   normalizeSearchText,
-  parseFavoriteIds
+  parseFavoriteIds,
+  resolveActivityMedia
 } from './activityExplorerUtils.js';
 
 test('normalizza maiuscole e accenti nella ricerca', () => {
@@ -60,4 +61,28 @@ test('costruisce link telefonico e indicazioni validi', () => {
     buildDirectionsUrl([16.6105, 40.6664]),
     'https://www.google.com/maps/dir/?api=1&destination=40.6664%2C16.6105'
   );
+});
+
+test('risolve video opzionale e fallback immagine', () => {
+  assert.deepEqual(resolveActivityMedia({
+    image: '/image.jpg',
+    video: '/clip.mp4',
+    videoPoster: '/poster.jpg'
+  }), {
+    image: '/image.jpg',
+    video: '/clip.mp4',
+    poster: '/poster.jpg'
+  });
+
+  assert.deepEqual(resolveActivityMedia({ image: '/image.jpg' }), {
+    image: '/image.jpg',
+    video: '',
+    poster: '/image.jpg'
+  });
+
+  assert.deepEqual(resolveActivityMedia({ image: '/image.jpg', video: '  ' }), {
+    image: '/image.jpg',
+    video: '',
+    poster: '/image.jpg'
+  });
 });

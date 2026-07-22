@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ActivityCard from './ActivityCard';
+import ActivityDetailDialog from './ActivityDetailDialog';
 import { ACTIVITIES, ACTIVITY_CATEGORIES } from './activitiesData';
 import { filterActivities, parseFavoriteIds } from './activityExplorerUtils';
 import './ActivitiesRedesign.css';
@@ -20,6 +21,9 @@ export default function ActivitiesRedesign() {
   const [category, setCategory] = useState('all');
   const [favoriteIds, setFavoriteIds] = useState(readFavorites);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [activePreviewId, setActivePreviewId] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const detailTriggerRef = useRef(null);
 
   const visibleActivities = filterActivities(ACTIVITIES, {
     query,
@@ -49,6 +53,17 @@ export default function ActivitiesRedesign() {
     setCategory('all');
     setFavoritesOnly(false);
   };
+
+  const openActivity = (activity, trigger) => {
+    detailTriggerRef.current = trigger;
+    setActivePreviewId(null);
+    setSelectedActivity(activity);
+  };
+
+  const closeActivity = useCallback(() => {
+    setSelectedActivity(null);
+    requestAnimationFrame(() => detailTriggerRef.current?.focus());
+  }, []);
 
   const emptyFavorites = favoritesOnly && favoriteIds.length === 0;
 
@@ -113,6 +128,9 @@ export default function ActivitiesRedesign() {
                 key={activity.id}
                 activity={activity}
                 isFavorite={favoriteIds.includes(activity.id)}
+                previewActive={activePreviewId === activity.id}
+                onPreviewChange={setActivePreviewId}
+                onOpen={openActivity}
                 onToggleFavorite={toggleFavorite}
               />
             ))}
@@ -126,6 +144,15 @@ export default function ActivitiesRedesign() {
           </div>
         )}
       </section>
+
+      {selectedActivity && (
+        <ActivityDetailDialog
+          activity={selectedActivity}
+          isFavorite={favoriteIds.includes(selectedActivity.id)}
+          onClose={closeActivity}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
     </main>
   );
 }

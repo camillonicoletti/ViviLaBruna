@@ -21,7 +21,7 @@ Il media usa due modalità equivalenti:
 1. Se l’attività ha un video, la card mostra prima il poster e riproduce il video senza audio durante hover/focus su desktop o quando la card è sufficientemente visibile su dispositivi touch.
 2. Se il video non è disponibile o non si carica, l’immagine esistente usa un movimento lento di zoom e traslazione.
 
-Le attività attuali non possiedono video dedicati: la prima versione userà quindi le immagini già presenti con movimento cinematografico. Il supporto ai video viene implementato subito, ma i file video potranno essere aggiunti in seguito senza modificare la card.
+Tutte le attività usano inizialmente il video condiviso `/matera_tramonto.mp4`, già presente in `public` e già impiegato nella precedente pagina Esplora Attività. L’immagine specifica di ogni attività resta il poster iniziale e il fallback in caso di errore. In futuro ogni attività potrà sostituire il video condiviso con un file dedicato senza modificare la card.
 
 Un solo video può essere attivo per volta. Il media si ferma quando la card esce dall’area visibile, perde hover/focus o quando viene aperta un’altra attività. Con `prefers-reduced-motion` non parte alcun movimento automatico.
 

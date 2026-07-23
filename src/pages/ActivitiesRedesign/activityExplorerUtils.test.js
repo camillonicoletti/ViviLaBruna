@@ -86,3 +86,10 @@ test('risolve video opzionale e fallback immagine', () => {
     poster: '/image.jpg'
   });
 });
+
+test('usa il video dei Sassi come anteprima di tutte le attività', () => {
+  assert.equal(ACTIVITIES.length, 6);
+  assert.ok(ACTIVITIES.every((activity) => (
+    activity.video === '/matera_tramonto.mp4'
+  )));
+});

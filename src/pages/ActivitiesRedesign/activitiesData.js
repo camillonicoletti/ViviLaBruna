@@ -7,6 +7,8 @@ export const ACTIVITY_CATEGORIES = [
   { value: 'speciali', label: 'Speciali' }
 ];
 
+const SHARED_ACTIVITY_VIDEO = '/matera_tramonto.mp4';
+
 export const ACTIVITIES = [
   {
     id: 1,
@@ -17,6 +19,7 @@ export const ACTIVITIES = [
     rating: '4.9',
     reviews: 1240,
     image: '/hud/matera_sassi_sunset.png',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: '2 ore',
     summary: 'Cammina con una guida tra grotte e vicoli dei Sassi nella luce dorata del tramonto.',
     location: 'Piazza Vittorio Veneto, Matera',
@@ -32,6 +35,7 @@ export const ACTIVITIES = [
     rating: '5.0',
     reviews: 312,
     image: '/hud/matera_hot_air_balloon.png',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: '3 ore',
     summary: 'Sorvola i Sassi e la Murgia alle prime luci del giorno con brindisi al rientro.',
     location: 'Contrada Murgia Timone, Matera',
@@ -47,6 +51,7 @@ export const ACTIVITIES = [
     rating: '4.8',
     reviews: 580,
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1200&auto=format&fit=crop',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: '2,5 ore',
     summary: 'Impasta e cuoci il Pane di Matera IGP con un fornaio del centro storico.',
     location: 'Via Santo Stefano, Matera',
@@ -62,6 +67,7 @@ export const ACTIVITIES = [
     rating: '4.7',
     reviews: 890,
     image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1200&auto=format&fit=crop',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: '4 ore',
     summary: 'Attraversa la Gravina e raggiungi chiese rupestri e punti panoramici della Murgia.',
     location: 'Jazzo Gattini, Parco della Murgia',
@@ -77,6 +83,7 @@ export const ACTIVITIES = [
     rating: '4.9',
     reviews: 420,
     image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1200&auto=format&fit=crop',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: 'Mezza giornata',
     summary: 'Pedala senza fatica dai Sassi alla campagna materana con percorso digitale incluso.',
     location: 'Piazzetta Pascoli, Matera',
@@ -92,6 +99,7 @@ export const ACTIVITIES = [
     rating: '4.9',
     reviews: 215,
     image: '/hud/matera_romantic_dinner.png',
+    video: SHARED_ACTIVITY_VIDEO,
     duration: 'Serata intera',
     summary: 'Cena a lume di candela in una grotta di tufo con menu lucano e musica dal vivo.',
     location: 'Sasso Caveoso, Matera',

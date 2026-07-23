@@ -12,7 +12,7 @@
 
 - Keep search, category filters, saved favorites, phone links, and directions working unchanged.
 - Do not add a new dependency or remote service.
-- Use existing images with cinematic motion because current activities have no dedicated video files.
+- Use `/matera_tramonto.mp4` as the shared preview video and keep each existing image as its poster and fallback.
 - Support optional `video` and `videoPoster` fields without requiring them.
 - Allow only one active preview at a time.
 - Keep automatic video muted and respect `prefers-reduced-motion`.

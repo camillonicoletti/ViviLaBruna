@@ -16,34 +16,33 @@ La modifica riguarda soltanto la visualizzazione mobile fino a 760 px. Il compor
 
 ## Controlli video mobile
 
-- Nel dettaglio vengono aggiunti due controlli personalizzati sovrapposti al video: volume e schermo intero.
-- I controlli sono posizionati sotto l’area superiore riservata alla chiusura, così da non sovrapporsi alla Dynamic Island, alla barra di stato o alla X.
-- Il pulsante volume alterna video silenziato e video con audio e comunica lo stato tramite icona e testo accessibile.
-- Il pulsante schermo intero usa l’API standard quando disponibile e il fallback `webkitEnterFullscreen` previsto da Safari iOS.
-- I controlli nativi del video restano disponibili, mentre quelli personalizzati garantiscono accesso immediato alle due azioni richieste.
-- I controlli personalizzati sono nascosti su desktop.
+- Il dettaglio conserva esclusivamente i controlli nativi del browser; non vengono aggiunti controlli personalizzati.
+- Su iPhone i singoli controlli nativi non possono essere riposizionati con CSS. Per renderli visibili, il fotogramma video viene fatto iniziare 64 px più in basso rispetto al bordo superiore del contenitore.
+- Lo spazio superiore diventa una fascia scura di sicurezza per la barra di stato e il pulsante di chiusura.
+- Altezza e proporzioni complessive del blocco video restano coerenti con l’attuale dettaglio mobile.
+- Su desktop il video mantiene posizione e dimensioni attuali.
+- L’etichetta “Video esperienza” viene rimossa dal dettaglio.
 
 ## Pulsante di chiusura
 
 - Il carattere tipografico `×` viene sostituito da un’icona SVG composta da due linee perfettamente centrate.
 - Il pulsante usa fondo scuro, bordo oro e icona oro, con contrasto elevato e area tattile di 48 px.
-- Rimane fisso in alto a destra durante lo scorrimento del dettaglio.
+- Rimane fisso in alto a destra, dentro la fascia di sicurezza, durante lo scorrimento del dettaglio.
 - Su mobile non riceve automaticamente il focus all’apertura, evitando l’anello bianco persistente visto su iPhone; su desktop mantiene il focus iniziale per l’accessibilità da tastiera.
 
 ## Gestione degli errori
 
-- Se nessuna API per lo schermo intero è disponibile, il controllo non genera errori e resta un’azione neutra.
 - Un eventuale rifiuto dell’avvio del video non deve trasformare un’interruzione temporanea in un errore permanente.
-- Il cambio volume richiede un gesto esplicito dell’utente, compatibile con le restrizioni audio dei browser mobili.
+- Volume e schermo intero restano gestiti dal browser, rispettando automaticamente le restrizioni di Safari iOS.
 
 ## Verifica
 
 - Test unitari per distinguere il tap sulla superficie della card dai tap su pulsanti e link.
-- Test unitari per la selezione tra API fullscreen standard e fallback Safari.
 - Verifica reale a 390 × 844 px:
   - tap sul corpo della card apre il dettaglio;
   - cuore e telefono mantengono la propria azione;
-  - controlli volume e fullscreen risultano visibili sotto la X;
+  - i controlli nativi superiori risultano spostati 64 px più in basso;
+  - l’etichetta “Video esperienza” non è presente;
   - la X è centrata e resta fissa durante lo scroll;
   - il desktop conserva layout e comportamento attuali.
 - Esecuzione dei test della pagina, lint mirato e build di produzione.

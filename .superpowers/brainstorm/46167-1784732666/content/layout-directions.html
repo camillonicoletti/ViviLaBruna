@@ -1,0 +1,149 @@
+<style>
+  #activity-directions {
+    --gold: #e8c96d;
+    --ink: #090806;
+    --stone: #17140f;
+    --paper: #f2ead8;
+    color: var(--foreground);
+  }
+  #activity-directions .intro { max-width: 760px; margin-bottom: 24px; }
+  #activity-directions .intro h2 { margin-bottom: 6px; }
+  #activity-directions .direction-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  #activity-directions .direction {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--card);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  #activity-directions .direction:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--gold) 70%, transparent); }
+  #activity-directions .direction.selected { border-color: var(--gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 30%, transparent); }
+  #activity-directions .preview {
+    min-height: 430px;
+    padding: 14px;
+    color: #fff;
+    background: radial-gradient(circle at 78% 15%, #3b3020 0, transparent 28%), linear-gradient(150deg, #17130e, #060606 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  #activity-directions .mini-nav { display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#f0dfac; margin-bottom:20px; }
+  #activity-directions .mini-logo { width:22px; height:22px; border:1px solid var(--gold); border-radius:50%; display:grid; place-items:center; }
+  #activity-directions .mini-kicker { color:var(--gold); text-transform:uppercase; letter-spacing:.15em; font-size:8px; }
+  #activity-directions .mini-title { font-family: Georgia, serif; font-size:22px; line-height:1; margin:5px 0 8px; max-width:220px; }
+  #activity-directions .mini-copy { color:#c8c1b4; font-size:9px; line-height:1.4; max-width:230px; }
+  #activity-directions .searchbar { height:30px; border:1px solid #4a4233; background:#12110f; border-radius:999px; margin:15px 0 10px; padding:0 12px; display:flex; align-items:center; gap:7px; color:#aaa; font-size:9px; }
+  #activity-directions .chips { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+  #activity-directions .chip { padding:5px 8px; border-radius:999px; font-size:7px; background:#201d18; border:1px solid #3d362a; }
+  #activity-directions .chip.active { background:var(--gold); color:#18130a; border-color:var(--gold); }
+  #activity-directions .activity-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #activity-directions .activity-card { min-height:116px; border-radius:11px; overflow:hidden; position:relative; background:#272019; border:1px solid #393126; }
+  #activity-directions .activity-card.hero { grid-column:1/-1; min-height:148px; }
+  #activity-directions .activity-photo { position:absolute; inset:0; background-size:cover; background-position:center; opacity:.72; }
+  #activity-directions .activity-shade { position:absolute; inset:0; background:linear-gradient(transparent 20%,rgba(0,0,0,.9)); }
+  #activity-directions .activity-text { position:absolute; inset:auto 9px 9px; }
+  #activity-directions .activity-text strong { display:block; font-family:Georgia,serif; font-size:10px; }
+  #activity-directions .activity-text span { color:#ddd2bd; font-size:7px; }
+  #activity-directions .mood-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+  #activity-directions .mood { height:78px; border-radius:10px; border:1px solid #4a4030; background:linear-gradient(145deg,#2c2419,#13110e); padding:10px; display:flex; flex-direction:column; justify-content:flex-end; }
+  #activity-directions .mood b { color:var(--gold); font-family:Georgia,serif; font-size:11px; }
+  #activity-directions .mood small { color:#aaa; font-size:7px; }
+  #activity-directions .mood-arrow { margin-top:18px; color:#c3bcae; text-align:center; font-size:8px; }
+  #activity-directions .result-strip { margin-top:12px; display:grid; grid-template-columns:repeat(2,1fr); gap:7px; opacity:.75; }
+  #activity-directions .result-strip div { height:68px; border-radius:9px; background:#29231a; border:1px solid #403729; }
+  #activity-directions .focus-card { margin-top:18px; height:250px; border-radius:16px; overflow:hidden; position:relative; border:1px solid #6c5830; }
+  #activity-directions .focus-card .activity-photo { opacity:.9; }
+  #activity-directions .focus-card .activity-shade { background:linear-gradient(transparent,rgba(0,0,0,.94)); }
+  #activity-directions .focus-info { position:absolute; left:16px; right:16px; bottom:16px; }
+  #activity-directions .focus-info h4 { font-family:Georgia,serif; font-size:18px; margin:4px 0; }
+  #activity-directions .focus-info p { font-size:8px; color:#ddd; margin:0 0 10px; }
+  #activity-directions .focus-action { display:flex; justify-content:space-between; align-items:center; font-size:9px; }
+  #activity-directions .focus-button { background:var(--gold); color:#1b160c; padding:7px 10px; border-radius:999px; font-weight:700; }
+  #activity-directions .focus-dots { display:flex; justify-content:center; gap:5px; margin-top:12px; }
+  #activity-directions .focus-dots i { display:block; width:5px; height:5px; border-radius:50%; background:#665d4e; }
+  #activity-directions .focus-dots i:first-child { width:17px; border-radius:4px; background:var(--gold); }
+  #activity-directions .direction-copy { padding:16px 17px 18px; }
+  #activity-directions .direction-label { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  #activity-directions .letter { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; background:var(--muted); font-weight:700; }
+  #activity-directions .recommended { color:#6e5715; background:#f3d77f; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:700; }
+  #activity-directions .direction-copy h3 { margin:0; font-size:17px; }
+  #activity-directions .direction-copy p { margin:7px 0 0; color:var(--muted-foreground); font-size:13px; line-height:1.45; }
+  @media (max-width: 900px) {
+    #activity-directions .direction-grid { grid-template-columns:1fr; }
+    #activity-directions .preview { min-height:390px; }
+  }
+</style>
+
+<div id="activity-directions">
+  <div class="intro">
+    <h2>Quale struttura rende più facile scegliere?</h2>
+    <p class="subtitle">Tutte mantengono nero, tufo, oro e fotografia immersiva del sito. Clicca quella che senti più chiara.</p>
+  </div>
+
+  <div class="direction-grid">
+    <article class="direction option" data-choice="a-grid-editoriale" onclick="toggleSelect(this)">
+      <div class="preview">
+        <div class="mini-nav"><div class="mini-logo">M</div><span>Matera da Vivere · ☰</span></div>
+        <div class="mini-kicker">Esperienze autentiche</div>
+        <div class="mini-title">Cosa vuoi vivere a Matera?</div>
+        <div class="mini-copy">Trova subito l’esperienza giusta e confronta le informazioni essenziali.</div>
+        <div class="searchbar">⌕ &nbsp; Cerca un’attività</div>
+        <div class="chips"><span class="chip active">Tutte</span><span class="chip">Cultura</span><span class="chip">Sapori</span><span class="chip">Avventura</span></div>
+        <div class="activity-grid">
+          <div class="activity-card hero">
+            <div class="activity-photo" style="background-image:url('https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=900&auto=format&fit=crop')"></div><div class="activity-shade"></div>
+            <div class="activity-text"><strong>Tour dei Sassi al tramonto</strong><span>2 ore · ★ 4.9 · da 25€</span></div>
+          </div>
+          <div class="activity-card"><div class="activity-photo" style="background-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop')"></div><div class="activity-shade"></div><div class="activity-text"><strong>Pane materano</strong><span>2,5 ore · 45€</span></div></div>
+          <div class="activity-card"><div class="activity-photo" style="background-image:url('https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=600&auto=format&fit=crop')"></div><div class="activity-shade"></div><div class="activity-text"><strong>Trekking Murgia</strong><span>4 ore · 20€</span></div></div>
+        </div>
+      </div>
+      <div class="direction-copy">
+        <div class="direction-label"><span class="letter">A</span><h3>Griglia editoriale</h3><span class="recommended">Consigliata</span></div>
+        <p>Vedi e confronti subito più attività. Ricerca e categorie restano sempre semplici e visibili.</p>
+      </div>
+    </article>
+
+    <article class="direction option" data-choice="b-scegli-per-mood" onclick="toggleSelect(this)">
+      <div class="preview">
+        <div class="mini-nav"><div class="mini-logo">M</div><span>Matera da Vivere · ☰</span></div>
+        <div class="mini-kicker">Lasciati guidare</div>
+        <div class="mini-title">Come vuoi sentirti oggi?</div>
+        <div class="mini-copy">Parti da un desiderio, poi scopri solo le esperienze più adatte.</div>
+        <div class="mood-grid">
+          <div class="mood"><b>Meraviglia</b><small>Sassi, storia e panorami</small></div>
+          <div class="mood"><b>Gusto</b><small>Pane, vino e tradizioni</small></div>
+          <div class="mood"><b>Adrenalina</b><small>Murgia e avventura</small></div>
+          <div class="mood"><b>Intimità</b><small>Esperienze speciali</small></div>
+        </div>
+        <div class="mood-arrow">Scegli un’atmosfera ↓</div>
+        <div class="result-strip"><div></div><div></div></div>
+      </div>
+      <div class="direction-copy">
+        <div class="direction-label"><span class="letter">B</span><h3>Scelta per atmosfera</h3></div>
+        <p>Molto intuitiva per chi non sa cosa cercare, ma aggiunge un passaggio prima di vedere tutte le attività.</p>
+      </div>
+    </article>
+
+    <article class="direction option" data-choice="c-focus-una-alla-volta" onclick="toggleSelect(this)">
+      <div class="preview">
+        <div class="mini-nav"><div class="mini-logo">M</div><span>01 / 06 · ☰</span></div>
+        <div class="mini-kicker">In evidenza</div>
+        <div class="mini-title">Vivi la città di pietra.</div>
+        <div class="focus-card">
+          <div class="activity-photo" style="background-image:url('https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=900&auto=format&fit=crop')"></div><div class="activity-shade"></div>
+          <div class="focus-info"><span class="mini-kicker">Cultura & storia</span><h4>Tour dei Sassi al tramonto</h4><p>Una passeggiata guidata tra vicoli e grotte nella luce dorata.</p><div class="focus-action"><span>2 ore · da 25€</span><span class="focus-button">Scopri →</span></div></div>
+        </div>
+        <div class="focus-dots"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="direction-copy">
+        <div class="direction-label"><span class="letter">C</span><h3>Una storia alla volta</h3></div>
+        <p>È la più cinematografica e pulita, però rende più lento confrontare prezzo, durata e alternative.</p>
+      </div>
+    </article>
+  </div>
+</div>

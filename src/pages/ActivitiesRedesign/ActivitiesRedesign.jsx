@@ -78,11 +78,15 @@ export default function ActivitiesRedesign() {
         <button
           type="button"
           className={`activity-redesign-saved${favoritesOnly ? ' is-active' : ''}`}
+          data-count={favoriteIds.length}
+          aria-label={`${favoriteIds.length} ${favoriteIds.length === 1 ? 'attività salvata' : 'attività salvate'}`}
           aria-pressed={favoritesOnly}
           onClick={() => setFavoritesOnly((current) => !current)}
         >
-          <span aria-hidden="true">{favoritesOnly ? '♥' : '♡'}</span>
-          {favoriteIds.length} {favoriteIds.length === 1 ? 'salvata' : 'salvate'}
+          <span className="activity-redesign-saved-icon" aria-hidden="true">{favoritesOnly ? '♥' : '♡'}</span>
+          <span className="activity-redesign-saved-copy">
+            {favoriteIds.length} {favoriteIds.length === 1 ? 'salvata' : 'salvate'}
+          </span>
         </button>
       </section>
 

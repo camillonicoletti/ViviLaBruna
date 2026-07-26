@@ -1,0 +1,95 @@
+<style>
+  :root { --gold:#e8c96d; --ink:#090806; --cream:#f7f0df; --muted:#b7ad9d; }
+  .card-lab { max-width: 1180px; margin: 0 auto; }
+  .card-lab h2 { margin-bottom: 6px; font-family: Georgia, serif; font-size: clamp(30px,4vw,52px); }
+  .card-lab .subtitle { max-width: 760px; }
+  .direction-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin-top:28px; }
+  .direction { position:relative; padding:12px; border:1px solid rgba(232,201,109,.22); border-radius:24px; background:linear-gradient(155deg,#201b14,#0d0c09); cursor:pointer; transition:.25s ease; overflow:hidden; }
+  .direction:hover,.direction.selected { transform:translateY(-5px); border-color:var(--gold); box-shadow:0 22px 55px rgba(0,0,0,.38); }
+  .direction.selected::after { content:'SCELTA'; position:absolute; z-index:8; top:18px; right:18px; padding:5px 9px; border-radius:999px; background:var(--gold); color:#171107; font-size:10px; font-weight:900; letter-spacing:.1em; }
+  .recommend { display:inline-flex; margin:4px 0 10px 3px; padding:5px 9px; border-radius:999px; color:#231906; background:var(--gold); font-size:10px; font-weight:900; letter-spacing:.09em; }
+  .preview { position:relative; min-height:395px; overflow:hidden; border-radius:17px; background:#0d0b08; box-shadow:inset 0 0 0 1px rgba(255,255,255,.07); }
+  .scene { position:relative; height:205px; overflow:hidden; background:linear-gradient(155deg,#c37f43 0%,#61432d 36%,#17130e 100%); }
+  .scene::before { content:''; position:absolute; inset:25% -35% -10%; background:linear-gradient(16deg,transparent 15%,rgba(17,13,9,.65) 16% 28%,transparent 29%), repeating-linear-gradient(90deg,#2c2117 0 18px,#4b3423 19px 31px,#241a12 32px 52px); clip-path:polygon(0 62%,7% 38%,16% 55%,22% 27%,32% 48%,41% 18%,49% 51%,58% 25%,66% 48%,76% 14%,85% 53%,93% 30%,100% 45%,100% 100%,0 100%); animation:slowPan 9s ease-in-out infinite alternate; transform:scale(1.18); }
+  .scene::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 35%,rgba(9,8,6,.92)); }
+  @keyframes slowPan { from{transform:scale(1.18) translateX(-2%)} to{transform:scale(1.25) translateX(3%)} }
+  .video-pill { position:absolute; z-index:3; left:12px; top:12px; padding:6px 8px; border-radius:999px; background:rgba(9,8,6,.74); border:1px solid rgba(255,255,255,.18); font-size:10px; font-weight:800; letter-spacing:.06em; }
+  .heart { position:absolute; z-index:3; right:12px; top:12px; display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:rgba(9,8,6,.78); color:white; font-size:19px; }
+  .play { position:absolute; z-index:3; inset:0; display:grid; place-items:center; font-size:30px; color:white; text-shadow:0 3px 18px #000; }
+  .preview-copy { padding:15px; }
+  .eyebrow { color:var(--gold); font-size:10px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
+  .preview h3 { margin:7px 0 7px; color:var(--cream); font:500 24px/1.04 Georgia,serif; }
+  .meta { display:flex; gap:8px; color:#d6cdbf; font-size:11px; }
+  .meta b { margin-left:auto; color:var(--gold); }
+  .primary { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:14px; }
+  .mini-location { color:#afa596; font-size:11px; }
+  .cta { padding:10px 12px; border-radius:10px; background:var(--gold); color:#1e1608; font-size:11px; font-weight:900; white-space:nowrap; }
+  .peek-panel { position:absolute; z-index:5; left:10px; right:10px; bottom:10px; padding:13px; border:1px solid rgba(232,201,109,.26); border-radius:14px; background:rgba(16,13,9,.88); backdrop-filter:blur(14px); transform:translateY(76%); transition:.35s ease; }
+  .direction:hover .peek-panel { transform:translateY(0); }
+  .peek-panel strong { display:block; color:var(--gold); margin-bottom:5px; }
+  .peek-panel small { color:#c7beb1; line-height:1.5; }
+  .inline-preview .scene { height:152px; }
+  .inline-details { margin:12px 0 0; padding:12px; border-radius:12px; background:rgba(255,255,255,.045); color:#c8bfb2; font-size:11px; line-height:1.55; }
+  .inline-details div { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+  .inline-details div:last-child { border:0; }
+  .reel-preview .scene { height:395px; }
+  .reel-preview .scene::after { background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.88)); }
+  .reel-copy { position:absolute; z-index:4; left:16px; right:16px; bottom:17px; }
+  .reel-copy h3 { font-size:29px; }
+  .reel-actions { display:flex; gap:7px; margin-top:13px; }
+  .reel-actions span { flex:1; padding:10px 8px; text-align:center; border-radius:10px; border:1px solid rgba(232,201,109,.45); font-size:10px; font-weight:850; }
+  .direction-copy { padding:16px 5px 5px; }
+  .direction-copy h3 { margin:0 0 7px; color:var(--cream); font-size:18px; }
+  .direction-copy p { margin:0; color:var(--muted); font-size:13px; line-height:1.5; }
+  .tradeoff { display:block; margin-top:10px; color:#8f8679; font-size:11px; }
+  @media(max-width:900px){ .direction-grid{grid-template-columns:1fr} .preview{min-height:360px} }
+  @media(prefers-reduced-motion:reduce){ .scene::before{animation:none} .direction,.peek-panel{transition:none} }
+</style>
+
+<div class="card-lab">
+  <div class="label">Nuova card attività</div>
+  <h2>Quanto deve diventare immersiva?</h2>
+  <p class="subtitle">Tutte mantengono preferiti, luogo, prezzo e chiamata immediata. Clicca la direzione che senti più adatta al sito.</p>
+
+  <div class="direction-grid cards">
+    <div class="direction card" data-choice="a-cinematic" onclick="toggleSelect(this)">
+      <span class="recommend">CONSIGLIATA</span>
+      <div class="preview">
+        <div class="scene">
+          <span class="video-pill">▶ VIDEO · 8 SEC</span><span class="heart">♡</span><span class="play">▶</span>
+        </div>
+        <div class="preview-copy">
+          <span class="eyebrow">Cultura & storia</span>
+          <h3>Tour dei Sassi<br>al tramonto</h3>
+          <div class="meta"><span>◷ 2 ore</span><span>★ 4.9</span><b>da 25€</b></div>
+          <div class="primary"><span class="mini-location">⌖ Piazza Vittorio Veneto</span><span class="cta">Scopri</span></div>
+        </div>
+        <div class="peek-panel"><strong>Si apre sopra la pagina</strong><small>Video grande, racconto breve, telefono e indicazioni sempre fissi in basso.</small></div>
+      </div>
+      <div class="direction-copy"><h3>A · Cinematic Reveal</h3><p>Video solo al passaggio/tocco. “Scopri” apre una scheda ampia sopra la pagina, senza perdere i risultati.</p><span class="tradeoff">Moderna e chiara · Ottimo equilibrio tra emozione e velocità</span></div>
+    </div>
+
+    <div class="direction card" data-choice="b-inline" onclick="toggleSelect(this)">
+      <div style="height:31px"></div>
+      <div class="preview inline-preview">
+        <div class="scene"><span class="video-pill">▶ ANTEPRIMA</span><span class="heart">♡</span></div>
+        <div class="preview-copy">
+          <span class="eyebrow">Cultura & storia</span><h3>Tour dei Sassi al tramonto</h3>
+          <div class="meta"><span>◷ 2 ore</span><span>★ 4.9</span><b>25€</b></div>
+          <div class="inline-details"><div><span>Dove</span><b>Piazza Vittorio Veneto</b></div><div><span>Telefono</span><b>+39 333 123 4567</b></div><div><span>Incluso</span><b>Guida locale</b></div></div>
+          <div class="primary"><span class="cta" style="background:transparent;color:var(--gold);border:1px solid var(--gold)">Indicazioni</span><span class="cta">Chiama ora</span></div>
+        </div>
+      </div>
+      <div class="direction-copy"><h3>B · Espansione nella griglia</h3><p>La card si allunga e mostra subito tutti i dettagli, restando nella pagina.</p><span class="tradeoff">Molto esplicita · Però sposta le altre card e rende la griglia meno stabile</span></div>
+    </div>
+
+    <div class="direction card" data-choice="c-reel" onclick="toggleSelect(this)">
+      <div style="height:31px"></div>
+      <div class="preview reel-preview">
+        <div class="scene"><span class="video-pill">● LIVE PREVIEW</span><span class="heart">♡</span></div>
+        <div class="reel-copy"><span class="eyebrow">Esperienza a Matera</span><h3>Tour dei Sassi al tramonto</h3><div class="meta"><span>◷ 2 ore</span><span>★ 4.9</span><b>da 25€</b></div><div class="reel-actions"><span>Indicazioni</span><span style="background:var(--gold);color:#211707">Chiama</span></div></div>
+      </div>
+      <div class="direction-copy"><h3>C · Video Reel</h3><p>Il video domina tutta la card; testo e azioni galleggiano sopra, in stile esperienza social.</p><span class="tradeoff">Molto scenografica · Più pesante e meno immediata per confrontare attività</span></div>
+    </div>
+  </div>
+</div>

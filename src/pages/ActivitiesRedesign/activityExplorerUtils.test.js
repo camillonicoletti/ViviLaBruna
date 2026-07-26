@@ -7,7 +7,8 @@ import {
   filterActivities,
   normalizeSearchText,
   parseFavoriteIds,
-  resolveActivityMedia
+  resolveActivityMedia,
+  shouldOpenActivityCard
 } from './activityExplorerUtils.js';
 
 test('normalizza maiuscole e accenti nella ricerca', () => {
@@ -92,4 +93,19 @@ test('usa il video dei Sassi come anteprima di tutte le attività', () => {
   assert.ok(ACTIVITIES.every((activity) => (
     activity.video === '/matera_tramonto.mp4'
   )));
+});
+
+test('apre la card soltanto da mobile e fuori da pulsanti o link', () => {
+  assert.equal(shouldOpenActivityCard({
+    isMobile: true,
+    isInteractiveTarget: false
+  }), true);
+  assert.equal(shouldOpenActivityCard({
+    isMobile: true,
+    isInteractiveTarget: true
+  }), false);
+  assert.equal(shouldOpenActivityCard({
+    isMobile: false,
+    isInteractiveTarget: false
+  }), false);
 });

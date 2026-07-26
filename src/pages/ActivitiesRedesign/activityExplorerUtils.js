@@ -74,3 +74,10 @@ export function resolveActivityMedia(activity = {}) {
     poster: suppliedPoster || image
   };
 }
+
+export function shouldOpenActivityCard({
+  isMobile = false,
+  isInteractiveTarget = false
+} = {}) {
+  return Boolean(isMobile && !isInteractiveTarget);
+}

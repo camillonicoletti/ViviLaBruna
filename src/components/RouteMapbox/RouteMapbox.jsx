@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_SATELLITE_STYLE, createStreetFallbackStyle, shouldUseFallbackStyle } from '../mapStyleFallback';
+import { setRouteMapGestures } from './routeMapGesturePolicy';
 import './RouteMapbox.css';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -106,18 +107,8 @@ function fitRouteBounds(map, coordinates) {
   map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, pitch: 45, bearing: -17.6, duration: 1200 });
 }
 
-// Su mobile la mappa nella pergamena resta "ferma": si può solo toccare i
-// marker, non scorrere/zoomare. A tutto schermo torna completamente interattiva.
-const MAP_GESTURES = ['scrollZoom', 'boxZoom', 'dragRotate', 'dragPan', 'keyboard', 'doubleClickZoom', 'touchZoomRotate', 'touchPitch'];
-
 function isMobileViewport() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
-}
-
-function setMapGestures(map, enabled) {
-  MAP_GESTURES.forEach(function(handler) {
-    if (map[handler]) enabled ? map[handler].enable() : map[handler].disable();
-  });
 }
 
 export default function RouteMapbox({ waypoints, draw }) {
@@ -189,12 +180,13 @@ export default function RouteMapbox({ waypoints, draw }) {
     };
   }, []);
 
-  // Entrando/uscendo dal fullscreen: (ri)blocca i gesti su mobile e riporta
+  // Entrando/uscendo dal fullscreen: in formato compatto blocca solo il pan
+  // (lo zoom resta disponibile) e riporta
   // sempre l'inquadratura al centro del percorso (non dove l'utente si era spostato).
   useEffect(function() {
     var map = mapRef.current;
     if (!map) return;
-    setMapGestures(map, !isMobileViewport() || isFullscreen);
+    setRouteMapGestures(map, !isMobileViewport() || isFullscreen);
     var coords = routeCoordsRef.current;
     var timer = setTimeout(function() {
       if (!mapRef.current) return;
@@ -312,9 +304,9 @@ export default function RouteMapbox({ waypoints, draw }) {
     });
     mapRef.current = map;
 
-    // Stato iniziale dei gesti: su mobile la mappa parte "bloccata" (solo marker
-    // toccabili); resta interattiva su desktop e quando andrà a tutto schermo.
-    setMapGestures(map, !isMobileViewport() || isFullscreen);
+    // Stato iniziale dei gesti: su mobile la mappa compatta non si trascina,
+    // ma pinch, doppio tap e controlli di zoom restano disponibili.
+    setRouteMapGestures(map, !isMobileViewport() || isFullscreen);
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
 

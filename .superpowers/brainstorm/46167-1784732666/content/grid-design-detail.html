@@ -1,0 +1,130 @@
+<style>
+  #grid-design-detail {
+    --gold:#e8c96d;
+    --gold-soft:#f5e3a2;
+    --night:#090806;
+    --stone:#17140f;
+    --stone-2:#231e17;
+    color:var(--foreground);
+  }
+  #grid-design-detail .heading { max-width:780px; margin-bottom:22px; }
+  #grid-design-detail .heading h2 { margin-bottom:6px; }
+  #grid-design-detail .previews { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,.7fr); gap:22px; align-items:start; }
+  #grid-design-detail .frame { background:var(--night); border:1px solid color-mix(in srgb,var(--gold) 28%,transparent); border-radius:20px; overflow:hidden; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+  #grid-design-detail .frame-label { padding:10px 14px; color:#bcb3a5; font-size:11px; text-transform:uppercase; letter-spacing:.14em; border-bottom:1px solid #27231d; display:flex; justify-content:space-between; }
+  #grid-design-detail .site { padding:18px; background:radial-gradient(circle at 82% 5%,#352b1d 0,transparent 24%),linear-gradient(155deg,#15110c,#070706 72%); }
+  #grid-design-detail .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  #grid-design-detail .brand { display:flex; align-items:center; gap:8px; color:var(--gold-soft); font-family:Georgia,serif; font-size:12px; }
+  #grid-design-detail .brand-mark { width:27px; height:27px; border:1px solid var(--gold); border-radius:50%; display:grid; place-items:center; font-size:10px; }
+  #grid-design-detail .saved { border:1px solid #50452f; border-radius:999px; padding:7px 10px; color:#f0dfac; font-size:10px; }
+  #grid-design-detail .kicker { color:var(--gold); font-size:8px; text-transform:uppercase; letter-spacing:.18em; }
+  #grid-design-detail .hero h3 { font-family:Georgia,serif; font-size:26px; line-height:1.02; margin:6px 0 8px; max-width:410px; font-weight:400; }
+  #grid-design-detail .hero p { color:#bcb4a8; font-size:10px; max-width:430px; margin:0 0 16px; }
+  #grid-design-detail .search { height:36px; background:#11100e; border:1px solid #4a4133; border-radius:999px; display:flex; align-items:center; gap:9px; padding:0 13px; color:#aaa196; font-size:10px; }
+  #grid-design-detail .filters { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 17px; }
+  #grid-design-detail .filter { padding:6px 10px; border-radius:999px; border:1px solid #40372c; color:#c8c0b4; font-size:8px; }
+  #grid-design-detail .filter.active { background:var(--gold); color:#21190c; border-color:var(--gold); }
+  #grid-design-detail .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; }
+  #grid-design-detail .activity { background:#15130f; border:1px solid #373025; border-radius:14px; overflow:hidden; }
+  #grid-design-detail .photo { height:118px; background-size:cover; background-position:center; position:relative; }
+  #grid-design-detail .photo:after { content:""; position:absolute; inset:35% 0 0; background:linear-gradient(transparent,#15130f); }
+  #grid-design-detail .tag { position:absolute; left:9px; top:9px; z-index:1; padding:4px 7px; background:rgba(10,9,7,.78); border:1px solid rgba(232,201,109,.45); border-radius:999px; color:#f4df9c; font-size:7px; }
+  #grid-design-detail .heart { position:absolute; right:9px; top:9px; z-index:1; width:27px; height:27px; border-radius:50%; display:grid; place-items:center; background:rgba(10,9,7,.82); border:1px solid rgba(255,255,255,.18); color:#fff; font-size:12px; }
+  #grid-design-detail .activity-body { padding:0 11px 11px; }
+  #grid-design-detail .activity h4 { font-family:Georgia,serif; font-size:13px; line-height:1.15; margin:0 0 5px; font-weight:400; }
+  #grid-design-detail .promise { min-height:28px; color:#c7bfb3; font-size:8px; line-height:1.35; margin:0 0 8px; }
+  #grid-design-detail .facts { display:flex; gap:7px; color:#e8dcc7; font-size:7px; padding-bottom:8px; border-bottom:1px solid #2b261f; }
+  #grid-design-detail .contact { display:grid; gap:4px; padding:8px 0; font-size:7px; color:#c8c0b5; }
+  #grid-design-detail .contact b { color:#f0e6d6; font-weight:500; }
+  #grid-design-detail .actions { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  #grid-design-detail .action { padding:7px 4px; text-align:center; border-radius:8px; border:1px solid #4b4030; color:#f0dfac; font-size:7px; }
+  #grid-design-detail .action.primary { background:var(--gold); color:#21190b; border-color:var(--gold); font-weight:700; }
+  #grid-design-detail .mobile .site { padding:14px; }
+  #grid-design-detail .mobile .topbar { margin-bottom:20px; }
+  #grid-design-detail .mobile .hero h3 { font-size:23px; }
+  #grid-design-detail .mobile .cards { grid-template-columns:1fr; }
+  #grid-design-detail .mobile .activity:nth-child(n+2) { display:none; }
+  #grid-design-detail .mobile .photo { height:185px; }
+  #grid-design-detail .mobile .activity h4 { font-size:17px; }
+  #grid-design-detail .mobile .promise { min-height:0; font-size:10px; }
+  #grid-design-detail .mobile .facts, #grid-design-detail .mobile .contact, #grid-design-detail .mobile .actions .action { font-size:9px; }
+  #grid-design-detail .mobile .contact { gap:7px; }
+  #grid-design-detail .decision { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  #grid-design-detail .decision .option { cursor:pointer; padding:11px 16px; border:1px solid var(--border); border-radius:999px; background:var(--card); }
+  #grid-design-detail .decision .option:first-child { border-color:color-mix(in srgb,var(--gold) 72%,var(--border)); }
+  #grid-design-detail .notes { margin-top:18px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  #grid-design-detail .note { border-top:2px solid color-mix(in srgb,var(--gold) 60%,transparent); padding-top:9px; }
+  #grid-design-detail .note b { display:block; font-size:12px; margin-bottom:3px; }
+  #grid-design-detail .note span { color:var(--muted-foreground); font-size:11px; line-height:1.35; }
+  @media(max-width:900px){
+    #grid-design-detail .previews{grid-template-columns:1fr;}
+    #grid-design-detail .desktop .cards{grid-template-columns:repeat(2,minmax(0,1fr));}
+    #grid-design-detail .desktop .activity:nth-child(3){display:none;}
+    #grid-design-detail .notes{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:560px){
+    #grid-design-detail .desktop{display:none;}
+    #grid-design-detail .notes{grid-template-columns:1fr;}
+  }
+</style>
+
+<div id="grid-design-detail">
+  <div class="heading">
+    <h2>Design proposto: “Guida locale immediata”</h2>
+    <p class="subtitle">La card risponde senza altri passaggi a quattro domande: cosa faccio, quanto dura/costa, dove si trova, chi devo chiamare.</p>
+  </div>
+
+  <div class="previews">
+    <div class="frame desktop">
+      <div class="frame-label"><span>Desktop · griglia comparabile</span><span>3 colonne</span></div>
+      <div class="site">
+        <div class="topbar"><div class="brand"><span class="brand-mark">MDV</span> Matera da Vivere</div><div class="saved">♡ 2 salvate</div></div>
+        <div class="hero"><span class="kicker">Esperienze autentiche</span><h3>Cosa vuoi vivere a Matera?</h3><p>Scegli con calma: trovi subito le informazioni che servono davvero.</p></div>
+        <div class="search">⌕ &nbsp; Cerca per attività o luogo</div>
+        <div class="filters"><span class="filter active">Tutte</span><span class="filter">Cultura</span><span class="filter">Sapori</span><span class="filter">Natura</span><span class="filter">Speciali</span></div>
+        <div class="cards">
+          <div class="activity">
+            <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=700&auto=format&fit=crop')"><span class="tag">Cultura & storia</span><span class="heart">♡</span></div>
+            <div class="activity-body"><h4>Tour dei Sassi al tramonto</h4><p class="promise">Cammina con una guida tra grotte e vicoli nella luce dorata.</p><div class="facts"><span>◷ 2 ore</span><span>★ 4,9</span><span>da 25€</span></div><div class="contact"><span>⌖ <b>Piazza Vittorio Veneto</b></span><span>☎ <b>+39 333 123 4567</b></span></div><div class="actions"><span class="action">Indicazioni</span><span class="action primary">Chiama ora</span></div></div>
+          </div>
+          <div class="activity">
+            <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=700&auto=format&fit=crop')"><span class="tag">Sapori</span><span class="heart">♥</span></div>
+            <div class="activity-body"><h4>Laboratorio del Pane IGP</h4><p class="promise">Impasta e cuoci il pane di Matera con un fornaio del centro.</p><div class="facts"><span>◷ 2,5 ore</span><span>★ 4,8</span><span>da 45€</span></div><div class="contact"><span>⌖ <b>Via Santo Stefano</b></span><span>☎ <b>+39 0835 123 456</b></span></div><div class="actions"><span class="action">Indicazioni</span><span class="action primary">Chiama ora</span></div></div>
+          </div>
+          <div class="activity">
+            <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=700&auto=format&fit=crop')"><span class="tag">Natura</span><span class="heart">♡</span></div>
+            <div class="activity-body"><h4>Trekking della Murgia</h4><p class="promise">Attraversa la Gravina e raggiungi le chiese rupestri.</p><div class="facts"><span>◷ 4 ore</span><span>★ 4,7</span><span>da 20€</span></div><div class="contact"><span>⌖ <b>Jazzo Gattini</b></span><span>☎ <b>+39 320 112 2334</b></span></div><div class="actions"><span class="action">Indicazioni</span><span class="action primary">Chiama ora</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame mobile">
+      <div class="frame-label"><span>Smartphone · priorità</span><span>1 colonna</span></div>
+      <div class="site">
+        <div class="topbar"><div class="brand"><span class="brand-mark">MDV</span> Matera</div><div class="saved">♡ 2</div></div>
+        <div class="hero"><span class="kicker">Esperienze autentiche</span><h3>Cosa vuoi vivere a Matera?</h3><p>Tutto ciò che serve per scegliere, subito.</p></div>
+        <div class="search">⌕ &nbsp; Cerca un’attività</div>
+        <div class="filters"><span class="filter active">Tutte</span><span class="filter">Cultura</span><span class="filter">Sapori</span></div>
+        <div class="cards">
+          <div class="activity">
+            <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1529260830199-42c24126f198?q=80&w=700&auto=format&fit=crop')"><span class="tag">Cultura & storia</span><span class="heart">♡</span></div>
+            <div class="activity-body"><h4>Tour dei Sassi al tramonto</h4><p class="promise">Cammina con una guida tra grotte e vicoli nella luce dorata.</p><div class="facts"><span>◷ 2 ore</span><span>★ 4,9</span><span>da 25€</span></div><div class="contact"><span>⌖ <b>Piazza Vittorio Veneto</b></span><span>☎ <b>+39 333 123 4567</b></span></div><div class="actions"><span class="action">Indicazioni</span><span class="action primary">Chiama ora</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>Capisci subito</b><span>Una frase concreta descrive cosa farai, senza testo promozionale lungo.</span></div>
+    <div class="note"><b>Scegli e salva</b><span>Il cuore conserva i preferiti; il contatore li filtra senza aprire sidebar.</span></div>
+    <div class="note"><b>Agisci subito</b><span>Telefono visibile, chiamata diretta e indicazioni Maps sulla stessa card.</span></div>
+    <div class="note"><b>Niente complessità</b><span>Nessun HUD, wizard AI, programma laterale o scroll controllato.</span></div>
+  </div>
+
+  <div class="decision options">
+    <div class="option" data-choice="approve-grid-detail" onclick="toggleSelect(this)">✓ Approvo questo design</div>
+    <div class="option" data-choice="revise-grid-detail" onclick="toggleSelect(this)">Vorrei modificarlo</div>
+  </div>
+</div>

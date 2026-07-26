@@ -36,20 +36,6 @@ body.route-map-fullscreen-active .navbar-wrap {
   display: none !important;
 }
 
-/* ── MAPPA "FERMA" NELLA PERGAMENA SU MOBILE ──
-   Fuori dal fullscreen nascondiamo i pulsanti di zoom: la mappa non si sposta,
-   restano toccabili solo i marker. A tutto schermo lo zoom ricompare. */
-@media (max-width: 900px) {
-  .route-mapbox-container .mapboxgl-ctrl-group {
-    display: none;
-  }
-  .route-mapbox-wrapper.is-fullscreen .mapboxgl-ctrl-group,
-  .route-mapbox-wrapper:fullscreen .mapboxgl-ctrl-group,
-  .route-mapbox-wrapper:-webkit-full-screen .mapboxgl-ctrl-group {
-    display: block;
-  }
-}
-
 /* Gestione SafeArea per iPhone (Tacche/Barra inferiore) quando è fullscreen */
 .route-mapbox-wrapper.is-fullscreen .route-map-actions {
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));

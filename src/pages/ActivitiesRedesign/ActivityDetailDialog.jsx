@@ -16,7 +16,8 @@ export default function ActivityDetailDialog({
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    closeButtonRef.current?.focus();
+    const isMobile = window.matchMedia?.('(max-width: 760px)')?.matches ?? false;
+    if (!isMobile) closeButtonRef.current?.focus();
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
@@ -42,37 +43,41 @@ export default function ActivityDetailDialog({
         aria-labelledby={titleId}
         onMouseDown={(event) => event.stopPropagation()}
       >
+        <button
+          ref={closeButtonRef}
+          type="button"
+          className="activity-detail-close"
+          aria-label="Chiudi dettagli attività"
+          onClick={onClose}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M7 7l10 10M17 7 7 17" />
+          </svg>
+        </button>
+
         <ActivityMedia
           activity={activity}
           active
           controls={Boolean(activity.video)}
+          customMobileControls={Boolean(activity.video)}
           className="activity-detail-media"
         >
-          <span className="activity-detail-media-label">
-            {activity.video ? 'Video esperienza' : 'Anteprima cinematografica'}
-          </span>
           <button
             type="button"
-            className={`activity-detail-favorite${isFavorite ? ' is-active' : ''}`}
+            className={`activity-detail-favorite activity-detail-favorite-desktop${isFavorite ? ' is-active' : ''}`}
             aria-label={`${isFavorite ? 'Rimuovi' : 'Salva'} ${activity.title} ${isFavorite ? 'dai' : 'nei'} preferiti`}
             aria-pressed={isFavorite}
             onClick={() => onToggleFavorite(activity.id)}
           >
             <span aria-hidden="true">{isFavorite ? '♥' : '♡'}</span>
           </button>
+          <span className="activity-detail-scroll-hint" aria-hidden="true">
+            Scorri
+            <span>↓</span>
+          </span>
         </ActivityMedia>
 
         <div className="activity-detail-content">
-          <button
-            ref={closeButtonRef}
-            type="button"
-            className="activity-detail-close"
-            aria-label="Chiudi dettagli attività"
-            onClick={onClose}
-          >
-            ×
-          </button>
-
           <div className="activity-detail-scroll">
             <span className="activity-detail-kicker">{activity.categoryLabel}</span>
             <h2 id={titleId}>{activity.title}</h2>
@@ -86,14 +91,31 @@ export default function ActivityDetailDialog({
 
             <div className="activity-detail-contact">
               <p>
-                <span aria-hidden="true">⌖</span>
+                <svg className="activity-redesign-info-icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M12 21s6-5.25 6-11a6 6 0 1 0-12 0c0 5.75 6 11 6 11Z" />
+                  <circle cx="12" cy="10" r="2.1" />
+                </svg>
                 <span><small>Dove</small>{activity.location}</span>
               </p>
               <p>
-                <span aria-hidden="true">☎</span>
+                <svg className="activity-redesign-info-icon" aria-hidden="true" viewBox="0 0 24 24">
+                  <rect x="7" y="2.5" width="10" height="19" rx="2" />
+                  <path d="M10 5h4M11 18.5h2" />
+                </svg>
                 <span><small>Telefono</small><a href={telephoneHref}>{activity.phone}</a></span>
               </p>
             </div>
+
+            <button
+              type="button"
+              className={`activity-detail-favorite-mobile${isFavorite ? ' is-active' : ''}`}
+              aria-label={`${isFavorite ? 'Rimuovi' : 'Aggiungi'} ${activity.title} ${isFavorite ? 'dai' : 'ai'} preferiti`}
+              aria-pressed={isFavorite}
+              onClick={() => onToggleFavorite(activity.id)}
+            >
+              <span aria-hidden="true">{isFavorite ? '♥' : '♡'}</span>
+              {isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}
+            </button>
 
             <div className="activity-detail-note">
               <span aria-hidden="true">✦</span>
